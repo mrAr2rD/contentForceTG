@@ -4,8 +4,16 @@ Rails.application.routes.draw do
     omniauth_callbacks: 'users/omniauth_callbacks'
   }
 
-  # Root path
+  # Authenticated root - Dashboard
+  authenticated :user do
+    root "dashboard#index", as: :authenticated_root
+  end
+
+  # Public root - Landing page
   root "pages#home"
+
+  # Dashboard
+  get "dashboard", to: "dashboard#index", as: :dashboard
 
   get "pages/home"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
