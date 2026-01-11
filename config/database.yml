@@ -79,12 +79,31 @@ test:
 # for a full overview on how database connection configuration can be specified.
 #
 production:
-  <<: *default
-  # Use DATABASE_URL environment variable for all connections
-  # This allows Coolify to manage the database connection
-  url: <%= ENV.fetch("DATABASE_URL") { "" } %>
+  primary: &primary_production
+    <<: *default
+    # Use DATABASE_URL environment variable for all connections
+    # This allows Coolify to manage the database connection
+    url: <%= ENV.fetch("DATABASE_URL") { "" } %>
 
-  # Fallback configuration if DATABASE_URL is not set
-  database: contentforce_production
-  username: contentforce
-  password: <%= ENV["CONTENTFORCE_DATABASE_PASSWORD"] %>
+    # Fallback configuration if DATABASE_URL is not set
+    database: contentforce_production
+    username: contentforce
+    password: <%= ENV["CONTENTFORCE_DATABASE_PASSWORD"] %>
+  
+  # Solid Cache uses the same database
+  cache:
+    <<: *primary_production
+    database: contentforce_production
+    migrations_paths: db/cache_migrate
+  
+  # Solid Queue uses the same database
+  queue:
+    <<: *primary_production
+    database: contentforce_production
+    migrations_paths: db/queue_migrate
+  
+  # Solid Cable uses the same database
+  cable:
+    <<: *primary_production
+    database: contentforce_production
+    migrations_paths: db/cable_migrate
