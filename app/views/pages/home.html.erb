@@ -139,26 +139,133 @@
               </div>
             </div>
           </div>
-          <div class="aspect-video bg-gradient-to-br from-slate-50 via-white to-violet-50 flex items-center justify-center p-12">
-            <div class="text-center max-w-md">
-              <div class="relative inline-block mb-6">
-                <div class="absolute inset-0 bg-gradient-to-br from-violet-500 to-purple-600 rounded-3xl blur-xl opacity-30 animate-pulse"></div>
-                <div class="relative w-20 h-20 bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-xl">
-                  <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
-                  </svg>
+          <div class="aspect-video bg-white p-4">
+            <div class="h-full rounded-xl border border-slate-200 overflow-hidden flex bg-white shadow-xl">
+              <!-- Left Sidebar -->
+              <div class="w-48 bg-white border-r border-slate-100 flex flex-col">
+                <div class="p-4 border-b border-slate-100">
+                  <div class="flex items-center gap-2">
+                    <div class="w-6 h-6 bg-slate-900 rounded flex items-center justify-center">
+                      <span class="text-white text-xs font-bold">CF</span>
+                    </div>
+                    <span class="text-sm font-semibold text-slate-900">ContentForce</span>
+                  </div>
+                </div>
+
+                <div class="p-3">
+                  <div class="text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 px-2">Main</div>
+                  <nav class="space-y-0.5">
+                    <div class="px-2 py-1.5 bg-slate-100 rounded text-xs font-medium text-slate-900 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                      </svg>
+                      Dashboard
+                    </div>
+                    <div class="px-2 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+                      </svg>
+                      Drafts
+                      <span class="ml-auto w-3 h-3 bg-slate-900 rounded-sm flex items-center justify-center text-[8px] text-white font-medium">•</span>
+                    </div>
+                    <div class="px-2 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                      </svg>
+                      Schedule
+                    </div>
+                    <div class="px-2 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                      </svg>
+                      Analytics
+                    </div>
+                    <div class="px-2 py-1.5 text-xs text-slate-600 flex items-center gap-2">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                      </svg>
+                      Settings
+                    </div>
+                  </nav>
+
+                  <div class="mt-4 text-[10px] font-medium text-slate-400 uppercase tracking-wider mb-2 px-2">Workspace</div>
+                  <button class="px-2 py-1.5 text-xs text-slate-600 flex items-center gap-2 w-full">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    New Channel
+                  </button>
                 </div>
               </div>
-              <h3 class="text-xl font-bold text-slate-900 mb-2">AI-редактор контента</h3>
-              <p class="text-sm text-slate-600 leading-relaxed">Создавайте идеальные посты с помощью искусственного интеллекта</p>
-              
-              <div class="mt-8 flex items-center justify-center gap-3">
-                <div class="flex -space-x-3">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 border-2 border-white shadow-sm"></div>
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 border-2 border-white shadow-sm"></div>
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-pink-600 border-2 border-white shadow-sm"></div>
+
+              <!-- Main Content -->
+              <div class="flex-1 bg-white flex flex-col">
+                <div class="flex-1 p-5">
+                  <div class="flex items-center gap-2 mb-4">
+                    <div class="w-5 h-5 bg-gradient-to-br from-violet-400 to-purple-500 rounded flex items-center justify-center">
+                      <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                      </svg>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-900">AI Assistant</span>
+                  </div>
+
+                  <h3 class="text-base font-bold text-slate-900 mb-1">What are we creating today?</h3>
+
+                  <div class="mt-4 space-y-2">
+                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 cursor-pointer transition-colors">
+                      <span class="text-base">✨</span>
+                      <span class="text-xs text-slate-700">Write a catchy morning post</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 cursor-pointer transition-colors">
+                      <span class="text-base">📣</span>
+                      <span class="text-xs text-slate-700">Announce a product update</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 cursor-pointer transition-colors">
+                      <span class="text-base">💬</span>
+                      <span class="text-xs text-slate-700">Create an engaging poll text</span>
+                    </div>
+                    <div class="flex items-center gap-2 px-3 py-2 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 cursor-pointer transition-colors">
+                      <span class="text-base">🚀</span>
+                      <span class="text-xs text-slate-700">Summarize crypto news</span>
+                    </div>
+                  </div>
                 </div>
-                <span class="text-xs font-medium text-slate-500">Claude, GPT-4, Gemini</span>
+              </div>
+
+              <!-- Right Panel -->
+              <div class="w-80 bg-slate-50 border-l border-slate-100 p-4">
+                <div class="mb-3">
+                  <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Live Preview</div>
+                  <div class="flex items-center gap-4 text-[10px] text-slate-500 mt-1">
+                    <span class="text-emerald-600 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                      Syncing
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Telegram Card -->
+                <div class="bg-gradient-to-b from-blue-400 to-blue-500 rounded-2xl p-3 shadow-lg">
+                  <div class="flex items-center gap-2 mb-3">
+                    <div class="w-9 h-9 bg-slate-200 rounded-full flex items-center justify-center">
+                      <span class="text-xs font-bold text-slate-600">CF</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-xs font-semibold text-white truncate">Workspace Channel</div>
+                      <div class="text-[10px] text-blue-100">12.4k subscribers</div>
+                    </div>
+                  </div>
+
+                  <div class="bg-white rounded-xl p-3 min-h-[120px] flex items-center justify-center">
+                    <div class="text-[10px] text-slate-300 italic text-center">Content will appear here...</div>
+                  </div>
+
+                  <div class="mt-2 flex items-center justify-between text-[10px] text-blue-100">
+                    <span>14:52</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
