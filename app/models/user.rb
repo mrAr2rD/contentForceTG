@@ -1,9 +1,10 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
   # :lockable, :timeoutable and :omniauthable
+  # Note: :confirmable is disabled for easier development
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :confirmable, :trackable,
+         :trackable,
          :omniauthable, omniauth_providers: [:telegram]
 
   # Enums
