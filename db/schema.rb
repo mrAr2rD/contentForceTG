@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_15_153631) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_15_205331) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -130,7 +130,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_153631) do
     t.datetime "updated_at", null: false
     t.boolean "verified", default: false, null: false
     t.datetime "verified_at"
-    t.index ["bot_username"], name: "index_telegram_bots_on_bot_username", unique: true
     t.index ["channel_id"], name: "index_telegram_bots_on_channel_id"
     t.index ["project_id"], name: "index_telegram_bots_on_project_id"
     t.index ["verified"], name: "index_telegram_bots_on_verified"

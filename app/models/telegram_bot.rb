@@ -8,8 +8,11 @@ class TelegramBot < ApplicationRecord
 
   # Validations
   validates :bot_token, presence: true
-  validates :bot_username, presence: true, uniqueness: { case_sensitive: false }
+  validates :bot_username, presence: true
   validates :channel_id, presence: true
+
+  # Note: bot_username НЕ уникален - несколько пользователей могут использовать одного бота
+  # Также один бот может публиковать в несколько каналов в рамках одного проекта
 
   # Scopes
   scope :verified, -> { where(verified: true) }
