@@ -29,7 +29,7 @@ class PostsController < ApplicationController
     authorize @post
 
     if @post.save
-      redirect_to editor_posts_path(id: @post.id), notice: 'Пост успешно создан!'
+      redirect_to editor_posts_path(post_id: @post.id), notice: 'Пост успешно создан!'
     else
       render :new, status: :unprocessable_entity
     end
@@ -90,21 +90,24 @@ class PostsController < ApplicationController
 
   # Editor view - трехпанельный интерфейс
   def editor
-    @post = params[:id] ? current_user.posts.find(params[:id]) : current_user.posts.build
-    authorize @post, :edit? if @post.persisted?
-    authorize @post, :new? if @post.new_record?
-    
+    # Check for post_id parameter (when redirected from create)
+    if params[:post_id].present?
+      @post = current_user.posts.find(params[:post_id])
+      authorize @post, :edit?
+    else
+      @post = current_user.posts.build
+      authorize @post, :new?
+    end
+
     @project = @post.project || current_user.projects.first
     @telegram_bots = @project&.telegram_bots&.verified || []
-    
+
     render layout: "editor"
   end
 
   private
 
   def set_post
-    # Skip if id is "new" or "editor" (happens when routes conflict)
-    return if params[:id] == "new" || params[:id] == "editor"
     @post = current_user.posts.find(params[:id])
   end
 

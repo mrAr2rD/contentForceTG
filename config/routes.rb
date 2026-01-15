@@ -36,8 +36,11 @@ Rails.application.routes.draw do
   end
 
   # Posts (top-level access)
-  get 'posts/editor', to: 'posts#editor', as: 'editor_posts'
   resources :posts do
+    collection do
+      get :editor
+    end
+
     member do
       post :publish
       post :schedule
