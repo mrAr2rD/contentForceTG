@@ -71,12 +71,13 @@ Rails.application.routes.draw do
   # Static pages
   get 'pages/home'
   
-  # Admin namespace
+  # Admin namespace - Simple admin without Administrate
   namespace :admin do
-    resources :users
-    resources :projects
-    resources :posts
-    resources :telegram_bots
+    get '/', to: 'dashboard#index'
+    resources :users, only: [:index, :show, :edit, :update, :destroy]
+    resources :projects, only: [:index, :show, :destroy]
+    resources :posts, only: [:index, :show, :destroy]
+    resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
 
     root to: "users#index"
