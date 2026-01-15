@@ -4,7 +4,7 @@ class AiUsageLog < ApplicationRecord
   belongs_to :user
   belongs_to :project, optional: true
 
-  enum purpose: {
+  enum :purpose, {
     content_generation: 0,
     content_improvement: 1,
     image_generation: 2,
