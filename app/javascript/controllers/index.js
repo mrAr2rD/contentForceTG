@@ -12,3 +12,6 @@ application.register("post-editor", PostEditorController)
 
 import ChatController from "./chat_controller"
 application.register("chat", ChatController)
+
+import TelegramBotFormController from "./telegram_bot_form_controller"
+application.register("telegram-bot-form", TelegramBotFormController)
