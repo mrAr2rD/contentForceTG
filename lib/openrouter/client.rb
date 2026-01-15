@@ -3,7 +3,7 @@
 require 'net/http'
 require 'json'
 
-module OpenRouter
+module Openrouter
   class Client
     BASE_URL = 'https://openrouter.ai/api/v1'
 

@@ -6,7 +6,7 @@ module Ai
       @project = project
       @user = user
       @config = AiConfiguration.current
-      @client = OpenRouter::Client.new
+      @client = Openrouter::Client.new
     end
 
     def generate(prompt:, context: {})
