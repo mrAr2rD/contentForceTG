@@ -47,10 +47,21 @@ module Telegram
     end
 
     def verify_channel_permissions
-      response = make_request('getChat', { chat_id: @bot.channel_id })
-      
+      channel_id = @bot.channel_id.to_s
+      unless channel_id.start_with?('@') || channel_id.match?(/\A-?\d+\z/)
+        raise "Invalid channel format. It should be a numeric ID (e.g., -1001234567890) or a username (e.g., @my_channel)."
+      end
+
+      response = make_request('getChat', { chat_id: channel_id })
+
       unless response['ok']
-        raise "Cannot access channel: #{response['description']}"
+        error_message = "Cannot access channel: #{response['description']}."
+        if channel_id.start_with?('@')
+          error_message += " Make sure the bot is an administrator in the channel."
+        else
+          error_message += " Make sure the chat ID is correct and the bot has been added to the channel."
+        end
+        raise error_message
       end
 
       chat = response['result']
@@ -58,7 +69,7 @@ module Telegram
 
       # Проверяем права бота в канале
       member_response = make_request('getChatMember', {
-        chat_id: @bot.channel_id,
+        chat_id: channel_id,
         user_id: get_bot_info['id']
       })
 
@@ -67,6 +78,9 @@ module Telegram
         unless can_post_messages?(member)
           raise "Bot doesn't have permission to post messages in this channel"
         end
+      else
+        # This part might be redundant if getChat already failed, but good for robustness
+        raise "Could not get chat member info: #{member_response['description']}. Is the bot a member of the channel?"
       end
     end
 
