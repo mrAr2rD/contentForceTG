@@ -82,12 +82,8 @@ Rails.application.routes.draw do
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
     get '/', to: 'dashboard#index'
-
-  # Calendar
-  get 'calendar', to: 'calendar#index', as: :calendar    resources :users, only: [:index, :show, :edit, :update, :destroy]
-
-  # Analytics
-  get 'analytics', to: 'analytics#index', as: :analytics    resources :projects, only: [:index, :show, :destroy]
+    resources :users, only: [:index, :show, :edit, :update, :destroy]
+    resources :projects, only: [:index, :show, :destroy]
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
