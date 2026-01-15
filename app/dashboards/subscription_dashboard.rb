@@ -11,8 +11,8 @@ class SubscriptionDashboard < Administrate::BaseDashboard
     cancel_at_period_end: Field::Boolean,
     canceled_at: Field::DateTime,
     trial_ends_at: Field::DateTime,
-    usage: Field::JSON,
-    limits: Field::JSON,
+    usage: Field::Text,
+    limits: Field::Text,
     created_at: Field::DateTime,
     updated_at: Field::DateTime,
   }.freeze
