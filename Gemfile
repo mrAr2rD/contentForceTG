@@ -40,6 +40,10 @@ gem "redis", "~> 5.0"
 # Admin Panel
 gem "administrate"
 
+# View Components
+gem "view_component"
+gem "lookbook", group: :development
+
 # Image Processing for Active Storage
 gem "image_processing", "~> 1.2"
 

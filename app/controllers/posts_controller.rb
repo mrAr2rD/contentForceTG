@@ -1,0 +1,121 @@
+# frozen_string_literal: true
+
+class PostsController < ApplicationController
+  before_action :authenticate_user!
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule]
+  before_action :set_project, only: [:new, :create]
+  layout "dashboard"
+
+  def index
+    @posts = policy_scope(Post).includes(:project, :telegram_bot).order(created_at: :desc)
+    
+    # Filtering
+    @posts = @posts.where(status: params[:status]) if params[:status].present?
+    @posts = @posts.where(project_id: params[:project_id]) if params[:project_id].present?
+  end
+
+  def show
+    authorize @post if @post
+  end
+
+  def new
+    @post = @project ? @project.posts.build(user: current_user) : current_user.posts.build
+    authorize @post
+  end
+
+  def create
+    @post = current_user.posts.build(post_params)
+    @post.project = @project if @project
+    authorize @post
+
+    if @post.save
+      redirect_to @post, notice: 'Пост успешно создан!'
+    else
+      render :new, status: :unprocessable_entity
+    end
+  end
+
+  def edit
+    authorize @post
+    @project = @post.project
+  end
+
+  def update
+    authorize @post
+
+    if @post.update(post_params)
+      redirect_to @post, notice: 'Пост обновлен!'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    authorize @post
+    project = @post.project
+    @post.destroy
+    
+    redirect_path = project ? project_path(project) : posts_path
+    redirect_to redirect_path, notice: 'Пост удален!', status: :see_other
+  end
+
+  def publish
+    authorize @post
+
+    if @post.telegram_bot.present?
+      begin
+        result = @post.publish!
+        redirect_to @post, notice: 'Пост опубликован!'
+      rescue StandardError => e
+        redirect_to @post, alert: "Ошибка публикации: #{e.message}"
+      end
+    else
+      redirect_to @post, alert: 'Выберите Telegram бота для публикации'
+    end
+  end
+
+  def schedule
+    authorize @post
+    scheduled_at = params[:scheduled_at]
+
+    if scheduled_at.present?
+      @post.schedule!(Time.zone.parse(scheduled_at))
+      redirect_to @post, notice: "Пост запланирован на #{scheduled_at}"
+    else
+      redirect_to @post, alert: 'Укажите дату и время публикации'
+    end
+  rescue StandardError => e
+    redirect_to @post, alert: "Ошибка планирования: #{e.message}"
+  end
+
+  # Editor view - трехпанельный интерфейс
+  def editor
+    @post = params[:id] ? current_user.posts.find(params[:id]) : current_user.posts.build
+    authorize @post, :edit? if @post.persisted?
+    authorize @post, :new? if @post.new_record?
+    
+    @project = @post.project || current_user.projects.first
+    @telegram_bots = @project&.telegram_bots&.verified || []
+    
+    render layout: "editor"
+  end
+
+  private
+
+  def set_post
+    # Skip if id is "new" (happens when routes conflict)
+    return if params[:id] == "new"
+    @post = current_user.posts.find(params[:id])
+  end
+
+  def set_project
+    @project = current_user.projects.find(params[:project_id]) if params[:project_id].present?
+  end
+
+  def post_params
+    params.require(:post).permit(
+      :title, :content, :status, :project_id, :telegram_bot_id,
+      :published_at, :telegram_message_id, :image
+    )
+  end
+end

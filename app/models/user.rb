@@ -22,7 +22,12 @@ class User < ApplicationRecord
   validates :role, presence: true
 
   # Callbacks
-  after_create :create_default_subscription
+  after_create :create_default_subscription, if: -> { subscription.nil? }
+
+  # Helper method for admin check
+  def admin?
+    role == 'admin'
+  end
 
   # Class methods
   def self.from_telegram_auth(auth_data)
@@ -48,8 +53,7 @@ class User < ApplicationRecord
   private
 
   def create_default_subscription
-    # Will be implemented when Subscription model is created
-    # create_subscription!(tier: :free, status: :active)
+    create_subscription!(plan: :free, status: :active) if subscription.nil?
   end
 
   # Override Devise method to allow Telegram users without password

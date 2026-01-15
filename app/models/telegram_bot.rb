@@ -3,8 +3,8 @@ class TelegramBot < ApplicationRecord
   belongs_to :project
   has_many :posts, dependent: :nullify
 
-  # Encryption
-  encrypts :bot_token
+  # Encryption - временно отключено для разработки
+  # encrypts :bot_token
 
   # Validations
   validates :bot_token, presence: true
@@ -18,16 +18,27 @@ class TelegramBot < ApplicationRecord
 
   # Callbacks
   before_validation :extract_bot_username, if: -> { bot_token.present? && bot_username.blank? }
+  after_create :setup_webhook, if: -> { verified? }
 
   # Instance methods
   def verify!
     return if verified?
 
-    # Verification logic will be implemented in Telegram::VerifyService
-    update!(
-      verified: true,
-      verified_at: Time.current
-    )
+    Telegram::VerifyService.new(self).verify!
+  rescue StandardError => e
+    Rails.logger.error("Failed to verify bot #{id}: #{e.message}")
+    raise
+  end
+
+  def setup_webhook!
+    Telegram::WebhookService.new(self).setup!
+  rescue StandardError => e
+    Rails.logger.error("Failed to setup webhook for bot #{id}: #{e.message}")
+    raise
+  end
+
+  def setup_webhook
+    setup_webhook! if verified?
   end
 
   def verified?

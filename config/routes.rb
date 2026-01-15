@@ -1,4 +1,7 @@
 Rails.application.routes.draw do
+  # Health check
+  get '/health', to: 'health#index'
+
   # Devise routes with custom controllers
   devise_for :users, controllers: {
     omniauth_callbacks: 'users/omniauth_callbacks'
@@ -6,23 +9,82 @@ Rails.application.routes.draw do
 
   # Authenticated root - Dashboard
   authenticated :user do
-    root "dashboard#index", as: :authenticated_root
+    root 'dashboard#index', as: :authenticated_root
   end
 
   # Public root - Landing page
-  root "pages#home"
+  root 'pages#home'
 
   # Dashboard
-  get "dashboard", to: "dashboard#index", as: :dashboard
+  get 'dashboard', to: 'dashboard#index', as: :dashboard
 
-  get "pages/home"
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # Projects
+  resources :projects do
+    member do
+      post :archive
+      post :activate
+    end
+    
+    # Nested resources
+    resources :telegram_bots do
+      member do
+        post :verify
+      end
+    end
+    
+    resources :posts, shallow: true
+  end
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
-  get "up" => "rails/health#show", as: :rails_health_check
+  # Posts (top-level access)
+  resources :posts do
+    member do
+      post :publish
+      post :schedule
+    end
+    
+    collection do
+      get :editor
+    end
+  end
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+  # API namespace
+  namespace :api do
+    namespace :v1 do
+      resources :ai, only: [] do
+        collection do
+          post :generate
+          post :improve
+          post :generate_hashtags
+        end
+      end
+
+      # Posts API
+      resources :posts, only: [:index, :show, :create, :update, :destroy]
+      
+      # Projects API  
+      resources :projects, only: [:index, :show]
+    end
+  end
+
+  # Webhooks
+  namespace :webhooks do
+    post 'telegram/:bot_token', to: 'telegram#receive', as: :telegram
+  end
+
+  # Static pages
+  get 'pages/home'
+  
+  # Admin namespace
+  namespace :admin do
+    resources :users
+    resources :projects
+    resources :posts
+    resources :telegram_bots
+    resources :subscriptions
+
+    root to: "users#index"
+  end
+  
+  # Rails health check
+  get 'up' => 'rails/health#show', as: :rails_health_check
 end

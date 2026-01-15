@@ -10,10 +10,67 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_11_020040) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_15_133924) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
+
+  create_table "active_storage_attachments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
+    t.datetime "created_at", null: false
+    t.string "name", null: false
+    t.uuid "record_id", null: false
+    t.string "record_type", null: false
+    t.index ["blob_id"], name: "index_active_storage_attachments_on_blob_id"
+    t.index ["record_type", "record_id", "name", "blob_id"], name: "index_active_storage_attachments_uniqueness", unique: true
+  end
+
+  create_table "active_storage_blobs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.bigint "byte_size", null: false
+    t.string "checksum"
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.string "filename", null: false
+    t.string "key", null: false
+    t.text "metadata"
+    t.string "service_name", null: false
+    t.index ["key"], name: "index_active_storage_blobs_on_key", unique: true
+  end
+
+  create_table "active_storage_variant_records", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "blob_id", null: false
+    t.string "variation_digest", null: false
+    t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
+  end
+
+  create_table "ai_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.text "custom_system_prompt"
+    t.string "default_model", default: "claude-3-sonnet", null: false
+    t.jsonb "enabled_features", default: {}
+    t.jsonb "fallback_models", default: ["gpt-3.5-turbo"]
+    t.integer "max_tokens", default: 2000
+    t.decimal "temperature", precision: 3, scale: 2, default: "0.7"
+    t.datetime "updated_at", null: false
+    t.index ["default_model"], name: "index_ai_configurations_on_default_model"
+  end
+
+  create_table "ai_usage_logs", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "cost", precision: 10, scale: 6, default: "0.0", null: false
+    t.datetime "created_at", null: false
+    t.string "model_used", null: false
+    t.uuid "project_id"
+    t.integer "purpose", default: 0, null: false
+    t.integer "tokens_used", default: 0, null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["created_at"], name: "index_ai_usage_logs_on_created_at"
+    t.index ["model_used"], name: "index_ai_usage_logs_on_model_used"
+    t.index ["project_id"], name: "index_ai_usage_logs_on_project_id"
+    t.index ["purpose"], name: "index_ai_usage_logs_on_purpose"
+    t.index ["user_id", "created_at"], name: "index_ai_usage_logs_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_ai_usage_logs_on_user_id"
+  end
 
   create_table "posts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.text "content"
@@ -22,11 +79,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_11_020040) do
     t.datetime "published_at"
     t.integer "status"
     t.uuid "telegram_bot_id", null: false
+    t.bigint "telegram_message_id"
     t.string "title"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["project_id"], name: "index_posts_on_project_id"
     t.index ["telegram_bot_id"], name: "index_posts_on_telegram_bot_id"
+    t.index ["telegram_message_id"], name: "index_posts_on_telegram_message_id"
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
@@ -38,6 +97,24 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_11_020040) do
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
     t.index ["user_id"], name: "index_projects_on_user_id"
+  end
+
+  create_table "subscriptions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "cancel_at_period_end", default: false
+    t.datetime "canceled_at"
+    t.datetime "created_at", null: false
+    t.datetime "current_period_end"
+    t.datetime "current_period_start"
+    t.jsonb "limits", default: {}
+    t.integer "plan", default: 0, null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "trial_ends_at"
+    t.datetime "updated_at", null: false
+    t.jsonb "usage", default: {}
+    t.uuid "user_id", null: false
+    t.index ["plan"], name: "index_subscriptions_on_plan"
+    t.index ["status"], name: "index_subscriptions_on_status"
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
   create_table "telegram_bots", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -83,9 +160,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_11_020040) do
     t.index ["telegram_id"], name: "index_users_on_telegram_id", unique: true
   end
 
+  add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "ai_usage_logs", "projects"
+  add_foreign_key "ai_usage_logs", "users"
   add_foreign_key "posts", "projects"
   add_foreign_key "posts", "telegram_bots"
   add_foreign_key "posts", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "subscriptions", "users"
   add_foreign_key "telegram_bots", "projects"
 end

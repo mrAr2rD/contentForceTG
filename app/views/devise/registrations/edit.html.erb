@@ -1,43 +1,60 @@
-<h2>Edit <%= resource_name.to_s.humanize %></h2>
-
-<%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
-  <%= render "devise/shared/error_messages", resource: resource %>
-
-  <div class="field">
-    <%= f.label :email %><br />
-    <%= f.email_field :email, autofocus: true, autocomplete: "email" %>
+<div class="max-w-2xl mx-auto px-8 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-semibold text-foreground">Настройки аккаунта</h1>
+    <p class="text-sm text-muted-foreground mt-1">Управляйте вашим аккаунтом и настройками</p>
   </div>
 
-  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-    <div>Currently waiting confirmation for: <%= resource.unconfirmed_email %></div>
-  <% end %>
+  <div class="space-y-6">
+    <!-- Profile Settings -->
+    <div class="bg-card border border-border rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-foreground mb-4">Профиль</h2>
+      
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "space-y-4" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
 
-  <div class="field">
-    <%= f.label :password %> <i>(leave blank if you don't want to change it)</i><br />
-    <%= f.password_field :password, autocomplete: "new-password" %>
-    <% if @minimum_password_length %>
-      <br />
-      <em><%= @minimum_password_length %> characters minimum</em>
-    <% end %>
+        <div class="space-y-2">
+          <%= f.label :email, "Email", class: "text-sm font-medium text-foreground" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+          <div class="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
+            Ожидается подтверждение для: <%= resource.unconfirmed_email %>
+          </div>
+        <% end %>
+
+        <div class="space-y-2">
+          <%= f.label :password, "Новый пароль", class: "text-sm font-medium text-foreground" %>
+          <p class="text-xs text-muted-foreground">Оставьте пустым, если не хотите менять пароль</p>
+          <%= f.password_field :password, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+          <% if @minimum_password_length %>
+            <p class="text-xs text-muted-foreground">Минимум <%= @minimum_password_length %> символов</p>
+          <% end %>
+        </div>
+
+        <div class="space-y-2">
+          <%= f.label :password_confirmation, "Подтверждение пароля", class: "text-sm font-medium text-foreground" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <div class="space-y-2">
+          <%= f.label :current_password, "Текущий пароль", class: "text-sm font-medium text-foreground" %>
+          <p class="text-xs text-muted-foreground">Нужен для подтверждения изменений</p>
+          <%= f.password_field :current_password, autocomplete: "current-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <div class="flex items-center gap-3 pt-4">
+          <%= f.submit "Сохранить изменения", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+          <%= link_to "Отмена", dashboard_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-card border border-red-200 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-red-600 mb-4">Опасная зона</h2>
+      <p class="text-sm text-muted-foreground mb-4">Удаление аккаунта необратимо. Все ваши данные будут удалены.</p>
+      <%= button_to "Удалить аккаунт", registration_path(resource_name), data: { confirm: "Вы уверены? Это действие нельзя отменить.", turbo_confirm: "Вы уверены? Это действие нельзя отменить." }, method: :delete, class: "inline-flex h-10 items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white ring-offset-background transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+    </div>
   </div>
-
-  <div class="field">
-    <%= f.label :password_confirmation %><br />
-    <%= f.password_field :password_confirmation, autocomplete: "new-password" %>
-  </div>
-
-  <div class="field">
-    <%= f.label :current_password %> <i>(we need your current password to confirm your changes)</i><br />
-    <%= f.password_field :current_password, autocomplete: "current-password" %>
-  </div>
-
-  <div class="actions">
-    <%= f.submit "Update" %>
-  </div>
-<% end %>
-
-<h3>Cancel my account</h3>
-
-<div>Unhappy? <%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?", turbo_confirm: "Are you sure?" }, method: :delete %></div>
-
-<%= link_to "Back", :back %>
+</div>
