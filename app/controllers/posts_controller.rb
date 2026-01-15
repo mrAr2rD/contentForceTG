@@ -29,7 +29,7 @@ class PostsController < ApplicationController
     authorize @post
 
     if @post.save
-      redirect_to @post, notice: 'Пост успешно создан!'
+      redirect_to editor_posts_path(id: @post.id), notice: 'Пост успешно создан!'
     else
       render :new, status: :unprocessable_entity
     end
