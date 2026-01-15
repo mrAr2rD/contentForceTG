@@ -1,0 +1,180 @@
+<div class="max-w-7xl mx-auto px-8 py-8" data-controller="analytics">
+  <!-- Header -->
+  <div class="mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div>
+        <h1 class="text-xl font-semibold text-foreground">Аналитика</h1>
+        <p class="text-xs text-muted-foreground mt-1">Отслеживайте производительность ваших публикаций</p>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <!-- Project Filter -->
+        <% if @projects.any? %>
+          <select onchange="window.location.href='/analytics?project_id=' + this.value + '&range=<%= @date_range %>'" class="px-3 py-2 border border-input bg-background rounded text-sm focus:ring-1 focus:ring-ring outline-none">
+            <option value="">Все проекты</option>
+            <% @projects.each do |project| %>
+              <option value="<%= project.id %>" <%= 'selected' if @selected_project&.id == project.id %>>
+                <%= project.name %>
+              </option>
+            <% end %>
+          </select>
+        <% end %>
+
+        <!-- Date Range -->
+        <select onchange="window.location.href='/analytics?project_id=<%= @selected_project&.id %>&range=' + this.value" class="px-3 py-2 border border-input bg-background rounded text-sm focus:ring-1 focus:ring-ring outline-none">
+          <option value="7" <%= 'selected' if @date_range == '7' %>>7 дней</option>
+          <option value="30" <%= 'selected' if @date_range == '30' %>>30 дней</option>
+          <option value="90" <%= 'selected' if @date_range == '90' %>>90 дней</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <% if @selected_project %>
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <!-- Total Views -->
+      <div class="bg-card border border-border rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-muted-foreground">Всего просмотров</p>
+          <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@total_views) %></p>
+      </div>
+
+      <!-- Total Subscribers -->
+      <div class="bg-card border border-border rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-muted-foreground">Подписчиков</p>
+          <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(@total_subscribers) %></p>
+      </div>
+
+      <!-- Total Posts -->
+      <div class="bg-card border border-border rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-muted-foreground">Опубликовано</p>
+          <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-foreground"><%= @total_posts %></p>
+      </div>
+
+      <!-- Engagement Rate -->
+      <div class="bg-card border border-border rounded-lg p-4">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs text-muted-foreground">Вовлеченность</p>
+          <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <svg class="w-4 h-4 text-orange-600 dark:text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-foreground"><%= @average_engagement.round(1) %>%</p>
+      </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+      <!-- Views Chart -->
+      <div class="bg-card border border-border rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-foreground mb-4">Просмотры</h3>
+        <canvas id="viewsChart" data-chart-data="<%= @views_chart_data.to_json %>"></canvas>
+      </div>
+
+      <!-- Subscribers Chart -->
+      <div class="bg-card border border-border rounded-lg p-6">
+        <h3 class="text-sm font-semibold text-foreground mb-4">Подписчики</h3>
+        <canvas id="subscribersChart" data-chart-data="<%= @subscribers_chart_data.to_json %>"></canvas>
+      </div>
+    </div>
+
+    <!-- Engagement Chart - Full Width -->
+    <div class="bg-card border border-border rounded-lg p-6 mb-6">
+      <h3 class="text-sm font-semibold text-foreground mb-4">Динамика вовлеченности</h3>
+      <canvas id="engagementChart" data-chart-data="<%= @engagement_chart_data.to_json %>"></canvas>
+    </div>
+
+    <!-- Top Posts -->
+    <div class="bg-card border border-border rounded-lg">
+      <div class="p-4 border-b border-border">
+        <h3 class="text-sm font-semibold text-foreground">Топ публикаций</h3>
+      </div>
+
+      <% if @top_posts.any? %>
+        <div class="divide-y divide-border">
+          <% @top_posts.each_with_index do |post, index| %>
+            <%= link_to post_path(post), class: "flex items-center gap-4 p-4 hover:bg-accent transition-colors group" do %>
+              <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                <span class="text-sm font-bold text-primary"><%= index + 1 %></span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h4 class="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
+                  <%= post.title %>
+                </h4>
+                <p class="text-xs text-muted-foreground mt-0.5">
+                  <%= post.published_at&.strftime("%d %B %Y") %>
+                </p>
+              </div>
+              <div class="flex items-center gap-4 text-xs">
+                <div class="text-center">
+                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_views) %></p>
+                  <p class="text-muted-foreground">просмотров</p>
+                </div>
+                <div class="text-center">
+                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_forwards) %></p>
+                  <p class="text-muted-foreground">репостов</p>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="p-12 text-center">
+          <div class="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-3">
+            <svg class="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-muted-foreground">Нет данных для отображения</p>
+        </div>
+      <% end %>
+    </div>
+
+  <% else %>
+    <!-- Empty State -->
+    <div class="flex items-center justify-center h-96">
+      <div class="text-center">
+        <div class="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <svg class="w-10 h-10 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-foreground mb-2">Нет проектов</h3>
+        <p class="text-sm text-muted-foreground mb-4">Создайте проект чтобы увидеть аналитику</p>
+        <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+          </svg>
+          Создать проект
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>

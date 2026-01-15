@@ -18,3 +18,6 @@ application.register("telegram-bot-form", TelegramBotFormController)
 
 import CalendarController from "./calendar_controller"
 application.register("calendar", CalendarController)
+
+import AnalyticsController from "./analytics_controller"
+application.register("analytics", AnalyticsController)

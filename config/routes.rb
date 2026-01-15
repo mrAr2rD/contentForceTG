@@ -20,7 +20,9 @@ Rails.application.routes.draw do
 
   # Calendar
   get 'calendar', to: 'calendar#index', as: :calendar
-  # Posts (must be defined before projects for correct route priority)
+
+  # Analytics
+  get 'analytics', to: 'analytics#index', as: :analytics  # Posts (must be defined before projects for correct route priority)
   resources :posts do
     collection do
       get :editor
@@ -83,7 +85,9 @@ Rails.application.routes.draw do
 
   # Calendar
   get 'calendar', to: 'calendar#index', as: :calendar    resources :users, only: [:index, :show, :edit, :update, :destroy]
-    resources :projects, only: [:index, :show, :destroy]
+
+  # Analytics
+  get 'analytics', to: 'analytics#index', as: :analytics    resources :projects, only: [:index, :show, :destroy]
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
