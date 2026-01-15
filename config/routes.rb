@@ -36,14 +36,11 @@ Rails.application.routes.draw do
   end
 
   # Posts (top-level access)
+  get 'posts/editor', to: 'posts#editor'
   resources :posts do
     member do
       post :publish
       post :schedule
-    end
-    
-    collection do
-      get :editor
     end
   end
 
