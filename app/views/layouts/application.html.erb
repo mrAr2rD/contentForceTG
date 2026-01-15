@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-controller="theme">
   <head>
     <title><%= content_for(:title) || "Contentforce" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -20,17 +20,29 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <script>
+      // Load theme before page renders to avoid flash
+      (function() {
+        const theme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        if (theme === 'dark' || (!theme && systemPrefersDark)) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
 
-  <body>
+  <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
     <% if notice.present? %>
-      <div class="fixed top-4 right-4 z-50 bg-green-50 border border-green-200 text-green-800 px-6 py-4 rounded-lg shadow-lg max-w-md">
+      <div class="fixed top-4 right-4 z-50 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-100 px-6 py-4 rounded-lg shadow-lg max-w-md">
         <p class="font-medium"><%= notice %></p>
       </div>
     <% end %>
 
     <% if alert.present? %>
-      <div class="fixed top-4 right-4 z-50 bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-lg shadow-lg max-w-md">
+      <div class="fixed top-4 right-4 z-50 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-100 px-6 py-4 rounded-lg shadow-lg max-w-md">
         <p class="font-medium"><%= alert %></p>
       </div>
     <% end %>

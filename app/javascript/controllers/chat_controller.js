@@ -69,19 +69,19 @@ export default class extends Controller {
   addMessage(text, type = "assistant") {
     const messageDiv = document.createElement('div')
     messageDiv.className = `rounded-lg p-3 text-sm ${
-      type === "user" 
-        ? "bg-blue-50 text-blue-900 ml-auto max-w-[80%]" 
+      type === "user"
+        ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-900 dark:text-primary-100 ml-auto max-w-[80%]"
         : type === "error"
-        ? "bg-red-50 text-red-900"
-        : "bg-violet-50 text-slate-700"
+        ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-100"
+        : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-100"
     }`
-    
+
     const formattedText = text
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.+?)`/g, '<code class="bg-white px-1 rounded">$1</code>')
+      .replace(/`(.+?)`/g, '<code class="bg-white dark:bg-zinc-900 px-1 rounded text-zinc-900 dark:text-zinc-100">$1</code>')
       .replace(/\n/g, '<br>')
-    
+
     messageDiv.innerHTML = formattedText
     this.messagesTarget.appendChild(messageDiv)
     this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight

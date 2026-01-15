@@ -22,14 +22,14 @@ export default class extends Controller {
 
   formatContent(content) {
     if (!content || content.trim() === '') {
-      return '<p class="text-slate-600 italic">Начните писать или используйте AI для генерации...</p>'
+      return '<p class="text-zinc-500 dark:text-zinc-400 italic">Начните писать или используйте AI для генерации...</p>'
     }
 
     return content
-      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>')
-      .replace(/`(.+?)`/g, '<code class="bg-slate-100 px-1 rounded text-sm">$1</code>')
-      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-blue-600 hover:underline">$1</a>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold">$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
+      .replace(/`(.+?)`/g, '<code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-sm text-zinc-900 dark:text-zinc-100">$1</code>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="text-primary-600 dark:text-primary-400 hover:underline">$1</a>')
       .replace(/\n/g, '<br>')
   }
 
