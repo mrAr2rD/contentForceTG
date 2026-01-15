@@ -18,24 +18,7 @@ Rails.application.routes.draw do
   # Dashboard
   get 'dashboard', to: 'dashboard#index', as: :dashboard
 
-  # Projects
-  resources :projects do
-    member do
-      post :archive
-      post :activate
-    end
-    
-    # Nested resources
-    resources :telegram_bots do
-      member do
-        post :verify
-      end
-    end
-    
-    resources :posts, shallow: true
-  end
-
-  # Posts (top-level access)
+  # Posts (must be defined before projects for correct route priority)
   resources :posts do
     collection do
       get :editor
@@ -45,6 +28,24 @@ Rails.application.routes.draw do
       post :publish
       post :schedule
     end
+  end
+
+  # Projects
+  resources :projects do
+    member do
+      post :archive
+      post :activate
+    end
+
+    # Nested resources
+    resources :telegram_bots do
+      member do
+        post :verify
+      end
+    end
+
+    # Nested posts (only new/create, other actions use top-level routes)
+    resources :posts, only: [:new, :create]
   end
 
   # API namespace

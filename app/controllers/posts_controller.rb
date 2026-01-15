@@ -4,7 +4,7 @@ class PostsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule]
   before_action :set_project, only: [:new, :create]
-  layout "dashboard"
+  layout "dashboard", except: [:editor]
 
   def index
     @posts = policy_scope(Post).includes(:project, :telegram_bot).order(created_at: :desc)
