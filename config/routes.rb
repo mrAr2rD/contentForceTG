@@ -18,6 +18,8 @@ Rails.application.routes.draw do
   # Dashboard
   get 'dashboard', to: 'dashboard#index', as: :dashboard
 
+  # Calendar
+  get 'calendar', to: 'calendar#index', as: :calendar
   # Posts (must be defined before projects for correct route priority)
   resources :posts do
     collection do
@@ -78,7 +80,9 @@ Rails.application.routes.draw do
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
     get '/', to: 'dashboard#index'
-    resources :users, only: [:index, :show, :edit, :update, :destroy]
+
+  # Calendar
+  get 'calendar', to: 'calendar#index', as: :calendar    resources :users, only: [:index, :show, :edit, :update, :destroy]
     resources :projects, only: [:index, :show, :destroy]
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
