@@ -103,8 +103,8 @@ class PostsController < ApplicationController
   private
 
   def set_post
-    # Skip if id is "new" (happens when routes conflict)
-    return if params[:id] == "new"
+    # Skip if id is "new" or "editor" (happens when routes conflict)
+    return if params[:id] == "new" || params[:id] == "editor"
     @post = current_user.posts.find(params[:id])
   end
 
