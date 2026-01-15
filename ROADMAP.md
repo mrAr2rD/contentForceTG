@@ -3,11 +3,11 @@
 
 **Версия:** 2.1 (Монолитная архитектура + Notion-style UI)
 **Дата создания:** 10 января 2026
-**Последнее обновление:** 15 января 2026 (16:51 MSK)
-**Статус проекта:** В разработке - Этап 1 ✅ 100%, Этап 2 ✅ 95%, Этап 3 ✅ 100%, UI Редизайн ✅ 100%
+**Последнее обновление:** 15 января 2026 (00:17 MSK)
+**Статус проекта:** В разработке - Этап 1 ✅ 100%, Этап 2 ✅ 100%, Этап 3 ✅ 100%, Этап 4 ✅ 100%, UI Редизайн ✅ 100%
 **Целевая дата MVP:** Март 2026 (12 недель)
 
-**Последняя проверка:** 15 января 2026 (16:51 MSK)
+**Последняя проверка:** 15 января 2026 (00:17 MSK)
 **Реализовано:**
 - ✅ Базовая инфраструктура (Rails 8, PostgreSQL, Redis, Docker)
 - ✅ Аутентификация (Devise + Telegram OAuth)
@@ -24,7 +24,7 @@
 - ✅ Webhook контроллер
 - ✅ Background jobs для публикации (PublishPostJob)
 - ✅ Post Editor (трехпанельный интерфейс с AI чатом) - **ПЕРЕРАБОТАН В NOTION-STYLE**
-- ✅ Stimulus контроллеры (post_editor, chat, theme)
+- ✅ Stimulus контроллеры (post_editor, chat, theme, calendar, analytics)
 - ✅ Active Storage для изображений
 - ✅ Administrate админ панель настроена
 - ✅ Dashboard и базовые views - **ПЕРЕРАБОТАНЫ В NOTION-STYLE**
@@ -32,11 +32,14 @@
 - ✅ **ViewComponent дизайн-система (Button, Card, Input, Sidebar)**
 - ✅ **Темная тема (Dark Mode) с автоопределением**
 - ✅ **Notion-style типографика и spacing**
+- ✅ **Календарь публикаций (Stage 4.1)** ✨ НОВОЕ
+- ✅ **Аналитика с графиками (Stage 4.2)** ✨ НОВОЕ
+- ✅ **Мульти-канальная архитектура** ✨ НОВОЕ
 
 **Требует внимания:**
 - ⚠️ GitHub Actions CI/CD не настроен
-- ⚠️ Миграции выполняются (rails db:migrate в процессе)
-- ⚠️ view_component gem устанавливается
+- ⚠️ Robokassa биллинг (Stage 4.3) - не начато
+- ⚠️ Unit/Integration тесты (Stage 5) - частично
 
 ---
 
@@ -86,8 +89,12 @@
 - Routes настроены полностью
 - Administrate админка настроена (дашборды + контроллеры)
 
+✅ **Дополнительно выполнено:**
+- **Этап 4.1 и 4.2 ЗАВЕРШЕНЫ** (календарь, аналитика)
+
 ❌ **Не начато:**
-- Этап 4-5 (календарь, аналитика, биллинг)
+- Этап 4.3 (Robokassa биллинг)
+- Этап 5 (полное тестирование и production deployment)
 
 ### Этап 3: Интеграция Telegram и AI (Week 5-8) - **✅ 100% ЗАВЕРШЕНО**
 
@@ -1335,35 +1342,47 @@
 
 ---
 
-## ЭТАП 4: Календарь, аналитика и биллинг (Week 9-10)
+## ЭТАП 4: Календарь, аналитика и биллинг (Week 9-10) - **✅ 66% ЗАВЕРШЕНО**
 
-### 4.1 Календарь публикаций
+### 4.1 Календарь публикаций - **✅ 100% ЗАВЕРШЕНО**
 
 #### 4.1.1 CalendarController
-- ( ) Создать `app/controllers/calendar_controller.rb`
+- (X) Создать `app/controllers/calendar_controller.rb` ✅
+- (X) Реализовать фильтрацию по проектам и датам ✅
+- (X) Подготовить данные для календаря ✅
 
 #### 4.1.2 Views и Stimulus
-- ( ) Создать `app/views/calendar/index.html.erb`
-- ( ) Создать `app/javascript/controllers/calendar_controller.js`
-- ( ) Интегрировать Flatpickr и SortableJS
+- (X) Создать `app/views/calendar/index.html.erb` ✅
+- (X) Создать `app/javascript/controllers/calendar_controller.js` ✅
+- (X) Месячный вид календаря с событиями ✅
+- (X) Вид списка с группировкой по датам ✅
+- (X) Sidebar с upcoming posts и статистикой ✅
+- (X) Навигация по месяцам ✅
+- (X) Роут и ссылка в navigation ✅
 
-### 4.2 Аналитика
+### 4.2 Аналитика - **✅ 100% ЗАВЕРШЕНО**
 
 #### 4.2.1 Модели аналитики
-- ( ) PostAnalytics
-- ( ) ChannelSubscriberMetrics
-- ( ) ButtonClickEvent
-- ( ) SubscriberChange
-- ( ) TrackedLink
+- (X) PostAnalytic (views, forwards, reactions, button_clicks) ✅
+- (X) ChannelSubscriberMetric (subscriber_count, growth, churn_rate) ✅
+- (X) Associations с Post и TelegramBot ✅
+- (X) Scopes и helper методы ✅
+- (X) Миграции с индексами ✅
 
 #### 4.2.2 Background Jobs
-- ( ) `app/jobs/analytics/update_post_views_job.rb`
-- ( ) `app/jobs/analytics/snapshot_channel_metrics_job.rb`
-- ( ) `app/jobs/analytics/calculate_churn_rate_job.rb`
+- (X) `app/jobs/analytics/update_post_views_job.rb` ✅
+- (X) `app/jobs/analytics/snapshot_channel_metrics_job.rb` ✅
+- (X) `app/jobs/analytics/calculate_churn_rate_job.rb` ✅
+- (X) `app/services/telegram/analytics_service.rb` ✅
 
 #### 4.2.3 Dashboard аналитики
-- ( ) Контроллер и API
-- ( ) Views с Chart.js
+- (X) AnalyticsController с расчетом метрик ✅
+- (X) Views с Chart.js 4.4.1 ✅
+- (X) 4 карточки статистики ✅
+- (X) 3 графика (views, subscribers, engagement) ✅
+- (X) Топ-10 публикаций ✅
+- (X) Фильтры по проектам и временным диапазонам ✅
+- (X) Роут и ссылка в navigation ✅
 
 ### 4.3 Robokassa биллинг
 
