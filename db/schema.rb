@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_15_214351) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_214351) do
     t.jsonb "enabled_features", default: {}
     t.jsonb "fallback_models", default: ["gpt-3.5-turbo"]
     t.integer "max_tokens", default: 2000
+    t.string "openrouter_api_key"
     t.decimal "temperature", precision: 3, scale: 2, default: "0.7"
     t.datetime "updated_at", null: false
     t.index ["default_model"], name: "index_ai_configurations_on_default_model"

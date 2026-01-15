@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class AiConfiguration < ApplicationRecord
+  # Encrypt API key
+  encrypts :openrouter_api_key, deterministic: false
+
   # Singleton pattern - только одна конфигурация
   def self.current
     first_or_create!(
@@ -8,6 +11,16 @@ class AiConfiguration < ApplicationRecord
       temperature: DEFAULT_TEMPERATURE,
       max_tokens: DEFAULT_MAX_TOKENS
     )
+  end
+
+  # Проверка наличия API ключа
+  def api_key_configured?
+    openrouter_api_key.present?
+  end
+
+  # Получить API ключ (для использования в клиенте)
+  def api_key
+    openrouter_api_key || ENV['OPENROUTER_API_KEY']
   end
 
   AVAILABLE_MODELS = {

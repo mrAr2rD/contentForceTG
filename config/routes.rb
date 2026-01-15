@@ -88,6 +88,9 @@ Rails.application.routes.draw do
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
 
+    # AI Settings (singleton resource)
+    resource :ai_settings, only: [:edit, :update]
+
     root to: "users#index"
   end
   
