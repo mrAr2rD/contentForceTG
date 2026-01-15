@@ -4,6 +4,7 @@ class Post < ApplicationRecord
   belongs_to :project, optional: true
   belongs_to :telegram_bot, optional: true
   has_one_attached :image
+  has_many :post_analytics, dependent: :destroy
 
   # Enums
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft

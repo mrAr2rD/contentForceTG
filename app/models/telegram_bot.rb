@@ -2,7 +2,7 @@ class TelegramBot < ApplicationRecord
   # Associations
   belongs_to :project
   has_many :posts, dependent: :nullify
-
+  has_many :channel_subscriber_metrics, dependent: :destroy
   # Encryption - временно отключено для разработки
   # encrypts :bot_token
 

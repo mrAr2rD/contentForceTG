@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_15_205331) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_15_211541) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -70,6 +70,35 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_205331) do
     t.index ["purpose"], name: "index_ai_usage_logs_on_purpose"
     t.index ["user_id", "created_at"], name: "index_ai_usage_logs_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_ai_usage_logs_on_user_id"
+  end
+
+  create_table "channel_subscriber_metrics", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "churn_rate", precision: 5, scale: 2, default: "0.0"
+    t.datetime "created_at", null: false
+    t.datetime "measured_at", null: false
+    t.integer "subscriber_count", default: 0
+    t.integer "subscriber_growth", default: 0
+    t.uuid "telegram_bot_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["measured_at"], name: "index_channel_subscriber_metrics_on_measured_at"
+    t.index ["telegram_bot_id", "measured_at"], name: "idx_on_telegram_bot_id_measured_at_8fab0e2fc4"
+    t.index ["telegram_bot_id"], name: "index_channel_subscriber_metrics_on_telegram_bot_id"
+  end
+
+  create_table "post_analytics", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.jsonb "button_clicks", default: {}
+    t.datetime "created_at", null: false
+    t.integer "forwards", default: 0
+    t.datetime "measured_at", null: false
+    t.uuid "post_id", null: false
+    t.jsonb "reactions", default: {}
+    t.string "telegram_message_id"
+    t.datetime "updated_at", null: false
+    t.integer "views", default: 0
+    t.index ["measured_at"], name: "index_post_analytics_on_measured_at"
+    t.index ["post_id", "measured_at"], name: "index_post_analytics_on_post_id_and_measured_at"
+    t.index ["post_id"], name: "index_post_analytics_on_post_id"
+    t.index ["telegram_message_id"], name: "index_post_analytics_on_telegram_message_id"
   end
 
   create_table "posts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -164,6 +193,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_205331) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ai_usage_logs", "projects"
   add_foreign_key "ai_usage_logs", "users"
+  add_foreign_key "channel_subscriber_metrics", "telegram_bots"
+  add_foreign_key "post_analytics", "posts"
   add_foreign_key "posts", "projects"
   add_foreign_key "posts", "telegram_bots"
   add_foreign_key "posts", "users"
