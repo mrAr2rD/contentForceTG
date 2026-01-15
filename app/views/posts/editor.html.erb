@@ -1,4 +1,7 @@
-<div data-controller="post-editor chat" class="h-screen flex flex-col bg-white dark:bg-zinc-950">
+<div data-controller="post-editor chat"
+     data-chat-project-id-value="<%= @project&.id %>"
+     data-chat-ai-model-value="<%= @project&.ai_model || 'anthropic/claude-3.5-sonnet' %>"
+     class="h-screen flex flex-col bg-white dark:bg-zinc-950">
   <!-- Header - Notion style -->
   <header class="h-14 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between bg-white dark:bg-zinc-950">
     <div class="flex items-center gap-4">
@@ -110,10 +113,47 @@
         <!-- Title -->
         <div>
           <%= f.label :title, "Заголовок", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.text_field :title, 
+          <%= f.text_field :title,
               placeholder: "Название поста",
               class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
         </div>
+
+        <!-- AI Settings Section -->
+        <% if @project %>
+          <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+            <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-50 mb-3 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              AI Настройки
+            </h3>
+
+            <!-- AI Model -->
+            <div class="mb-4">
+              <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Модель AI</label>
+              <select data-chat-target="modelSelect"
+                      data-action="change->chat#changeModel"
+                      class="flex h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-2 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow">
+                <% Project::AI_MODELS.each do |value, label| %>
+                  <option value="<%= value %>" <%= 'selected' if @project.ai_model == value %>>
+                    <%= label %>
+                  </option>
+                <% end %>
+              </select>
+            </div>
+
+            <!-- Writing Style -->
+            <div>
+              <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Стиль написания</label>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
+                <%= @project.writing_style_name %>
+              </p>
+              <%= link_to "Изменить в настройках", edit_project_path(@project),
+                  class: "text-xs text-primary-600 dark:text-primary-400 hover:underline",
+                  target: "_blank" %>
+            </div>
+          </div>
+        <% end %>
 
         <%# TODO: Add tone_of_voice and post_type columns to posts table %>
         <%# Tone of Voice %>

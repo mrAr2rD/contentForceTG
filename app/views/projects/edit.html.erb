@@ -47,6 +47,59 @@
         <%= f.select :status, [["Черновик", "draft"], ["Активный", "active"], ["Архив", "archived"]], {}, class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
       </div>
 
+      <!-- AI Settings Section -->
+      <div class="pt-4 border-t border-border">
+        <h3 class="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Настройки AI
+        </h3>
+
+        <div class="space-y-4">
+          <!-- AI Model -->
+          <div class="space-y-2">
+            <%= f.label :ai_model, "Модель AI", class: "text-sm font-medium text-foreground" %>
+            <%= f.select :ai_model,
+                options_for_select(Project::AI_MODELS.to_a, @project.ai_model),
+                {},
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+            <p class="text-xs text-muted-foreground">Модель, которая будет использоваться для генерации контента</p>
+          </div>
+
+          <!-- AI Temperature -->
+          <div class="space-y-2">
+            <%= f.label :ai_temperature, "Креативность (Temperature)", class: "text-sm font-medium text-foreground" %>
+            <%= f.number_field :ai_temperature,
+                step: 0.1,
+                min: 0,
+                max: 2,
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+            <p class="text-xs text-muted-foreground">0 = более предсказуемо, 2 = более креативно (рекомендуется 0.7)</p>
+          </div>
+
+          <!-- Writing Style -->
+          <div class="space-y-2">
+            <%= f.label :writing_style, "Стиль написания", class: "text-sm font-medium text-foreground" %>
+            <%= f.select :writing_style,
+                options_for_select(Project::WRITING_STYLES.to_a, @project.writing_style),
+                {},
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+            <p class="text-xs text-muted-foreground">Выберите стиль, который AI будет использовать при генерации</p>
+          </div>
+
+          <!-- System Prompt -->
+          <div class="space-y-2">
+            <%= f.label :system_prompt, "Системный промпт (необязательно)", class: "text-sm font-medium text-foreground" %>
+            <%= f.text_area :system_prompt,
+                rows: 4,
+                placeholder: "Например: Ты эксперт в области технологий. Пиши посты для IT-аудитории с техническими деталями...",
+                class: "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+            <p class="text-xs text-muted-foreground">Кастомная инструкция для AI. Если не указан, будет использован стандартный промпт на основе выбранного стиля</p>
+          </div>
+        </div>
+      </div>
+
       <div class="pt-4 flex items-center gap-3 border-t border-border">
         <%= f.submit "Сохранить изменения", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
         <%= link_to "Отмена", project_path(@project), class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>

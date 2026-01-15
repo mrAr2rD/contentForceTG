@@ -70,6 +70,14 @@ class ProjectsController < ApplicationController
   end
 
   def project_params
-    params.require(:project).permit(:name, :description, :status)
+    params.require(:project).permit(
+      :name,
+      :description,
+      :status,
+      :ai_model,
+      :ai_temperature,
+      :system_prompt,
+      :writing_style
+    )
   end
 end

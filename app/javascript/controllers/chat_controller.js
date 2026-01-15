@@ -1,10 +1,14 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["input", "messages", "submitButton"]
+  static targets = ["input", "messages", "submitButton", "modelSelect"]
+  static values = {
+    projectId: String,
+    aiModel: String
+  }
 
   connect() {
-    const postEditorElement = this.element.closest('[data-controller*="post-editor"]') || 
+    const postEditorElement = this.element.closest('[data-controller*="post-editor"]') ||
                               document.querySelector('[data-controller*="post-editor"]')
     if (postEditorElement) {
       this.postEditorController = this.application.getControllerForElementAndIdentifier(
@@ -12,6 +16,14 @@ export default class extends Controller {
         "post-editor"
       )
     }
+
+    // Set initial model from value
+    this.currentModel = this.aiModelValue
+  }
+
+  changeModel(event) {
+    this.currentModel = event.target.value
+    console.log('AI Model changed to:', this.currentModel)
   }
 
   async sendMessage(event) {
@@ -37,7 +49,8 @@ export default class extends Controller {
         },
         body: JSON.stringify({
           prompt: prompt,
-          project_id: this.getProjectId()
+          project_id: this.projectIdValue || this.getProjectId(),
+          model: this.currentModel
         })
       })
 
@@ -45,11 +58,19 @@ export default class extends Controller {
 
       if (data.success) {
         this.addMessage(data.content, "assistant")
-        
+
         // Update post editor content
-        if (this.postEditorController && this.postEditorController.hasContentEditorTarget) {
-          this.postEditorController.contentEditorTarget.value = data.content
-          this.postEditorController.updatePreview()
+        if (this.postEditorController) {
+          if (this.postEditorController.hasContentEditorTarget) {
+            this.postEditorController.contentEditorTarget.value = data.content
+          }
+          if (this.postEditorController.hasContentTarget) {
+            this.postEditorController.contentTarget.value = data.content
+          }
+          // Trigger preview update if method exists
+          if (typeof this.postEditorController.updatePreview === 'function') {
+            this.postEditorController.updatePreview()
+          }
         }
       } else {
         this.addMessage(`Ошибка: ${data.error}`, "error")

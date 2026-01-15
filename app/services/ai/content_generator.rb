@@ -16,7 +16,10 @@ module Ai
       end
 
       # Получаем модель из настроек проекта или глобальных настроек
-      model = @project&.ai_model || @config.default_model
+      model = context[:model] || @project&.ai_model || @config.default_model
+
+      # Получаем температуру из настроек проекта или глобальных
+      temperature = @project&.ai_temperature || @config.temperature
 
       # Строим системный промпт с контекстом проекта
       system_prompt = build_system_prompt(context)
@@ -26,7 +29,7 @@ module Ai
         model: model,
         system: system_prompt,
         user_message: prompt,
-        temperature: @config.temperature,
+        temperature: temperature,
         max_tokens: @config.max_tokens
       )
 
@@ -102,11 +105,21 @@ module Ai
     end
 
     def build_system_prompt(context)
-      base_prompt = @config.custom_system_prompt || default_system_prompt
+      # Используем системный промпт из проекта, если есть
+      base_prompt = if @project&.system_prompt.present?
+                      @project.system_prompt
+                    else
+                      @config.custom_system_prompt || default_system_prompt
+                    end
 
       if @project
         base_prompt += "\n\nПроект: #{@project.name}"
-        base_prompt += "\nТон голоса: #{@project.default_tone_of_voice}" if @project.default_tone_of_voice
+
+        # Добавляем стиль написания из настроек проекта
+        if @project.writing_style.present?
+          base_prompt += "\nСтиль написания: #{@project.ai_system_prompt}"
+        end
+
         base_prompt += "\nОписание: #{@project.description}" if @project.description.present?
       end
 
@@ -118,7 +131,7 @@ module Ai
       end
 
       if context[:tone_of_voice]
-        base_prompt += "\n\nТон голоса: #{context[:tone_of_voice]}"
+        base_prompt += "\n\nДополнительные указания по тону: #{context[:tone_of_voice]}"
       end
 
       base_prompt
