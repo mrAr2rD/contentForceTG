@@ -115,23 +115,24 @@
               class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
         </div>
 
-        <!-- Tone of Voice -->
-        <div>
-          <%= f.label :tone_of_voice, "Тон голоса", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.select :tone_of_voice, 
-              Post.tone_of_voices.keys.map { |k| [k.humanize, k] },
-              { include_blank: "По умолчанию" },
-              { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        </div>
+        <%# TODO: Add tone_of_voice and post_type columns to posts table %>
+        <%# Tone of Voice %>
+        <%# <div> %>
+        <%#   <%= f.label :tone_of_voice, "Тон голоса", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+        <%#   <%= f.select :tone_of_voice,  %>
+        <%#       Post.tone_of_voices.keys.map { |k| [k.humanize, k] }, %>
+        <%#       { include_blank: "По умолчанию" }, %>
+        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
+        <%# </div> %>
 
-        <!-- Post Type -->
-        <div>
-          <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.select :post_type, 
-              Post.post_types.keys.map { |k| [k.humanize, k] },
-              {},
-              { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        </div>
+        <%# Post Type %>
+        <%# <div> %>
+        <%#   <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+        <%#   <%= f.select :post_type,  %>
+        <%#       Post.post_types.keys.map { |k| [k.humanize, k] }, %>
+        <%#       {}, %>
+        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
+        <%# </div> %>
 
         <!-- Hidden fields -->
         <%= f.hidden_field :content, data: { post_editor_target: "content" } %>
