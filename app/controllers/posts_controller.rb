@@ -116,10 +116,16 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(
+    permitted = params.require(:post).permit(
       :title, :content, :status, :project_id, :telegram_bot_id,
       :published_at, :telegram_message_id, :image,
       :post_type, :button_text, :button_url
     )
+
+    # Convert empty strings to nil for optional foreign keys
+    permitted[:project_id] = nil if permitted[:project_id].blank?
+    permitted[:telegram_bot_id] = nil if permitted[:telegram_bot_id].blank?
+
+    permitted
   end
 end
