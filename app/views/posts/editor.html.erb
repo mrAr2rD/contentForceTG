@@ -181,6 +181,7 @@
             <%= f.text_field :button_text,
                 placeholder: "Например: Перейти на сайт",
                 maxlength: 64,
+                data: { action: "input->post-editor#updateButtonText" },
                 class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
             <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Максимум 64 символа</p>
           </div>
@@ -189,6 +190,7 @@
             <%= f.label :button_url, "Ссылка кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
             <%= f.url_field :button_url,
                 placeholder: "https://example.com",
+                data: { action: "input->post-editor#updateButtonUrl" },
                 class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow font-mono" %>
             <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Полный URL с https://</p>
           </div>

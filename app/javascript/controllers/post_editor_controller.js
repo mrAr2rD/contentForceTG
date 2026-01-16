@@ -149,6 +149,22 @@ export default class extends Controller {
     }
   }
 
+  // Update button text in preview
+  updateButtonText(event) {
+    if (this.hasButtonTextPreviewTarget) {
+      const text = event.target.value || 'Кнопка'
+      this.buttonTextPreviewTarget.textContent = text
+    }
+  }
+
+  // Update button URL in preview
+  updateButtonUrl(event) {
+    const buttonLink = this.element.querySelector('[data-post-editor-target="buttonPreview"] a')
+    if (buttonLink) {
+      buttonLink.href = event.target.value || '#'
+    }
+  }
+
   // Preview uploaded image
   previewImage(event) {
     const file = event.target.files[0]
