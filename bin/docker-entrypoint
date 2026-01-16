@@ -9,6 +9,12 @@ fi
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
   ./bin/rails db:prepare
+
+  # Load Solid Queue schema if tables don't exist
+  if ! ./bin/rails runner "ActiveRecord::Base.connection.table_exists?('solid_queue_jobs')" 2>/dev/null; then
+    echo "Loading Solid Queue schema..."
+    ./bin/rails db:schema:load:queue
+  fi
 fi
 
 exec "${@}"
