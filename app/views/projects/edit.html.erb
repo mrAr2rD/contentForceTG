@@ -61,8 +61,8 @@
           <div class="space-y-2">
             <%= f.label :ai_model, "Модель AI", class: "text-sm font-medium text-foreground" %>
             <%= f.select :ai_model,
-                options_for_select(Project::AI_MODELS.to_a, @project.ai_model),
-                {},
+                options_for_select(Project::AI_MODELS.map { |k, v| [v, k] }, @project.ai_model),
+                { include_blank: "Не выбрано (использовать глобальные настройки)" },
                 class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
             <p class="text-xs text-muted-foreground">Модель, которая будет использоваться для генерации контента</p>
           </div>
@@ -82,8 +82,8 @@
           <div class="space-y-2">
             <%= f.label :writing_style, "Стиль написания", class: "text-sm font-medium text-foreground" %>
             <%= f.select :writing_style,
-                options_for_select(Project::WRITING_STYLES.to_a, @project.writing_style),
-                {},
+                options_for_select(Project::WRITING_STYLES.map { |k, v| [v, k] }, @project.writing_style),
+                { include_blank: "Не выбрано (использовать стандартный)" },
                 class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
             <p class="text-xs text-muted-foreground">Выберите стиль, который AI будет использовать при генерации</p>
           </div>
