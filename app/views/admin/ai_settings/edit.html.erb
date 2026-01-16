@@ -68,9 +68,11 @@
       <div class="space-y-2">
         <%= f.label :openrouter_api_key, "OpenRouter API Key", class: "text-sm font-medium text-foreground flex items-center gap-2" %>
         <div class="relative">
-          <%= f.password_field :openrouter_api_key,
+          <%= f.text_field :openrouter_api_key,
               placeholder: @ai_config.api_key_configured? ? "Оставьте пустым, чтобы не изменять" : "sk-or-v1-...",
-              class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10" %>
+              autocomplete: "off",
+              data: { api_key_field: true },
+              class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 font-mono" %>
           <div class="absolute right-3 top-1/2 -translate-y-1/2">
             <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
