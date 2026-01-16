@@ -8,10 +8,12 @@ module Admin
 
     def update
       @ai_config = AiConfiguration.current
-
-      # Remove empty API key from params to avoid overwriting with blank
       params_to_update = ai_config_params
-      if params_to_update[:openrouter_api_key].blank?
+
+      # Don't update API key if field was left empty (preserves existing key)
+      # Only update if user actually entered a value
+      api_key = params_to_update[:openrouter_api_key]
+      if api_key.nil? || api_key.strip == ''
         params_to_update.delete(:openrouter_api_key)
       end
 
