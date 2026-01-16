@@ -10,8 +10,9 @@ class Post < ApplicationRecord
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft
 
   # Validations
-  validates :title, presence: true, length: { minimum: 2, maximum: 200 }
-  validates :content, presence: true, length: { minimum: 10, maximum: 4096 }
+  validates :title, length: { minimum: 2, maximum: 200 }, allow_blank: true
+  validates :content, presence: true, length: { minimum: 10, maximum: 4096 }, unless: :draft?
+  validates :content, length: { maximum: 4096 }, if: :draft?, allow_blank: true
 
   # Callbacks
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
