@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru" data-controller="theme">
   <head>
+    <!-- Prevent FOUC - Load theme before rendering -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
     <title><%= content_for(:title) || "ContentForce" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <%= csrf_meta_tags %>

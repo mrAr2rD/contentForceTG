@@ -10,46 +10,28 @@
       <h2 class="text-lg font-semibold text-foreground mb-4">Внешний вид</h2>
 
       <div class="space-y-4">
-        <div>
-          <label class="text-sm font-medium text-foreground mb-3 block">Тема оформления</label>
-          <div class="grid grid-cols-2 gap-3">
-            <button
-              type="button"
-              data-action="click->theme#setLight"
-              class="flex items-center gap-3 p-4 border-2 rounded-lg transition-all hover:border-primary"
-              data-theme-target="lightButton"
-            >
-              <div class="w-10 h-10 rounded-lg bg-white border-2 border-zinc-200 flex items-center justify-center">
-                <svg class="w-5 h-5 text-zinc-900" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-                </svg>
-              </div>
-              <div class="text-left">
-                <div class="font-medium text-sm text-foreground">Светлая</div>
-                <div class="text-xs text-muted-foreground">Светлое оформление</div>
-              </div>
-            </button>
-
-            <button
-              type="button"
-              data-action="click->theme#setDark"
-              class="flex items-center gap-3 p-4 border-2 rounded-lg transition-all hover:border-primary"
-              data-theme-target="darkButton"
-            >
-              <div class="w-10 h-10 rounded-lg bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-                </svg>
-              </div>
-              <div class="text-left">
-                <div class="font-medium text-sm text-foreground">Темная</div>
-                <div class="text-xs text-muted-foreground">Темное оформление</div>
-              </div>
-            </button>
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="text-sm font-medium text-foreground block">Тема оформления</label>
+            <p class="text-xs text-muted-foreground mt-1">
+              Переключение между светлой и темной темой
+            </p>
           </div>
-          <p class="text-xs text-muted-foreground mt-3">
-            Выберите тему оформления. Настройка применяется мгновенно и сохраняется в вашем браузере.
-          </p>
+          <button
+            type="button"
+            data-action="click->theme#toggle"
+            class="p-2 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Переключить тему"
+          >
+            <!-- Sun icon (visible in dark mode) -->
+            <svg class="w-5 h-5 text-zinc-700 dark:text-zinc-300 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <!-- Moon icon (visible in light mode) -->
+            <svg class="w-5 h-5 text-zinc-700 dark:text-zinc-300 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
         </div>
       </div>
     </div>
