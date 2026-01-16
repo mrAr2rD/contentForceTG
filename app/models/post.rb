@@ -8,11 +8,14 @@ class Post < ApplicationRecord
 
   # Enums
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft
+  enum :post_type, { text: 0, image: 1, image_button: 2 }, default: :text
 
   # Validations
   validates :title, length: { minimum: 2, maximum: 200 }, allow_blank: true
   validates :content, presence: true, length: { minimum: 10, maximum: 4096 }, unless: :draft?
   validates :content, length: { maximum: 4096 }, if: :draft?, allow_blank: true
+  validates :button_text, presence: true, length: { maximum: 64 }, if: :image_button?
+  validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
 
   # Callbacks
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
