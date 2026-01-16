@@ -19,6 +19,7 @@ class Post < ApplicationRecord
   validates :content, length: { maximum: 4096 }, if: :draft?, allow_blank: true
   validates :button_text, presence: true, length: { maximum: 64 }, if: :image_button?
   validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
+  validate :telegram_caption_length, unless: :draft?
 
   # Callbacks
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
@@ -63,6 +64,10 @@ class Post < ApplicationRecord
     update!(status: :failed)
   end
 
+  def reset_to_draft!
+    update!(status: :draft, published_at: nil, telegram_message_id: nil)
+  end
+
   def published?
     status == "published"
   end
@@ -83,5 +88,15 @@ class Post < ApplicationRecord
 
   def purge_image_attachment
     image.purge if image.attached?
+  end
+
+  def telegram_caption_length
+    return unless content.present?
+    return if text? # Text posts can be up to 4096 characters
+
+    # Image and image_button posts have a 1024 character limit for captions
+    if (image? || image_button?) && content.length > 1024
+      errors.add(:content, "слишком длинный для Telegram (максимум 1024 символа для постов с картинкой, сейчас #{content.length})")
+    end
   end
 end
