@@ -118,7 +118,8 @@ class PostsController < ApplicationController
   def post_params
     params.require(:post).permit(
       :title, :content, :status, :project_id, :telegram_bot_id,
-      :published_at, :telegram_message_id, :image
+      :published_at, :telegram_message_id, :image,
+      :post_type, :button_text, :button_url
     )
   end
 end

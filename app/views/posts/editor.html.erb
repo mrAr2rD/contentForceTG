@@ -134,6 +134,66 @@
               class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
         </div>
 
+        <!-- Post Type -->
+        <div>
+          <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+          <%= f.select :post_type,
+              [
+                ['Текстовый', 'text'],
+                ['С изображением', 'image'],
+                ['С изображением и кнопкой', 'image_button']
+              ],
+              {},
+              {
+                data: {
+                  post_editor_target: "postType",
+                  action: "change->post-editor#toggleButtonFields"
+                },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
+              } %>
+        </div>
+
+        <!-- Image Upload (show for image and image_button types) -->
+        <div data-post-editor-target="imageField" class="<%= @post.post_type == 'text' ? 'hidden' : '' %>">
+          <%= f.label :image, "Изображение", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+          <div class="flex items-center gap-2">
+            <%= f.file_field :image,
+                accept: "image/*",
+                data: {
+                  action: "change->post-editor#previewImage"
+                },
+                class: "block w-full text-sm text-zinc-900 dark:text-zinc-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-zinc-50 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 transition-colors cursor-pointer" %>
+          </div>
+          <% if @post.image.attached? %>
+            <div class="mt-2 relative">
+              <%= image_tag @post.image, class: "w-full rounded-md max-h-48 object-cover" %>
+              <%= link_to "Удалить", "#",
+                  data: { action: "click->post-editor#removeImage" },
+                  class: "absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Button Fields (show only for image_button type) -->
+        <div data-post-editor-target="buttonFields" class="space-y-4 <%= @post.post_type == 'image_button' ? '' : 'hidden' %>">
+          <div>
+            <%= f.label :button_text, "Текст кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+            <%= f.text_field :button_text,
+                placeholder: "Например: Перейти на сайт",
+                maxlength: 64,
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Максимум 64 символа</p>
+          </div>
+
+          <div>
+            <%= f.label :button_url, "Ссылка кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+            <%= f.url_field :button_url,
+                placeholder: "https://example.com",
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow font-mono" %>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Полный URL с https://</p>
+          </div>
+        </div>
+
         <!-- AI Settings Section -->
         <% if @project %>
           <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800">
@@ -170,25 +230,6 @@
             </div>
           </div>
         <% end %>
-
-        <%# TODO: Add tone_of_voice and post_type columns to posts table %>
-        <%# Tone of Voice %>
-        <%# <div> %>
-        <%#   <%= f.label :tone_of_voice, "Тон голоса", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-        <%#   <%= f.select :tone_of_voice,  %>
-        <%#       Post.tone_of_voices.keys.map { |k| [k.humanize, k] }, %>
-        <%#       { include_blank: "По умолчанию" }, %>
-        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        <%# </div> %>
-
-        <%# Post Type %>
-        <%# <div> %>
-        <%#   <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-        <%#   <%= f.select :post_type,  %>
-        <%#       Post.post_types.keys.map { |k| [k.humanize, k] }, %>
-        <%#       {}, %>
-        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        <%# </div> %>
 
         <!-- Hidden fields -->
         <%= f.hidden_field :content, data: { post_editor_target: "content" } %>
@@ -227,20 +268,36 @@
           </div>
 
           <!-- Post Image (если есть) -->
-          <div data-post-editor-target="imagePreview" class="hidden">
-            <img src="" alt="Post image" class="w-full object-cover max-h-96" />
+          <div data-post-editor-target="imagePreview" class="<%= @post.image.attached? ? '' : 'hidden' %>">
+            <% if @post.image.attached? %>
+              <%= image_tag @post.image, alt: "Post image", class: "w-full object-cover max-h-96" %>
+            <% else %>
+              <img src="" alt="Post image" class="w-full object-cover max-h-96" data-post-editor-target="imagePreviewImg" />
+            <% end %>
           </div>
 
           <!-- Post Content: Title + Text (как в Telegram) -->
           <div class="bg-white dark:bg-zinc-900 px-4 py-4">
             <!-- Title (жирный, как в Telegram) -->
-            <h3 data-post-editor-target="titlePreview" class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3 hidden"></h3>
+            <h3 data-post-editor-target="titlePreview" class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3 <%= @post.title.present? ? '' : 'hidden' %>"><%= @post.title %></h3>
 
             <!-- Content with Rich Telegram Formatting -->
             <div data-post-editor-target="preview" class="telegram-content text-[15px] text-zinc-900 dark:text-zinc-50 leading-relaxed space-y-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-              <p class="text-zinc-400 dark:text-zinc-500 italic">
-                Начните писать или используйте AI для генерации...
-              </p>
+              <% if @post.content.present? %>
+                <%= simple_format(@post.content, class: '') %>
+              <% else %>
+                <p class="text-zinc-400 dark:text-zinc-500 italic">
+                  Начните писать или используйте AI для генерации...
+                </p>
+              <% end %>
+            </div>
+
+            <!-- Button (для типа image_button) -->
+            <div data-post-editor-target="buttonPreview" class="mt-4 <%= @post.post_type == 'image_button' && @post.button_text.present? ? '' : 'hidden' %>">
+              <a href="<%= @post.button_url %>" target="_blank"
+                 class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-colors text-sm">
+                <span data-post-editor-target="buttonTextPreview"><%= @post.button_text || 'Кнопка' %></span>
+              </a>
             </div>
           </div>
 
@@ -294,8 +351,9 @@
 
         <!-- Quick Actions - Notion style -->
         <div class="flex flex-wrap gap-2">
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#addEmoji"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -303,8 +361,9 @@
             </svg>
             Добавить эмодзи
           </button>
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#addHashtags"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -312,8 +371,9 @@
             </svg>
             Добавить хештеги
           </button>
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#triggerImageUpload"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

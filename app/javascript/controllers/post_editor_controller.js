@@ -1,10 +1,16 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static targets = ["form", "content", "contentEditor", "preview", "charCount", "titlePreview", "imagePreview"]
+  static targets = [
+    "form", "content", "contentEditor", "preview", "charCount",
+    "titlePreview", "imagePreview", "imagePreviewImg",
+    "postType", "imageField", "buttonFields",
+    "buttonPreview", "buttonTextPreview"
+  ]
 
   connect() {
     this.updatePreview()
+    this.toggleButtonFields()
   }
 
   updatePreview() {
@@ -109,19 +115,116 @@ export default class extends Controller {
       // Preserve emoji (they should already be in the text)
   }
 
-  handleImageUpload(event) {
+  // Toggle visibility of image and button fields based on post type
+  toggleButtonFields() {
+    if (!this.hasPostTypeTarget) return
+
+    const postType = this.postTypeTarget.value
+
+    // Show/hide image field
+    if (this.hasImageFieldTarget) {
+      if (postType === 'text') {
+        this.imageFieldTarget.classList.add('hidden')
+      } else {
+        this.imageFieldTarget.classList.remove('hidden')
+      }
+    }
+
+    // Show/hide button fields
+    if (this.hasButtonFieldsTarget) {
+      if (postType === 'image_button') {
+        this.buttonFieldsTarget.classList.remove('hidden')
+      } else {
+        this.buttonFieldsTarget.classList.add('hidden')
+      }
+    }
+
+    // Update button preview visibility
+    if (this.hasButtonPreviewTarget) {
+      if (postType === 'image_button') {
+        this.buttonPreviewTarget.classList.remove('hidden')
+      } else {
+        this.buttonPreviewTarget.classList.add('hidden')
+      }
+    }
+  }
+
+  // Preview uploaded image
+  previewImage(event) {
     const file = event.target.files[0]
-    if (file && this.hasImagePreviewTarget) {
+    if (file) {
       const reader = new FileReader()
       reader.onload = (e) => {
-        const img = this.imagePreviewTarget.querySelector('img')
-        if (img) {
-          img.src = e.target.result
-          this.imagePreviewTarget.classList.remove('hidden')
+        if (this.hasImagePreviewTarget) {
+          // Try to find img element
+          let img = this.imagePreviewTarget.querySelector('img')
+          if (!img && this.hasImagePreviewImgTarget) {
+            img = this.imagePreviewImgTarget
+          }
+
+          if (img) {
+            img.src = e.target.result
+            this.imagePreviewTarget.classList.remove('hidden')
+          }
         }
       }
       reader.readAsDataURL(file)
     }
+  }
+
+  // Remove image
+  removeImage(event) {
+    event.preventDefault()
+    if (this.hasImagePreviewTarget) {
+      this.imagePreviewTarget.classList.add('hidden')
+    }
+    // Find and clear file input
+    const fileInput = this.element.querySelector('input[type="file"]')
+    if (fileInput) {
+      fileInput.value = ''
+    }
+  }
+
+  // Trigger image upload from quick action button
+  triggerImageUpload() {
+    const fileInput = this.element.querySelector('input[type="file"][accept="image/*"]')
+    if (fileInput) {
+      // Also change post type to 'image' if it's currently 'text'
+      if (this.hasPostTypeTarget && this.postTypeTarget.value === 'text') {
+        this.postTypeTarget.value = 'image'
+        this.toggleButtonFields()
+      }
+      fileInput.click()
+    }
+  }
+
+  // Add emoji to content
+  addEmoji() {
+    const commonEmojis = ['😊', '👍', '🔥', '❤️', '✨', '🎉', '💡', '⚡', '🚀', '💪']
+    const emoji = commonEmojis[Math.floor(Math.random() * commonEmojis.length)]
+    this.insertAtCursor(emoji + ' ')
+  }
+
+  // Add hashtags
+  addHashtags() {
+    const currentContent = this.contentEditorTarget.value
+    const hashtags = '\n\n#тег1 #тег2 #тег3'
+    this.contentEditorTarget.value = currentContent + hashtags
+    this.contentEditorTarget.focus()
+    this.updatePreview()
+  }
+
+  // Helper to insert text at cursor position
+  insertAtCursor(text) {
+    const textarea = this.contentEditorTarget
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const content = textarea.value
+
+    textarea.value = content.substring(0, start) + text + content.substring(end)
+    textarea.selectionStart = textarea.selectionEnd = start + text.length
+    textarea.focus()
+    this.updatePreview()
   }
 
   save(event) {
