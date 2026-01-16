@@ -119,8 +119,8 @@ module Ai
           { role: 'system', content: system },
           { role: 'user', content: user_message }
         ],
-        temperature: temperature,
-        max_tokens: max_tokens,
+        temperature: temperature.to_f,  # Ensure temperature is a Float
+        max_tokens: max_tokens.to_i,    # Ensure max_tokens is an Integer
         transforms: ['middle-out'],
         route: 'fallback'
       )

@@ -83,4 +83,13 @@ class AiConfiguration < ApplicationRecord
     greater_than: 0,
     less_than_or_equal_to: 4000
   }
+
+  # Type casting для гарантии правильных типов
+  def temperature
+    super&.to_f || DEFAULT_TEMPERATURE
+  end
+
+  def max_tokens
+    super&.to_i || DEFAULT_MAX_TOKENS
+  end
 end
