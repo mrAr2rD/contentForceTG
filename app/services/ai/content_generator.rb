@@ -12,7 +12,11 @@ module Ai
     def generate(prompt:, context: {})
       # Проверка лимитов тарифа
       unless can_generate?
-        raise LimitExceededError, 'AI generation limit exceeded for current plan'
+        return {
+          content: nil,
+          error: 'Превышен лимит AI генераций для вашего тарифа',
+          success: false
+        }
       end
 
       # Получаем модель из настроек проекта или глобальных настроек
@@ -20,6 +24,11 @@ module Ai
 
       # Получаем температуру из настроек проекта или глобальных
       temperature = @project&.ai_temperature || @config.temperature
+
+      Rails.logger.info "=== AI Content Generation ==="
+      Rails.logger.info "Model: #{model}"
+      Rails.logger.info "Temperature: #{temperature}"
+      Rails.logger.info "Prompt length: #{prompt.length}"
 
       # Строим системный промпт с контекстом проекта
       system_prompt = build_system_prompt(context)
@@ -36,18 +45,33 @@ module Ai
       # Трекинг использования
       track_usage(response)
 
+      Rails.logger.info "Generation successful! Tokens: #{response[:usage][:total_tokens]}"
+
       {
         content: response[:content],
         model_used: response[:model],
         tokens_used: response[:usage][:total_tokens],
         success: true
       }
-    rescue OpenRouter::Error => e
-      handle_api_error(e, prompt, context)
-    rescue StandardError => e
+    rescue Openrouter::ConfigurationError => e
+      Rails.logger.error "OpenRouter configuration error: #{e.message}"
       {
         content: nil,
-        error: e.message,
+        error: 'OpenRouter API ключ не настроен. Обратитесь к администратору.',
+        success: false
+      }
+    rescue Openrouter::APIError => e
+      Rails.logger.error "OpenRouter API error: #{e.message}"
+      {
+        content: nil,
+        error: "Ошибка API: #{e.message}",
+        success: false
+      }
+    rescue StandardError => e
+      Rails.logger.error "AI Generation error: #{e.class} - #{e.message}\n#{e.backtrace.first(5).join("\n")}"
+      {
+        content: nil,
+        error: "Произошла ошибка: #{e.message}",
         success: false
       }
     end

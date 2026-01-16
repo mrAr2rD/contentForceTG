@@ -8,7 +8,15 @@ module Api
 
       def generate
         project = current_user.projects.find_by(id: params[:project_id])
-        
+
+        # Проверка наличия API ключа
+        unless AiConfiguration.current.api_key_configured?
+          return render json: {
+            success: false,
+            error: 'OpenRouter API ключ не настроен. Обратитесь к администратору.'
+          }, status: :unprocessable_entity
+        end
+
         generator = Ai::ContentGenerator.new(project: project, user: current_user)
         result = generator.generate(
           prompt: params[:prompt],
@@ -26,11 +34,18 @@ module Api
             tokens_used: result[:tokens_used]
           }
         else
+          Rails.logger.error "AI Generation failed: #{result[:error]}"
           render json: {
             success: false,
             error: result[:error]
           }, status: :unprocessable_entity
         end
+      rescue StandardError => e
+        Rails.logger.error "AI Controller error: #{e.message}\n#{e.backtrace.join("\n")}"
+        render json: {
+          success: false,
+          error: "Произошла ошибка при генерации контента: #{e.message}"
+        }, status: :internal_server_error
       end
 
       def improve
