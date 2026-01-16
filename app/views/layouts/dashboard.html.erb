@@ -20,9 +20,12 @@
   </head>
 
   <body class="antialiased bg-white dark:bg-zinc-950 transition-colors">
-    <div class="flex h-screen overflow-hidden">
-      <!-- Sidebar - Notion style -->
-      <aside class="w-64 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col shrink-0">
+    <div class="flex h-screen overflow-hidden" data-controller="sidebar">
+      <!-- Mobile overlay -->
+      <div data-sidebar-target="overlay" data-action="click->sidebar#closeMobile" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
+
+      <!-- Sidebar - Notion style with mobile support -->
+      <aside data-sidebar-target="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 border-r border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 flex flex-col shrink-0 transition-all duration-300 -translate-x-full lg:translate-x-0">
         <!-- Logo & Workspace -->
         <div class="h-14 px-4 flex items-center justify-between border-b border-zinc-200 dark:border-zinc-800">
           <div class="flex items-center gap-2">
@@ -31,13 +34,14 @@
             </div>
             <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">ContentForce</span>
           </div>
-          
-          <!-- Theme Toggle -->
-          <button
-            data-action="click->theme#toggle"
-            class="p-1.5 rounded-md text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-            title="Переключить тему"
-          >
+
+          <div class="flex items-center gap-1">
+            <!-- Theme Toggle -->
+            <button
+              data-action="click->theme#toggle"
+              class="p-1.5 rounded-md text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+              title="Переключить тему"
+            >
             <!-- Sun icon (visible in dark mode) -->
             <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
@@ -47,7 +51,19 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
             </svg>
           </button>
+
+          <!-- Close button (mobile only) -->
+          <button
+            data-action="click->sidebar#closeMobile"
+            class="lg:hidden p-1.5 rounded-md text-zinc-600 hover:text-zinc-900 hover:bg-zinc-200 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+            title="Закрыть меню"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
         </div>
+      </div>
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto notion-scrollbar px-3 py-4 space-y-1">
@@ -157,16 +173,32 @@
 
       <!-- Main Content -->
       <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Mobile header with menu button -->
+        <div class="lg:hidden h-14 px-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-950">
+          <button data-action="click->sidebar#openMobile" class="p-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-md bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-sm">
+              <span class="text-white text-sm font-bold">CF</span>
+            </div>
+            <span class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">ContentForce</span>
+          </div>
+          <div class="w-6"></div>
+        </div>
+
         <!-- Top Bar (optional, for breadcrumbs or actions) -->
         <% if content_for?(:top_bar) %>
-          <div class="h-14 px-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-950">
+          <div class="h-14 px-4 lg:px-6 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-zinc-950">
             <%= yield :top_bar %>
           </div>
         <% end %>
 
         <!-- Flash Messages - Notion style -->
         <% if notice.present? %>
-          <div class="mx-6 mt-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
+          <div class="mx-4 lg:mx-6 mt-4 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 text-green-800 dark:text-green-200 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
             <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -175,7 +207,7 @@
         <% end %>
 
         <% if alert.present? %>
-          <div class="mx-6 mt-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
+          <div class="mx-4 lg:mx-6 mt-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-900 text-red-800 dark:text-red-200 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
             <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
@@ -184,7 +216,7 @@
         <% end %>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto notion-scrollbar bg-white dark:bg-zinc-950">
+        <main class="flex-1 overflow-y-auto notion-scrollbar bg-white dark:bg-zinc-950" data-sidebar-target="content">
           <%= yield %>
         </main>
       </div>
