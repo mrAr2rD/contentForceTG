@@ -166,6 +166,59 @@
   .dark .notion-scrollbar::-webkit-scrollbar-thumb:hover {
     background-color: rgb(82 82 91);
   }
+
+  /* Telegram Content Styles */
+  .telegram-content {
+    @apply text-[15px] leading-[1.6];
+  }
+
+  .telegram-content p {
+    @apply mb-1;
+  }
+
+  .telegram-content p:last-child {
+    @apply mb-0;
+  }
+
+  .telegram-content strong {
+    @apply font-semibold text-zinc-900 dark:text-zinc-50;
+  }
+
+  .telegram-content em {
+    @apply italic;
+  }
+
+  .telegram-content code {
+    @apply bg-zinc-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded text-[13px] font-mono;
+  }
+
+  .telegram-content a {
+    @apply text-blue-600 dark:text-blue-400 hover:underline font-medium;
+  }
+
+  /* Telegram quote blocks */
+  .telegram-content blockquote,
+  .telegram-content .quote {
+    @apply border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950/20 pl-3 py-2 my-2 rounded-r;
+  }
+
+  /* Telegram emoji sizing */
+  .telegram-content img.emoji {
+    @apply inline-block w-5 h-5 align-text-bottom;
+  }
+
+  /* Telegram list styles */
+  .telegram-content ul {
+    @apply list-disc list-inside space-y-1 my-2;
+  }
+
+  .telegram-content ol {
+    @apply list-decimal list-inside space-y-1 my-2;
+  }
+
+  .telegram-content li {
+    @apply text-zinc-900 dark:text-zinc-50;
+  }
 }
 
 @layer utilities {
