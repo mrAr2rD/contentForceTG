@@ -1,0 +1,46 @@
+<div class="min-h-screen flex items-center justify-center bg-background px-4">
+  <div class="w-full max-w-md">
+    <div class="mb-8 text-center">
+      <div class="flex items-center justify-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded bg-foreground flex items-center justify-center">
+          <span class="text-background text-xs font-semibold">CF</span>
+        </div>
+        <span class="text-lg font-semibold text-foreground">ContentForce</span>
+      </div>
+      <h1 class="text-2xl font-semibold text-foreground mb-1">Создать аккаунт</h1>
+      <p class="text-sm text-muted-foreground">Начните работу с AI-контентом</p>
+    </div>
+
+    <div class="bg-card border border-border rounded-lg p-6 shadow-sm">
+      <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { class: "space-y-4" }) do |f| %>
+        <%= render "devise/shared/error_messages", resource: resource %>
+
+        <div class="space-y-2">
+          <%= f.label :email, "Email", class: "text-sm font-medium text-foreground" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <div class="space-y-2">
+          <%= f.label :password, "Пароль", class: "text-sm font-medium text-foreground" %>
+          <% if @minimum_password_length %>
+            <p class="text-xs text-muted-foreground">Минимум <%= @minimum_password_length %> символов</p>
+          <% end %>
+          <%= f.password_field :password, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <div class="space-y-2">
+          <%= f.label :password_confirmation, "Подтверждение пароля", class: "text-sm font-medium text-foreground" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+        </div>
+
+        <div>
+          <%= f.submit "Зарегистрироваться", class: "inline-flex h-10 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+        </div>
+      <% end %>
+
+      <div class="mt-6 text-center text-sm">
+        <%= render "devise/shared/links" %>
+      </div>
+    </div>
+  </div>
+</div>

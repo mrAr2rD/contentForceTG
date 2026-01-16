@@ -1,0 +1,174 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# Environment Check Script for Coolify Deployment
+# Run this script to validate your environment configuration
+
+puts "\n🔍 ContentForce Environment Check\n"
+puts "=" * 50
+
+# Required environment variables
+REQUIRED_VARS = {
+  'DATABASE_URL' => 'PostgreSQL connection string',
+  'REDIS_URL' => 'Redis connection string',
+  'RAILS_ENV' => 'Rails environment (should be production)',
+  'SECRET_KEY_BASE' => 'Rails secret key base',
+  'RAILS_MASTER_KEY' => 'Rails master encryption key'
+}
+
+OPTIONAL_VARS = {
+  'TELEGRAM_BOT_TOKEN' => 'Telegram bot token for OAuth',
+  'OPENROUTER_API_KEY' => 'OpenRouter API key for AI features',
+  'AWS_ACCESS_KEY_ID' => 'AWS S3 access key (optional)',
+  'SENTRY_DSN' => 'Sentry error tracking (optional)'
+}
+
+errors = []
+warnings = []
+
+puts "\n✓ Checking required variables:\n"
+
+REQUIRED_VARS.each do |var, description|
+  value = ENV[var]
+
+  if value.nil? || value.empty?
+    errors << "❌ #{var} is missing (#{description})"
+    puts "  ❌ #{var}: MISSING"
+  else
+    # Validate format
+    case var
+    when 'DATABASE_URL'
+      if value.include?('postgres://postgres:')
+        errors << "❌ DATABASE_URL has duplicate 'postgres://' - check format!"
+        puts "  ❌ #{var}: INVALID FORMAT (duplicate postgres://)"
+      elsif value.end_with?('postgresс') # cyrillic 'с'
+        errors << "❌ DATABASE_URL ends with cyrillic 'с' - should be latin 'postgres'"
+        puts "  ❌ #{var}: INVALID (cyrillic characters)"
+      elsif !value.start_with?('postgresql://')
+        warnings << "⚠️  DATABASE_URL should start with 'postgresql://' not 'postgres://'"
+        puts "  ⚠️  #{var}: SET (consider using postgresql:// prefix)"
+      else
+        puts "  ✅ #{var}: SET"
+      end
+
+    when 'REDIS_URL'
+      unless value.start_with?('redis://')
+        errors << "❌ REDIS_URL should start with 'redis://'"
+        puts "  ❌ #{var}: INVALID FORMAT"
+      else
+        puts "  ✅ #{var}: SET"
+      end
+
+    when 'RAILS_ENV'
+      if value != 'production'
+        warnings << "⚠️  RAILS_ENV is '#{value}' but should be 'production' for deployment"
+        puts "  ⚠️  #{var}: #{value} (should be 'production')"
+      else
+        puts "  ✅ #{var}: #{value}"
+      end
+
+    when 'SECRET_KEY_BASE'
+      if value.length < 64
+        errors << "❌ SECRET_KEY_BASE is too short (should be 128+ characters)"
+        puts "  ❌ #{var}: TOO SHORT"
+      else
+        puts "  ✅ #{var}: SET (#{value.length} chars)"
+      end
+
+    when 'RAILS_MASTER_KEY'
+      if value.length != 32
+        errors << "❌ RAILS_MASTER_KEY should be exactly 32 characters"
+        puts "  ❌ #{var}: INVALID LENGTH (#{value.length} chars, expected 32)"
+      else
+        puts "  ✅ #{var}: SET"
+      end
+
+    else
+      puts "  ✅ #{var}: SET"
+    end
+  end
+end
+
+puts "\n✓ Checking optional variables:\n"
+
+OPTIONAL_VARS.each do |var, description|
+  value = ENV[var]
+
+  if value.nil? || value.empty?
+    puts "  ⚠️  #{var}: NOT SET (#{description})"
+  else
+    puts "  ✅ #{var}: SET"
+  end
+end
+
+# Additional checks
+puts "\n✓ Additional checks:\n"
+
+# Check if config/master.key exists
+if File.exist?('config/master.key')
+  master_key = File.read('config/master.key').strip
+  if ENV['RAILS_MASTER_KEY'] && ENV['RAILS_MASTER_KEY'] != master_key
+    warnings << "⚠️  RAILS_MASTER_KEY env var doesn't match config/master.key"
+    puts "  ⚠️  RAILS_MASTER_KEY mismatch with config/master.key"
+  else
+    puts "  ✅ config/master.key exists and matches"
+  end
+else
+  puts "  ℹ️  config/master.key not found (using RAILS_MASTER_KEY from env)"
+end
+
+# Check database connection format
+if ENV['DATABASE_URL']
+  db_url = ENV['DATABASE_URL']
+
+  # Extract host
+  if db_url =~ /@([^:\/]+)/
+    host = $1
+    if host == 'localhost' || host == '127.0.0.1'
+      warnings << "⚠️  DATABASE_URL points to localhost - should be service name in Coolify"
+      puts "  ⚠️  Database host is #{host} (should be service name)"
+    else
+      puts "  ✅ Database host: #{host}"
+    end
+  end
+end
+
+# Check Redis connection format
+if ENV['REDIS_URL']
+  redis_url = ENV['REDIS_URL']
+
+  if redis_url =~ /redis:\/\/([^:\/]+)/
+    host = $1
+    if host == 'localhost' || host == '127.0.0.1'
+      warnings << "⚠️  REDIS_URL points to localhost - should be service name in Coolify"
+      puts "  ⚠️  Redis host is #{host} (should be service name)"
+    else
+      puts "  ✅ Redis host: #{host}"
+    end
+  end
+end
+
+# Summary
+puts "\n" + "=" * 50
+puts "\n📊 Summary:\n"
+
+if errors.empty? && warnings.empty?
+  puts "✅ All checks passed! Ready to deploy.\n"
+  exit 0
+elsif errors.empty?
+  puts "⚠️  Configuration OK with warnings:\n"
+  warnings.each { |w| puts "  #{w}" }
+  puts "\n✅ Safe to deploy, but review warnings.\n"
+  exit 0
+else
+  puts "❌ Configuration has errors:\n"
+  errors.each { |e| puts "  #{e}" }
+
+  if warnings.any?
+    puts "\n⚠️  Also warnings:\n"
+    warnings.each { |w| puts "  #{w}" }
+  end
+
+  puts "\n❌ Fix errors before deploying!\n"
+  exit 1
+end

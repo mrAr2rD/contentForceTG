@@ -1,0 +1,161 @@
+<div class="max-w-4xl mx-auto px-8 py-8">
+  <!-- Header -->
+  <div class="mb-6">
+    <%= link_to admin_root_path, class: "inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3 transition-colors" do %>
+      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Назад в админку
+    <% end %>
+    <div class="flex items-center gap-3 mb-2">
+      <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      <h1 class="text-xl font-semibold text-foreground">Настройки AI</h1>
+    </div>
+    <p class="text-xs text-muted-foreground">Глобальные настройки для всех пользователей платформы</p>
+  </div>
+
+  <!-- API Key Status -->
+  <% if @ai_config.api_key_configured? %>
+    <div class="mb-6 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-green-600 dark:text-green-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-green-900 dark:text-green-100">API ключ настроен</p>
+          <p class="text-xs text-green-700 dark:text-green-300 mt-1">OpenRouter API подключен и готов к использованию</p>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <div class="mb-6 bg-yellow-50 dark:bg-yellow-900/10 border border-yellow-200 dark:border-yellow-900 rounded-lg p-4">
+      <div class="flex items-start gap-3">
+        <svg class="w-5 h-5 text-yellow-600 dark:text-yellow-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        <div>
+          <p class="text-sm font-medium text-yellow-900 dark:text-yellow-100">API ключ не настроен</p>
+          <p class="text-xs text-yellow-700 dark:text-yellow-300 mt-1">Добавьте OpenRouter API ключ для работы AI функций</p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Form -->
+  <div class="bg-card border border-border rounded-lg">
+    <%= form_with model: @ai_config, url: admin_ai_settings_path, method: :patch, local: true, class: "p-6 space-y-6" do |f| %>
+      <% if @ai_config.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-md p-3">
+          <div class="flex items-start gap-2">
+            <svg class="w-4 h-4 text-red-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+            </svg>
+            <div>
+              <h3 class="text-xs font-medium text-red-800 mb-1">Ошибки при сохранении</h3>
+              <ul class="text-xs text-red-700 space-y-0.5">
+                <% @ai_config.errors.full_messages.each do |error| %>
+                  <li>• <%= error %></li>
+                <% end %>
+              </ul>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- OpenRouter API Key -->
+      <div class="space-y-2">
+        <%= f.label :openrouter_api_key, "OpenRouter API Key", class: "text-sm font-medium text-foreground flex items-center gap-2" %>
+        <div class="relative">
+          <%= f.text_field :openrouter_api_key,
+              placeholder: @ai_config.api_key_configured? ? "Оставьте пустым, чтобы не изменять" : "sk-or-v1-...",
+              autocomplete: "off",
+              data: { api_key_field: true },
+              class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-10 font-mono" %>
+          <div class="absolute right-3 top-1/2 -translate-y-1/2">
+            <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs text-muted-foreground">
+          Получите ключ на
+          <%= link_to "openrouter.ai", "https://openrouter.ai/keys", target: "_blank", class: "text-primary hover:underline" %>
+          • Этот ключ будет использоваться для всех пользователей
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-border">
+        <h3 class="text-sm font-semibold text-foreground mb-4">Глобальные настройки по умолчанию</h3>
+        <p class="text-xs text-muted-foreground mb-4">Эти настройки используются, если пользователь не настроил свои собственные в проекте</p>
+
+        <div class="space-y-4">
+          <!-- Default Model -->
+          <div class="space-y-2">
+            <%= f.label :default_model, "Модель по умолчанию", class: "text-sm font-medium text-foreground" %>
+            <%= f.select :default_model,
+                options_for_select(AiConfiguration::AVAILABLE_MODELS.map { |k, v| [v[:name], k] }, @ai_config.default_model),
+                {},
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+          </div>
+
+          <!-- Temperature -->
+          <div class="space-y-2">
+            <%= f.label :temperature, "Temperature (креативность)", class: "text-sm font-medium text-foreground" %>
+            <%= f.number_field :temperature,
+                step: 0.1,
+                min: 0,
+                max: 2,
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+            <p class="text-xs text-muted-foreground">0 = более предсказуемо, 2 = более креативно</p>
+          </div>
+
+          <!-- Max Tokens -->
+          <div class="space-y-2">
+            <%= f.label :max_tokens, "Максимум токенов", class: "text-sm font-medium text-foreground" %>
+            <%= f.number_field :max_tokens,
+                step: 100,
+                min: 100,
+                max: 4000,
+                class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+            <p class="text-xs text-muted-foreground">Максимальная длина ответа AI</p>
+          </div>
+
+          <!-- Custom System Prompt -->
+          <div class="space-y-2">
+            <%= f.label :custom_system_prompt, "Системный промпт (необязательно)", class: "text-sm font-medium text-foreground" %>
+            <%= f.text_area :custom_system_prompt,
+                rows: 4,
+                placeholder: "Кастомная инструкция для AI, применяемая ко всем запросам...",
+                class: "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+            <p class="text-xs text-muted-foreground">Глобальный системный промпт для всех пользователей</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="pt-4 flex items-center gap-3 border-t border-border">
+        <%= f.submit "Сохранить настройки", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+        <%= link_to "Отмена", admin_root_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Info Box -->
+  <div class="mt-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
+    <div class="flex items-start gap-3">
+      <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+      </svg>
+      <div>
+        <p class="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Важная информация</p>
+        <ul class="text-xs text-blue-700 dark:text-blue-300 space-y-1">
+          <li>• Один API ключ используется для всех пользователей платформы</li>
+          <li>• Пользователи могут переопределить модель и температуру в настройках своих проектов</li>
+          <li>• Все AI запросы тарифицируются по вашему OpenRouter аккаунту</li>
+          <li>• API ключ хранится в зашифрованном виде в базе данных</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

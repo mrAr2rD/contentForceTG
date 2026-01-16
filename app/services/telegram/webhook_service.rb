@@ -1,0 +1,64 @@
+# frozen_string_literal: true
+
+require 'net/http'
+require 'json'
+require 'uri'
+
+module Telegram
+  class WebhookService
+    def initialize(telegram_bot)
+      @bot = telegram_bot
+    end
+
+    def setup!
+      webhook_url = "#{ENV.fetch('TELEGRAM_WEBHOOK_URL', 'http://localhost:3000')}/webhooks/telegram/#{@bot.bot_token}"
+      
+      params = {
+        url: webhook_url,
+        allowed_updates: ['message', 'channel_post', 'callback_query', 'my_chat_member']
+      }
+
+      result = make_request('setWebhook', params)
+
+      unless result['ok']
+        raise "Failed to set webhook: #{result['description']}"
+      end
+
+      @bot.update!(last_sync_at: Time.current)
+      result
+    end
+
+    def delete!
+      result = make_request('deleteWebhook')
+
+      unless result['ok']
+        raise "Failed to delete webhook: #{result['description']}"
+      end
+
+      result
+    end
+
+    def info
+      make_request('getWebhookInfo')
+    end
+
+    private
+
+    def make_request(method, params = {})
+      uri = URI("https://api.telegram.org/bot#{@bot.bot_token}/#{method}")
+      
+      http = Net::HTTP.new(uri.host, uri.port)
+      http.use_ssl = true
+      http.read_timeout = 30
+      
+      request = Net::HTTP::Post.new(uri)
+      request['Content-Type'] = 'application/json'
+      request.body = params.to_json unless params.empty?
+      
+      response = http.request(request)
+      JSON.parse(response.body)
+    rescue StandardError => e
+      { 'ok' => false, 'description' => e.message }
+    end
+  end
+end

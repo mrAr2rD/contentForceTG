@@ -1,0 +1,217 @@
+<div class="notion-page py-12">
+  <!-- Welcome Section - Notion style -->
+  <div class="mb-12">
+    <h1 class="notion-h1 mb-2">
+      Добро пожаловать, <%= @user.email.split('@').first.capitalize %>! 👋
+    </h1>
+    <p class="notion-text text-zinc-500 dark:text-zinc-400">
+      Вот что происходит с вашим контентом сегодня
+    </p>
+  </div>
+
+  <!-- Quick Actions - Notion style -->
+  <div class="mb-8 flex flex-wrap gap-3">
+    <%= link_to new_post_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Новый пост
+    <% end %>
+
+    <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 border border-zinc-200 bg-white hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 rounded-md text-sm font-medium text-zinc-900 dark:text-zinc-50 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+      </svg>
+      Новый проект
+    <% end %>
+
+    <%= link_to editor_posts_path, class: "inline-flex items-center gap-2 px-4 py-2 border border-zinc-200 bg-white hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 rounded-md text-sm font-medium text-zinc-900 dark:text-zinc-50 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+      </svg>
+      AI Редактор
+    <% end %>
+  </div>
+
+  <!-- Stats Grid - Notion style cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+    <!-- Projects Card -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-1"><%= @recent_projects.count %></h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Проектов</p>
+    </div>
+
+    <!-- Posts Card -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-1"><%= @recent_posts.count %></h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Постов</p>
+    </div>
+
+    <!-- AI Credits Card -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">∞</h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">AI запросов</p>
+    </div>
+
+    <!-- Plan Card -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 hover:shadow-md transition-shadow">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+          <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+          </svg>
+        </div>
+      </div>
+      <h3 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-1">Free</h3>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Текущий план</p>
+    </div>
+  </div>
+
+  <!-- Recent Activity - Notion style -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Recent Projects -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+      <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">Недавние проекты</h2>
+      </div>
+      <% if @recent_projects.any? %>
+        <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @recent_projects.each do |project| %>
+            <%= link_to project_path(project), class: "flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors group" do %>
+              <div class="w-10 h-10 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 rounded-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 text-sm font-semibold shadow-sm">
+                <%= project.name[0].upcase %>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <%= project.name %>
+                </h3>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                  Обновлен <%= time_ago_in_words(project.updated_at) %> назад
+                </p>
+              </div>
+              <svg class="w-4 h-4 text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-6 py-12 text-center">
+          <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-zinc-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Нет проектов</p>
+          <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Создать проект
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Recent Posts -->
+    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
+      <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
+        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">Недавние посты</h2>
+      </div>
+      <% if @recent_posts.any? %>
+        <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @recent_posts.each do |post| %>
+            <%= link_to post_path(post), class: "flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors group" do %>
+              <div class="w-10 h-10 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+              </div>
+              <div class="flex-1 min-w-0">
+                <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
+                  <%= post.title || post.content.truncate(50) %>
+                </h3>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium <%= post.status == 'published' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-400' %>">
+                    <%= post.status %>
+                  </span>
+                  <span class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <%= time_ago_in_words(post.created_at) %> назад
+                  </span>
+                </div>
+              </div>
+              <svg class="w-4 h-4 text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="px-6 py-12 text-center">
+          <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-6 h-6 text-zinc-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Нет постов</p>
+          <%= link_to new_post_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors" do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+            </svg>
+            Создать пост
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Getting Started - Notion style callout -->
+  <% if @recent_projects.empty? && @recent_posts.empty? %>
+    <div class="rounded-lg border border-primary-200 dark:border-primary-900 bg-primary-50 dark:bg-primary-950/20 p-6">
+      <div class="flex items-start gap-4">
+        <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+          <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-base font-semibold text-primary-900 dark:text-primary-100 mb-2">
+            Начните работу с ContentForce
+          </h3>
+          <p class="text-sm text-primary-800 dark:text-primary-200 mb-4">
+            Создайте свой первый проект и начните генерировать контент с помощью AI
+          </p>
+          <div class="flex gap-3">
+            <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-md text-sm font-medium transition-colors" do %>
+              Создать проект
+            <% end %>
+            <a href="#" class="inline-flex items-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-md text-sm font-medium transition-colors">
+              Посмотреть гайд
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>

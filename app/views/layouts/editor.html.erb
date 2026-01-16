@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ru" data-controller="theme">
+  <head>
+    <title>AI Редактор - ContentForce</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <script>
+      // Load theme before page renders to avoid flash (manual only, no auto-detection)
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+  </head>
+
+  <body class="bg-white dark:bg-zinc-950 min-h-screen">
+    <%= yield %>
+  </body>
+</html>
