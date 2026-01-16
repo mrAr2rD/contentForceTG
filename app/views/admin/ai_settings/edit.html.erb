@@ -95,9 +95,18 @@
           <div class="space-y-2">
             <%= f.label :default_model, "Модель по умолчанию", class: "text-sm font-medium text-foreground" %>
             <%= f.select :default_model,
-                options_for_select(AiConfiguration::AVAILABLE_MODELS.map { |k, v| [v[:name], k] }, @ai_config.default_model),
+                grouped_options_for_select(
+                  {
+                    'Free (Бесплатные)' => AiConfiguration::AVAILABLE_MODELS.select { |k, v| v[:tier] == :free }.map { |k, v| [v[:name], k] },
+                    'Starter' => AiConfiguration::AVAILABLE_MODELS.select { |k, v| v[:tier] == :starter }.map { |k, v| [v[:name], k] },
+                    'Pro' => AiConfiguration::AVAILABLE_MODELS.select { |k, v| v[:tier] == :pro }.map { |k, v| [v[:name], k] },
+                    'Business' => AiConfiguration::AVAILABLE_MODELS.select { |k, v| v[:tier] == :business }.map { |k, v| [v[:name], k] }
+                  },
+                  @ai_config.default_model
+                ),
                 {},
                 class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+            <p class="text-xs text-muted-foreground">Эта модель будет использоваться для пользователей, которые не настроили свою</p>
           </div>
 
           <!-- Temperature -->
