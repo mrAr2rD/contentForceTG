@@ -2,7 +2,8 @@
 
 class AiConfiguration < ApplicationRecord
   # Encrypt API key (allow blank values)
-  encrypts :openrouter_api_key, deterministic: false, ignore_case: true
+  # Temporarily disabled encryption until RAILS_MASTER_KEY is configured
+  # encrypts :openrouter_api_key, deterministic: false, ignore_case: true
 
   # Singleton pattern - только одна конфигурация
   def self.current
