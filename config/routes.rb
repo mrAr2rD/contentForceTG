@@ -81,7 +81,8 @@ Rails.application.routes.draw do
   
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
-    get '/', to: 'dashboard#index'
+    root to: "dashboard#index"
+
     resources :users, only: [:index, :show, :edit, :update, :destroy]
     resources :projects, only: [:index, :show, :destroy]
     resources :posts, only: [:index, :show, :destroy]
@@ -90,8 +91,6 @@ Rails.application.routes.draw do
 
     # AI Settings (singleton resource)
     resource :ai_settings, only: [:edit, :update]
-
-    root to: "users#index"
   end
   
   # Rails health check

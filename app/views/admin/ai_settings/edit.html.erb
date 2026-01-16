@@ -1,7 +1,7 @@
 <div class="max-w-4xl mx-auto px-8 py-8">
   <!-- Header -->
   <div class="mb-6">
-    <%= link_to admin_path, class: "inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3 transition-colors" do %>
+    <%= link_to admin_root_path, class: "inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground mb-3 transition-colors" do %>
       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
       </svg>
@@ -134,7 +134,7 @@
 
       <div class="pt-4 flex items-center gap-3 border-t border-border">
         <%= f.submit "Сохранить настройки", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
-        <%= link_to "Отмена", admin_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
+        <%= link_to "Отмена", admin_root_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" %>
       </div>
     <% end %>
   </div>

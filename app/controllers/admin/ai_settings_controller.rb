@@ -1,11 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class AiSettingsController < ApplicationController
-    before_action :authenticate_user!
-    before_action :ensure_admin!
-    layout "dashboard"
-
+  class AiSettingsController < Admin::ApplicationController
     def edit
       @ai_config = AiConfiguration.current
     end
@@ -21,12 +17,6 @@ module Admin
     end
 
     private
-
-    def ensure_admin!
-      unless current_user.admin?
-        redirect_to root_path, alert: 'Доступ запрещен'
-      end
-    end
 
     def ai_config_params
       params.require(:ai_configuration).permit(
