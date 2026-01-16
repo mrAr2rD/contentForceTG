@@ -95,9 +95,9 @@ export default class extends Controller {
     const messageDiv = document.createElement('div')
     messageDiv.className = `rounded-lg p-3 text-sm leading-relaxed ${
       type === "user"
-        ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-900 dark:text-primary-100 ml-auto max-w-[80%]"
+        ? "bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-900 dark:text-primary-50 ml-auto max-w-[80%]"
         : type === "error"
-        ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-100"
+        ? "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-900 dark:text-red-50"
         : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50"
     }`
 

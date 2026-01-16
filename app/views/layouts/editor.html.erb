@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html data-controller="theme">
+<html lang="ru" data-controller="theme">
   <head>
     <title>AI Редактор - ContentForce</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -10,12 +10,10 @@
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
 
     <script>
-      // Load theme before page renders to avoid flash
+      // Load theme before page renders to avoid flash (manual only, no auto-detection)
       (function() {
-        const theme = localStorage.getItem('theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        if (theme === 'dark' || (!theme && systemPrefersDark)) {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
           document.documentElement.classList.add('dark');
         }
       })();
