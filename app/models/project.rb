@@ -1,12 +1,55 @@
 class Project < ApplicationRecord
   # Constants
   AI_MODELS = {
-    'anthropic/claude-3.5-sonnet' => 'Claude 3.5 Sonnet',
-    'anthropic/claude-3-opus' => 'Claude 3 Opus',
-    'openai/gpt-4-turbo' => 'GPT-4 Turbo',
+    # Free tier (доступно всем)
+    'deepseek/deepseek-chat' => 'DeepSeek Chat (Бесплатно)',
+    'google/gemini-2.0-flash-exp:free' => 'Gemini 2.0 Flash (Бесплатно)',
+    'meta-llama/llama-3.2-3b-instruct:free' => 'Llama 3.2 3B (Бесплатно)',
+
+    # Budget tier (Starter план)
     'openai/gpt-3.5-turbo' => 'GPT-3.5 Turbo',
-    'google/gemini-pro' => 'Gemini Pro'
+    'anthropic/claude-3-haiku' => 'Claude 3 Haiku',
+    'google/gemini-pro' => 'Gemini Pro',
+    'meta-llama/llama-3-8b-instruct' => 'Llama 3 8B',
+
+    # Pro tier (Pro план)
+    'anthropic/claude-3.5-sonnet' => 'Claude 3.5 Sonnet',
+    'openai/gpt-4-turbo' => 'GPT-4 Turbo',
+    'openai/gpt-4o' => 'GPT-4o',
+    'google/gemini-pro-1.5' => 'Gemini Pro 1.5',
+    'meta-llama/llama-3-70b-instruct' => 'Llama 3 70B',
+
+    # Premium tier (Business план)
+    'anthropic/claude-3-opus' => 'Claude 3 Opus',
+    'openai/gpt-4-turbo-preview' => 'GPT-4 Turbo Preview',
+    'openai/o1-preview' => 'OpenAI o1 Preview',
+    'google/gemini-ultra' => 'Gemini Ultra',
+    'deepseek/deepseek-coder' => 'DeepSeek Coder'
   }.freeze
+
+  # Model tiers for subscription limits
+  FREE_MODELS = [
+    'deepseek/deepseek-chat',
+    'google/gemini-2.0-flash-exp:free',
+    'meta-llama/llama-3.2-3b-instruct:free'
+  ].freeze
+
+  STARTER_MODELS = FREE_MODELS + [
+    'openai/gpt-3.5-turbo',
+    'anthropic/claude-3-haiku',
+    'google/gemini-pro',
+    'meta-llama/llama-3-8b-instruct'
+  ].freeze
+
+  PRO_MODELS = STARTER_MODELS + [
+    'anthropic/claude-3.5-sonnet',
+    'openai/gpt-4-turbo',
+    'openai/gpt-4o',
+    'google/gemini-pro-1.5',
+    'meta-llama/llama-3-70b-instruct'
+  ].freeze
+
+  BUSINESS_MODELS = AI_MODELS.keys.freeze
 
   WRITING_STYLES = {
     'professional' => 'Профессиональный',
@@ -28,13 +71,7 @@ class Project < ApplicationRecord
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
   validates :description, length: { maximum: 1000 }, allow_blank: true
   validates :ai_temperature, numericality: { greater_than_or_equal_to: 0, less_than_or_equal_to: 2 }, allow_nil: true
-  validates :ai_model, inclusion: { in: %w[
-    anthropic/claude-3.5-sonnet
-    anthropic/claude-3-opus
-    openai/gpt-4-turbo
-    openai/gpt-3.5-turbo
-    google/gemini-pro
-  ] }, allow_nil: true
+  validates :ai_model, inclusion: { in: AI_MODELS.keys }, allow_nil: true
   validates :writing_style, inclusion: { in: %w[professional casual friendly formal creative] }, allow_nil: true
 
   # Scopes
@@ -85,5 +122,43 @@ class Project < ApplicationRecord
     }
 
     style_prompts[writing_style] || style_prompts['professional']
+  end
+
+  # Get available models for user's subscription plan
+  def available_models(user_plan = :free)
+    case user_plan.to_sym
+    when :free
+      FREE_MODELS
+    when :starter
+      STARTER_MODELS
+    when :pro
+      PRO_MODELS
+    when :business
+      BUSINESS_MODELS
+    else
+      FREE_MODELS
+    end
+  end
+
+  # Check if model is available for user
+  def model_available_for_user?(model, user)
+    plan = user.subscription&.plan&.to_sym || :free
+    available_models(plan).include?(model)
+  end
+
+  # Get default model for plan
+  def self.default_model_for_plan(plan = :free)
+    case plan.to_sym
+    when :free
+      'deepseek/deepseek-chat'
+    when :starter
+      'anthropic/claude-3-haiku'
+    when :pro
+      'anthropic/claude-3.5-sonnet'
+    when :business
+      'anthropic/claude-3-opus'
+    else
+      'deepseek/deepseek-chat'
+    end
   end
 end
