@@ -6,6 +6,9 @@ class Post < ApplicationRecord
   has_one_attached :image
   has_many :post_analytics, dependent: :destroy
 
+  # Callbacks for manual purge (bypass Solid Queue until tables exist)
+  before_destroy :purge_image_attachment
+
   # Enums
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft
   enum :post_type, { text: 0, image: 1, image_button: 2 }, default: :text
@@ -74,5 +77,11 @@ class Post < ApplicationRecord
 
   def failed?
     status == "failed"
+  end
+
+  private
+
+  def purge_image_attachment
+    image.purge if image.attached?
   end
 end

@@ -28,7 +28,7 @@
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <%= link_to edit_post_path(@post), class: "inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" do %>
+        <%= link_to editor_posts_path(post_id: @post.id), class: "inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" do %>
           Редактировать
         <% end %>
         <% if @post.draft? && @post.telegram_bot %>
@@ -74,14 +74,32 @@
           </div>
 
           <!-- Post Content -->
-          <div class="bg-white px-4 py-4">
-            <div class="telegram-content text-[15px] text-zinc-900 leading-relaxed space-y-2">
-              <%= raw(@post.content
-                .gsub(/\*\*(.+?)\*\*/, '<strong class="font-semibold text-zinc-900">\1</strong>')
-                .gsub(/(?<!\*)\*([^\*]+?)\*(?!\*)/, '<em class="italic">\1</em>')
-                .gsub(/`(.+?)`/, '<code class="bg-zinc-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-zinc-900">\1</code>')
-                .gsub(/\[(.+?)\]\((.+?)\)/, '<a href="\2" class="text-blue-600 hover:underline font-medium">\1</a>')
-                .gsub(/\n/, '<br>')) %>
+          <div class="bg-white">
+            <!-- Image (if post type is image or image_button) -->
+            <% if (@post.post_type == 'image' || @post.post_type == 'image_button') && @post.image.attached? %>
+              <div class="w-full">
+                <%= image_tag @post.image, class: "w-full h-auto", alt: @post.title %>
+              </div>
+            <% end %>
+
+            <div class="px-4 py-4">
+              <div class="telegram-content text-[15px] text-zinc-900 leading-relaxed space-y-2">
+                <%= raw(@post.content
+                  .gsub(/\*\*(.+?)\*\*/, '<strong class="font-semibold text-zinc-900">\1</strong>')
+                  .gsub(/(?<!\*)\*([^\*]+?)\*(?!\*)/, '<em class="italic">\1</em>')
+                  .gsub(/`(.+?)`/, '<code class="bg-zinc-100 px-1.5 py-0.5 rounded text-[13px] font-mono text-zinc-900">\1</code>')
+                  .gsub(/\[(.+?)\]\((.+?)\)/, '<a href="\2" class="text-blue-600 hover:underline font-medium">\1</a>')
+                  .gsub(/\n/, '<br>')) %>
+              </div>
+
+              <!-- Button (if post type is image_button) -->
+              <% if @post.post_type == 'image_button' && @post.button_text.present? %>
+                <div class="mt-3">
+                  <a href="<%= @post.button_url %>" target="_blank" class="inline-flex items-center justify-center w-full px-4 py-2 bg-white border border-zinc-300 rounded-lg text-blue-600 text-sm font-medium hover:bg-zinc-50 transition-colors">
+                    <%= @post.button_text %>
+                  </a>
+                </div>
+              <% end %>
             </div>
           </div>
 

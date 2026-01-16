@@ -118,34 +118,34 @@ module Telegram
       request = Net::HTTP::Post.new(uri)
       request['Content-Type'] = "multipart/form-data; boundary=#{boundary}"
 
-      # Build multipart body
+      # Build multipart body with explicit binary encoding
       body_parts = []
 
-      # Add regular parameters
+      # Add regular parameters with binary encoding
       params.each do |key, value|
         next if value.nil?
 
         if value.is_a?(Hash)
-          body_parts << "--#{boundary}\r\n"
-          body_parts << "Content-Disposition: form-data; name=\"#{key}\"\r\n\r\n"
-          body_parts << "#{value.to_json}\r\n"
+          body_parts << "--#{boundary}\r\n".force_encoding('BINARY')
+          body_parts << "Content-Disposition: form-data; name=\"#{key}\"\r\n\r\n".force_encoding('BINARY')
+          body_parts << "#{value.to_json}\r\n".force_encoding('BINARY')
         else
-          body_parts << "--#{boundary}\r\n"
-          body_parts << "Content-Disposition: form-data; name=\"#{key}\"\r\n\r\n"
-          body_parts << "#{value}\r\n"
+          body_parts << "--#{boundary}\r\n".force_encoding('BINARY')
+          body_parts << "Content-Disposition: form-data; name=\"#{key}\"\r\n\r\n".force_encoding('BINARY')
+          body_parts << "#{value}\r\n".force_encoding('BINARY')
         end
       end
 
       # Add image file
       image_attachment.blob.open do |file|
-        body_parts << "--#{boundary}\r\n"
-        body_parts << "Content-Disposition: form-data; name=\"photo\"; filename=\"#{image_attachment.filename}\"\r\n"
-        body_parts << "Content-Type: #{image_attachment.content_type}\r\n\r\n"
-        body_parts << file.read
-        body_parts << "\r\n"
+        body_parts << "--#{boundary}\r\n".force_encoding('BINARY')
+        body_parts << "Content-Disposition: form-data; name=\"photo\"; filename=\"#{image_attachment.filename}\"\r\n".force_encoding('BINARY')
+        body_parts << "Content-Type: #{image_attachment.content_type}\r\n\r\n".force_encoding('BINARY')
+        body_parts << file.read.force_encoding('BINARY')
+        body_parts << "\r\n".force_encoding('BINARY')
       end
 
-      body_parts << "--#{boundary}--\r\n"
+      body_parts << "--#{boundary}--\r\n".force_encoding('BINARY')
 
       request.body = body_parts.join
 
