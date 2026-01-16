@@ -20,16 +20,6 @@
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
-
-    <script>
-      // Load theme before page renders to avoid flash (manual only, no auto-detection)
-      (function() {
-        const theme = localStorage.getItem('theme') || 'light';
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        }
-      })();
-    </script>
   </head>
 
   <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">
