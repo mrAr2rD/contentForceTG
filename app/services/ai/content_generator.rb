@@ -230,12 +230,17 @@ module Ai
     def calculate_cost(response)
       model_info = AiConfiguration::AVAILABLE_MODELS[response[:model]]
       return 0 unless model_info
+      return 0 unless model_info[:cost_per_1k_tokens] # Return 0 if no cost info available
 
-      input_tokens = response[:usage][:prompt_tokens]
-      output_tokens = response[:usage][:completion_tokens]
+      usage = response[:usage]
+      return 0 unless usage # Return 0 if no usage data
 
-      input_cost = (input_tokens / 1000.0) * model_info[:cost_per_1k_tokens][:input]
-      output_cost = (output_tokens / 1000.0) * model_info[:cost_per_1k_tokens][:output]
+      input_tokens = usage[:prompt_tokens] || 0
+      output_tokens = usage[:completion_tokens] || 0
+
+      cost_info = model_info[:cost_per_1k_tokens]
+      input_cost = (input_tokens / 1000.0) * (cost_info[:input] || 0)
+      output_cost = (output_tokens / 1000.0) * (cost_info[:output] || 0)
 
       input_cost + output_cost
     end
