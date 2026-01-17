@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Admin
-  class PaymentsController < Admin::BaseController
+  class PaymentsController < Admin::ApplicationController
     def index
       @payments = Payment.includes(:user, :subscription)
                         .order(created_at: :desc)
