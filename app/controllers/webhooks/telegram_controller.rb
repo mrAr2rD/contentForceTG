@@ -16,20 +16,211 @@ module Webhooks
 
       # Обрабатываем webhook данные
       update = params.permit!.to_h.except(:controller, :action, :bot_token)
-      
-      # Логируем для отладки
-      Rails.logger.info("Telegram webhook received for bot #{telegram_bot.id}: #{update}")
 
-      # TODO: Обработка различных типов обновлений
-      # - message
-      # - callback_query
-      # - channel_post
-      # - my_chat_member (для отслеживания добавления/удаления из каналов)
+      # Логируем для отладки
+      Rails.logger.info("Telegram webhook received for bot #{telegram_bot.id}: #{update.keys}")
+
+      # Обработка различных типов обновлений
+      process_channel_post(telegram_bot, update['channel_post']) if update['channel_post'].present?
+      process_edited_channel_post(telegram_bot, update['edited_channel_post']) if update['edited_channel_post'].present?
+      process_message_reaction(telegram_bot, update['message_reaction']) if update['message_reaction'].present?
+      process_chat_member(telegram_bot, update['my_chat_member']) if update['my_chat_member'].present?
+      process_callback_query(telegram_bot, update['callback_query']) if update['callback_query'].present?
 
       head :ok
     rescue StandardError => e
       Rails.logger.error("Telegram webhook error: #{e.message}")
+      Rails.logger.error(e.backtrace.join("\n"))
       head :ok # Всегда возвращаем 200, чтобы Telegram не повторял
+    end
+
+    private
+
+    # Process channel posts (when our bot posts to channel)
+    def process_channel_post(bot, post_data)
+      message_id = post_data['message_id']
+      views = post_data['views'] || 0
+
+      # Find our post by message_id
+      post = bot.posts.find_by(telegram_message_id: message_id)
+      return unless post
+
+      # Update or create analytics record
+      update_post_analytics(post, {
+        views: views,
+        forwards: post_data['forward_count'] || 0,
+        measured_at: Time.current
+      })
+
+      Rails.logger.info("Updated analytics for post #{post.id} from channel_post webhook")
+    end
+
+    # Process edited channel posts (view count updates)
+    def process_edited_channel_post(bot, post_data)
+      message_id = post_data['message_id']
+      views = post_data['views'] || 0
+
+      post = bot.posts.find_by(telegram_message_id: message_id)
+      return unless post
+
+      # This often contains updated view counts
+      update_post_analytics(post, {
+        views: views,
+        forwards: post_data['forward_count'] || 0,
+        measured_at: Time.current
+      })
+
+      Rails.logger.info("Updated analytics for post #{post.id} from edited_channel_post webhook (views: #{views})")
+    end
+
+    # Process message reactions (likes, hearts, etc.)
+    def process_message_reaction(bot, reaction_data)
+      message_id = reaction_data['message_id']
+      chat_id = reaction_data['chat']['id']
+
+      # Only process if it's our channel
+      return unless chat_id.to_s == bot.channel_id
+
+      post = bot.posts.find_by(telegram_message_id: message_id)
+      return unless post
+
+      # Get latest analytics or create new
+      last_analytics = post.post_analytics.recent.first
+      reactions_hash = last_analytics&.reactions || {}
+
+      # Update reactions based on new/old reactions
+      new_reactions = reaction_data['new_reaction'] || []
+      old_reactions = reaction_data['old_reaction'] || []
+
+      # Remove old reactions
+      old_reactions.each do |reaction|
+        emoji = reaction.dig('type', 'emoji')
+        reactions_hash[emoji] = [reactions_hash[emoji].to_i - 1, 0].max if emoji
+      end
+
+      # Add new reactions
+      new_reactions.each do |reaction|
+        emoji = reaction.dig('type', 'emoji')
+        reactions_hash[emoji] = reactions_hash[emoji].to_i + 1 if emoji
+      end
+
+      # Clean up zero values
+      reactions_hash.reject! { |_, count| count.zero? }
+
+      update_post_analytics(post, {
+        reactions: reactions_hash,
+        measured_at: Time.current
+      })
+
+      Rails.logger.info("Updated reactions for post #{post.id}: #{reactions_hash}")
+    end
+
+    # Process chat member updates (joins/leaves)
+    def process_chat_member(bot, member_data)
+      chat = member_data['chat']
+      return unless chat['type'] == 'channel'
+      return unless chat['id'].to_s == bot.channel_id
+
+      old_status = member_data.dig('old_chat_member', 'status')
+      new_status = member_data.dig('new_chat_member', 'status')
+
+      # Track subscriber changes
+      if subscriber_joined?(old_status, new_status)
+        increment_subscriber_count(bot, 1)
+        Rails.logger.info("New subscriber for bot #{bot.id}")
+      elsif subscriber_left?(old_status, new_status)
+        increment_subscriber_count(bot, -1)
+        Rails.logger.info("Lost subscriber for bot #{bot.id}")
+      end
+    end
+
+    # Process callback queries (button clicks)
+    def process_callback_query(bot, query_data)
+      message = query_data['message']
+      return unless message
+
+      message_id = message['message_id']
+      callback_data = query_data['data']
+
+      post = bot.posts.find_by(telegram_message_id: message_id)
+      return unless post
+
+      # Track button clicks
+      last_analytics = post.post_analytics.recent.first
+      button_clicks = last_analytics&.button_clicks || {}
+      button_clicks[callback_data] = button_clicks[callback_data].to_i + 1
+
+      update_post_analytics(post, {
+        button_clicks: button_clicks,
+        measured_at: Time.current
+      })
+
+      Rails.logger.info("Button click tracked for post #{post.id}: #{callback_data}")
+    end
+
+    # Helper: Update or create post analytics
+    def update_post_analytics(post, data)
+      last_analytics = post.post_analytics.recent.first
+
+      # If last analytics was created within 5 minutes, update it
+      # Otherwise create new record
+      if last_analytics && last_analytics.measured_at > 5.minutes.ago
+        last_analytics.update!(
+          views: data[:views] || last_analytics.views,
+          forwards: data[:forwards] || last_analytics.forwards,
+          reactions: data[:reactions] || last_analytics.reactions,
+          button_clicks: data[:button_clicks] || last_analytics.button_clicks,
+          measured_at: data[:measured_at] || Time.current
+        )
+      else
+        post.post_analytics.create!(
+          telegram_message_id: post.telegram_message_id,
+          views: data[:views] || last_analytics&.views || 0,
+          forwards: data[:forwards] || last_analytics&.forwards || 0,
+          reactions: data[:reactions] || last_analytics&.reactions || {},
+          button_clicks: data[:button_clicks] || last_analytics&.button_clicks || {},
+          measured_at: data[:measured_at] || Time.current
+        )
+      end
+    end
+
+    # Helper: Increment subscriber count
+    def increment_subscriber_count(bot, delta)
+      last_metric = bot.channel_subscriber_metrics.recent.first
+      current_count = last_metric&.subscriber_count || 0
+      new_count = [current_count + delta, 0].max
+
+      # If last metric was created today, update it
+      # Otherwise create new metric
+      if last_metric && last_metric.measured_at > 1.hour.ago
+        last_metric.update!(
+          subscriber_count: new_count,
+          subscriber_growth: last_metric.subscriber_growth + delta
+        )
+      else
+        bot.channel_subscriber_metrics.create!(
+          subscriber_count: new_count,
+          subscriber_growth: delta,
+          churn_rate: 0.0,
+          measured_at: Time.current
+        )
+      end
+    end
+
+    # Helper: Check if subscriber joined
+    def subscriber_joined?(old_status, new_status)
+      non_member_statuses = %w[left kicked]
+      member_statuses = %w[member administrator creator]
+
+      non_member_statuses.include?(old_status) && member_statuses.include?(new_status)
+    end
+
+    # Helper: Check if subscriber left
+    def subscriber_left?(old_status, new_status)
+      member_statuses = %w[member administrator creator]
+      non_member_statuses = %w[left kicked]
+
+      member_statuses.include?(old_status) && non_member_statuses.include?(new_status)
     end
   end
 end

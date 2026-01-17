@@ -13,7 +13,7 @@ module Telegram
     def verify!
       # 1. Проверяем токен через Telegram API
       bot_info = get_bot_info
-      
+
       @bot.update!(
         bot_username: bot_info['username'],
         verified: true,
@@ -24,6 +24,12 @@ module Telegram
       if @bot.channel_id.present?
         verify_channel_permissions
       end
+
+      # 3. Настраиваем webhook для получения обновлений (аналитика, реакции, подписчики)
+      setup_webhook
+
+      # 4. Запускаем первоначальный сбор метрик канала
+      schedule_initial_metrics_collection
 
       true
     rescue StandardError => e
@@ -91,18 +97,46 @@ module Telegram
 
     def make_request(method, params = {})
       uri = URI("https://api.telegram.org/bot#{@bot.bot_token}/#{method}")
-      
+
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true
-      
+
       request = Net::HTTP::Post.new(uri)
       request['Content-Type'] = 'application/json'
       request.body = params.to_json unless params.empty?
-      
+
       response = http.request(request)
       JSON.parse(response.body)
     rescue StandardError => e
       { 'ok' => false, 'description' => e.message }
+    end
+
+    def setup_webhook
+      begin
+        Telegram::WebhookService.new(@bot).setup!
+        Rails.logger.info("Webhook successfully configured for bot #{@bot.id}")
+      rescue StandardError => e
+        Rails.logger.error("Failed to set up webhook for bot #{@bot.id}: #{e.message}")
+        # Don't fail verification if webhook setup fails - it's not critical
+      end
+    end
+
+    def schedule_initial_metrics_collection
+      return unless @bot.channel_id.present?
+
+      begin
+        # Schedule immediate channel metrics snapshot
+        Analytics::SnapshotChannelMetricsJob.perform_later(@bot.id)
+
+        # Schedule daily metrics collection (at midnight)
+        tomorrow_midnight = Time.current.tomorrow.beginning_of_day
+        Analytics::SnapshotChannelMetricsJob.set(wait_until: tomorrow_midnight).perform_later(@bot.id)
+
+        Rails.logger.info("Scheduled initial metrics collection for bot #{@bot.id}")
+      rescue StandardError => e
+        Rails.logger.error("Failed to schedule metrics collection for bot #{@bot.id}: #{e.message}")
+        # Don't fail verification if scheduling fails
+      end
     end
   end
 end

@@ -11,13 +11,14 @@ module Analytics
       return unless bot.verified?
 
       begin
-        # Get current subscriber count from Telegram API
-        current_stats = fetch_channel_statistics(bot)
+        # Get current subscriber count from Telegram API using analytics service
+        analytics_service = Telegram::AnalyticsService.new(bot)
+        current_stats = analytics_service.fetch_channel_statistics
         current_count = current_stats[:subscriber_count]
 
         # Get previous metric to calculate growth
         previous_metric = bot.channel_subscriber_metrics.recent.first
-        previous_count = previous_metric&.subscriber_count || 0
+        previous_count = previous_metric&.subscriber_count || current_count
 
         # Calculate growth
         growth = current_count - previous_count
@@ -31,26 +32,15 @@ module Analytics
         )
 
         Rails.logger.info("Snapshot created for bot #{bot.id}: #{current_count} subscribers (#{growth >= 0 ? '+' : ''}#{growth})")
+
+        # Update bot's channel_name if we got new data
+        if current_stats[:title].present? && current_stats[:title] != bot.channel_name
+          bot.update(channel_name: current_stats[:title])
+        end
       rescue StandardError => e
         Rails.logger.error("Failed to snapshot channel metrics for bot #{bot.id}: #{e.message}")
         raise
       end
-    end
-
-    private
-
-    def fetch_channel_statistics(bot)
-      # This would call Telegram Bot API to get channel statistics
-      # For now, return mock data (implement real API call later)
-
-      # Real implementation would use:
-      # client = Telegram::Bot::Client.new(bot.bot_token)
-      # chat = client.api.get_chat(chat_id: bot.channel_id)
-      # member_count = chat.dig('result', 'member_count')
-
-      {
-        subscriber_count: rand(1000..10000)
-      }
     end
   end
 end

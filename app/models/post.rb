@@ -40,6 +40,10 @@ class Post < ApplicationRecord
       published_at: Time.current,
       telegram_message_id: result.message_id
     )
+
+    # Schedule periodic analytics updates for this post
+    schedule_analytics_updates
+
     result
   rescue StandardError => e
     mark_as_failed!(e.message)
@@ -98,5 +102,24 @@ class Post < ApplicationRecord
     if (image? || image_button?) && content.length > 1024
       errors.add(:content, "слишком длинный для Telegram (максимум 1024 символа для постов с картинкой, сейчас #{content.length})")
     end
+  end
+
+  def schedule_analytics_updates
+    return unless published? && telegram_message_id.present? && telegram_bot.present?
+
+    # First update: 1 hour after publication
+    Analytics::UpdatePostViewsJob.set(wait: 1.hour).perform_later(id)
+
+    # Second update: 6 hours after publication
+    Analytics::UpdatePostViewsJob.set(wait: 6.hours).perform_later(id)
+
+    # Third update: 24 hours after publication
+    Analytics::UpdatePostViewsJob.set(wait: 24.hours).perform_later(id)
+
+    # Fourth update: 7 days after publication (for long-term stats)
+    Analytics::UpdatePostViewsJob.set(wait: 7.days).perform_later(id)
+  rescue StandardError => e
+    Rails.logger.error("Failed to schedule analytics updates for post #{id}: #{e.message}")
+    # Don't fail publish if scheduling fails
   end
 end
