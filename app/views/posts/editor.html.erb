@@ -123,7 +123,7 @@
         <div>
           <%= f.label :telegram_bot_id, "Telegram Бот", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
           <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name,
-              { prompt: "Выберите бота", include_blank: true },
+              { include_blank: "Выберите бота" },
               {
                 data: {
                   post_editor_target: "botSelect",
