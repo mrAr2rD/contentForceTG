@@ -5,12 +5,17 @@ export default class extends Controller {
     "form", "content", "contentEditor", "preview", "charCount",
     "titlePreview", "imagePreview", "imagePreviewImg",
     "postType", "imageField", "buttonFields",
-    "buttonPreview", "buttonTextPreview"
+    "buttonPreview", "buttonTextPreview", "channelName", "botSelect"
   ]
+
+  static values = {
+    bots: Array
+  }
 
   connect() {
     this.updatePreview()
     this.toggleButtonFields()
+    this.updateChannelName()
   }
 
   updatePreview() {
@@ -39,11 +44,60 @@ export default class extends Controller {
     // Format and update body content
     const formatted = this.formatContent(bodyContent)
     this.previewTarget.innerHTML = formatted
-    this.charCountTarget.textContent = `${content.length} / 4096`
+
+    // Update character count with better formatting and warnings
+    this.updateCharCount(content.length)
 
     // Update hidden field
     if (this.hasContentTarget) {
       this.contentTarget.value = content
+    }
+  }
+
+  updateCharCount(length) {
+    // Telegram limits: 4096 for text messages, 1024 for photo captions
+    const hasImage = this.hasImagePreviewTarget && !this.imagePreviewTarget.classList.contains('hidden')
+    const limit = hasImage ? 1024 : 4096
+    const limitType = hasImage ? 'подпись' : 'текст'
+
+    // Calculate percentage
+    const percentage = (length / limit) * 100
+
+    // Update text
+    this.charCountTarget.textContent = `${length} / ${limit} символов (${limitType})`
+
+    // Update color based on usage
+    this.charCountTarget.classList.remove('text-zinc-500', 'dark:text-zinc-400', 'text-yellow-600', 'dark:text-yellow-400', 'text-red-600', 'dark:text-red-400')
+
+    if (length > limit) {
+      // Over limit - red
+      this.charCountTarget.classList.add('text-red-600', 'dark:text-red-400')
+    } else if (percentage >= 90) {
+      // 90-100% - yellow warning
+      this.charCountTarget.classList.add('text-yellow-600', 'dark:text-yellow-400')
+    } else {
+      // Under 90% - normal
+      this.charCountTarget.classList.add('text-zinc-500', 'dark:text-zinc-400')
+    }
+  }
+
+  updateChannelName() {
+    if (!this.hasChannelNameTarget || !this.hasBotSelectTarget) return
+
+    const selectedBotId = this.botSelectTarget.value
+
+    if (!selectedBotId) {
+      this.channelNameTarget.textContent = "Выберите бота"
+      return
+    }
+
+    // Find bot in the bots array
+    const bot = this.botsValue.find(b => b.id === selectedBotId)
+
+    if (bot && bot.channel_name) {
+      this.channelNameTarget.textContent = bot.channel_name
+    } else {
+      this.channelNameTarget.textContent = "Канал бота"
     }
   }
 
@@ -58,7 +112,7 @@ export default class extends Controller {
     let inQuote = false
     let quoteLines = []
 
-    lines.forEach((line, index) => {
+    lines.forEach((line) => {
       // Handle quotes (lines starting with >)
       if (line.trim().startsWith('>')) {
         inQuote = true
@@ -181,6 +235,8 @@ export default class extends Controller {
           if (img) {
             img.src = e.target.result
             this.imagePreviewTarget.classList.remove('hidden')
+            // Update char count to reflect caption limit (1024 chars)
+            this.updateCharCount(this.contentEditorTarget.value.length)
           }
         }
       }
@@ -193,6 +249,8 @@ export default class extends Controller {
     event.preventDefault()
     if (this.hasImagePreviewTarget) {
       this.imagePreviewTarget.classList.add('hidden')
+      // Update char count to reflect text limit (4096 chars)
+      this.updateCharCount(this.contentEditorTarget.value.length)
     }
     // Find and clear file input
     const fileInput = this.element.querySelector('input[type="file"]')

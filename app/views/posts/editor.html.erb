@@ -1,6 +1,7 @@
 <div data-controller="post-editor chat"
      data-chat-project-id-value="<%= @project&.id %>"
      data-chat-ai-model-value="<%= @project&.ai_model || 'anthropic/claude-3.5-sonnet' %>"
+     data-post-editor-bots-value="<%= @telegram_bots.map { |bot| { id: bot.id, channel_name: bot.channel_name || bot.bot_username } }.to_json %>"
      class="h-screen flex flex-col bg-white dark:bg-zinc-950">
   <!-- Header - Notion style -->
   <header class="h-14 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between bg-white dark:bg-zinc-950">
@@ -121,9 +122,15 @@
         <!-- Telegram Bot -->
         <div>
           <%= f.label :telegram_bot_id, "Telegram Бот", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name, 
-              { prompt: "Выберите бота", include_blank: true }, 
-              { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
+          <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name,
+              { prompt: "Выберите бота", include_blank: true },
+              {
+                data: {
+                  post_editor_target: "botSelect",
+                  action: "change->post-editor#updateChannelName"
+                },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
+              } %>
         </div>
 
         <!-- Title -->
@@ -261,8 +268,8 @@
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-zinc-900 dark:text-zinc-50 font-semibold text-sm truncate">
-                  <%= @post.telegram_bot&.channel_name || "Ваш Канал" %>
+                <p data-post-editor-target="channelName" class="text-zinc-900 dark:text-zinc-50 font-semibold text-sm truncate">
+                  <%= @post.telegram_bot&.channel_name || @telegram_bots.first&.channel_name || "Выберите бота" %>
                 </p>
                 <p class="text-zinc-500 dark:text-zinc-400 text-xs"><%= Time.current.strftime("%H:%M") %></p>
               </div>
@@ -321,7 +328,7 @@
                   72
                 </span>
               </div>
-              <span data-post-editor-target="charCount" class="font-medium text-zinc-500 dark:text-zinc-400">0 / 4096</span>
+              <span data-post-editor-target="charCount" class="font-medium tabular-nums text-zinc-500 dark:text-zinc-400">0 / 4096 символов</span>
             </div>
           </div>
         </div>
