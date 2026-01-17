@@ -1,0 +1,129 @@
+<div class="max-w-4xl">
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">User Details</h1>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">View and manage user information</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Edit", edit_admin_user_path(@user), class: "px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-md text-sm font-medium transition-colors" %>
+      <%= link_to "Back to Users", admin_users_path, class: "px-4 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-md text-sm font-medium transition-colors" %>
+    </div>
+  </div>
+
+  <!-- User Info Card -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 mb-6">
+    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">User Information</h2>
+
+    <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">ID</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50 font-mono"><%= @user.id %></dd>
+      </div>
+
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Email</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @user.email %></dd>
+      </div>
+
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Created At</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @user.created_at.strftime("%B %d, %Y at %H:%M") %></dd>
+      </div>
+
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Last Sign In</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+          <%= @user.last_sign_in_at ? @user.last_sign_in_at.strftime("%B %d, %Y at %H:%M") : "Never" %>
+        </dd>
+      </div>
+
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Sign In Count</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @user.sign_in_count || 0 %></dd>
+      </div>
+
+      <div>
+        <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Current Sign In IP</dt>
+        <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50 font-mono"><%= @user.current_sign_in_ip || "N/A" %></dd>
+      </div>
+
+      <% if @user.telegram_username.present? %>
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Telegram Username</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">@<%= @user.telegram_username %></dd>
+        </div>
+      <% end %>
+
+      <% if @user.telegram_user_id.present? %>
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Telegram User ID</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50 font-mono"><%= @user.telegram_user_id %></dd>
+        </div>
+      <% end %>
+    </dl>
+  </div>
+
+  <!-- Projects Card -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 mb-6">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Projects (<%= @user.projects.count %>)</h2>
+      <%= link_to "View All", admin_projects_path(user_id: @user.id), class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" %>
+    </div>
+
+    <% if @user.projects.any? %>
+      <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @user.projects.limit(5).each do |project| %>
+          <div class="py-3 flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= project.name %></p>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">Created <%= project.created_at.strftime("%B %d, %Y") %></p>
+            </div>
+            <%= link_to "View", admin_project_path(project), class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">No projects yet.</p>
+    <% end %>
+  </div>
+
+  <!-- Subscription Card -->
+  <% if @user.subscription.present? %>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Subscription</h2>
+
+      <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Plan</dt>
+          <dd class="mt-1">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @user.subscription.plan == 'free' ? 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-200' : 'bg-primary-100 text-primary-800 dark:bg-primary-900 dark:text-primary-200' %>">
+              <%= @user.subscription.plan.titleize %>
+            </span>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Status</dt>
+          <dd class="mt-1">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <%= @user.subscription.active? ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' %>">
+              <%= @user.subscription.status.titleize %>
+            </span>
+          </dd>
+        </div>
+
+        <% if @user.subscription.current_period_end.present? %>
+          <div>
+            <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Period End</dt>
+            <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @user.subscription.current_period_end.strftime("%B %d, %Y") %></dd>
+          </div>
+        <% end %>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Created At</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @user.subscription.created_at.strftime("%B %d, %Y") %></dd>
+        </div>
+      </dl>
+    </div>
+  <% end %>
+</div>
