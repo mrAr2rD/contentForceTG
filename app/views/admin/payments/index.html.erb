@@ -1,0 +1,124 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <div class="sm:flex sm:items-center">
+    <div class="sm:flex-auto">
+      <h1 class="text-2xl font-semibold text-foreground">Платежи</h1>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Список всех платежей в системе
+      </p>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="mt-4 flex gap-2">
+    <%= link_to 'Все', admin_payments_path, class: "px-3 py-2 text-sm rounded-md #{params[:status].blank? ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}" %>
+    <%= link_to 'Завершенные', admin_payments_path(status: :completed), class: "px-3 py-2 text-sm rounded-md #{params[:status] == 'completed' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}" %>
+    <%= link_to 'В обработке', admin_payments_path(status: :pending), class: "px-3 py-2 text-sm rounded-md #{params[:status] == 'pending' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}" %>
+    <%= link_to 'Ошибка', admin_payments_path(status: :failed), class: "px-3 py-2 text-sm rounded-md #{params[:status] == 'failed' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:bg-accent'}" %>
+  </div>
+
+  <!-- Payments Table -->
+  <div class="mt-8 flow-root">
+    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+          <table class="min-w-full divide-y divide-border">
+            <thead class="bg-muted/50">
+              <tr>
+                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-foreground sm:pl-6">
+                  ID
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  Пользователь
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  План
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  Сумма
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  Статус
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  Дата создания
+                </th>
+                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-foreground">
+                  Дата оплаты
+                </th>
+                <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <span class="sr-only">Действия</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border bg-card">
+              <% @payments.each do |payment| %>
+                <tr>
+                  <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-muted-foreground sm:pl-6">
+                    <%= payment.id.first(8) %>...
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-foreground">
+                    <%= link_to payment.user.email, admin_user_path(payment.user), class: "text-primary hover:underline" %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-foreground">
+                    <%= payment.metadata['plan']&.titleize || 'N/A' %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-foreground font-semibold">
+                    <%= number_to_currency(payment.amount, unit: '₽', separator: ',', delimiter: ' ', format: '%n %u') %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm">
+                    <% case payment.status %>
+                    <% when 'completed' %>
+                      <span class="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                        Завершен
+                      </span>
+                    <% when 'pending', 'processing' %>
+                      <span class="inline-flex items-center rounded-md bg-yellow-500/10 px-2 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                        В обработке
+                      </span>
+                    <% when 'failed' %>
+                      <span class="inline-flex items-center rounded-md bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                        Ошибка
+                      </span>
+                    <% when 'refunded' %>
+                      <span class="inline-flex items-center rounded-md bg-gray-500/10 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+                        Возврат
+                      </span>
+                    <% else %>
+                      <span class="inline-flex items-center rounded-md bg-gray-500/10 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+                        <%= payment.status.titleize %>
+                      </span>
+                    <% end %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-muted-foreground">
+                    <%= payment.created_at.strftime("%d.%m.%Y %H:%M") %>
+                  </td>
+                  <td class="whitespace-nowrap px-3 py-4 text-sm text-muted-foreground">
+                    <%= payment.paid_at&.strftime("%d.%m.%Y %H:%M") || '-' %>
+                  </td>
+                  <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                    <%= link_to 'Просмотр', admin_payment_path(payment), class: "text-primary hover:underline" %>
+                  </td>
+                </tr>
+              <% end %>
+
+              <% if @payments.empty? %>
+                <tr>
+                  <td colspan="8" class="px-3 py-8 text-center text-sm text-muted-foreground">
+                    Нет платежей
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <% if @payments.respond_to?(:total_pages) && @payments.total_pages > 1 %>
+    <div class="mt-6 flex items-center justify-center">
+      <%= paginate @payments, theme: 'twitter-bootstrap-4' %>
+    </div>
+  <% end %>
+</div>

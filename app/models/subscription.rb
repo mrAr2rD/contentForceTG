@@ -2,6 +2,7 @@
 
 class Subscription < ApplicationRecord
   belongs_to :user
+  has_many :payments, dependent: :destroy
 
   # Enums
   enum :plan, { free: 0, starter: 1, pro: 2, business: 3 }, default: :free
@@ -88,6 +89,14 @@ class Subscription < ApplicationRecord
     self.usage = {}
     save!
   end
+
+  # Pricing in RUB (rubles)
+  PLAN_PRICES = {
+    free: 0,
+    starter: 590,
+    pro: 1490,
+    business: 2990
+  }.freeze
 
   PLAN_LIMITS = {
     free: {

@@ -71,9 +71,21 @@ Rails.application.routes.draw do
     end
   end
 
+  # Subscriptions
+  resources :subscriptions, only: [:index] do
+    collection do
+      post :upgrade
+      post :downgrade
+      post :cancel
+    end
+  end
+
   # Webhooks
   namespace :webhooks do
     post 'telegram/:bot_token', to: 'telegram#receive', as: :telegram
+    post 'robokassa/result', to: 'robokassa#result', as: :robokassa_result
+    get 'robokassa/success', to: 'robokassa#success', as: :robokassa_success
+    get 'robokassa/fail', to: 'robokassa#fail', as: :robokassa_fail
   end
 
   # Static pages
@@ -88,6 +100,7 @@ Rails.application.routes.draw do
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
+    resources :payments, only: [:index, :show]
 
     # AI Settings (singleton resource)
     resource :ai_settings, only: [:edit, :update]

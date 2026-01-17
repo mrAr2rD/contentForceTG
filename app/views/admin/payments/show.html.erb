@@ -1,0 +1,145 @@
+<div class="px-4 sm:px-6 lg:px-8">
+  <!-- Header -->
+  <div class="sm:flex sm:items-center sm:justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-semibold text-foreground">Платеж <%= @payment.id.first(8) %>...</h1>
+      <p class="mt-2 text-sm text-muted-foreground">
+        Детальная информация о платеже
+      </p>
+    </div>
+    <%= link_to 'Назад к списку', admin_payments_path, class: "inline-flex items-center px-4 py-2 border border-border rounded-md text-sm font-medium text-foreground bg-background hover:bg-accent" %>
+  </div>
+
+  <!-- Payment Details -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Main Info -->
+    <div class="bg-card border border-border rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-foreground mb-4">Основная информация</h3>
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">ID платежа</dt>
+          <dd class="mt-1 text-sm text-foreground font-mono"><%= @payment.id %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Пользователь</dt>
+          <dd class="mt-1 text-sm text-foreground">
+            <%= link_to @payment.user.email, admin_user_path(@payment.user), class: "text-primary hover:underline" %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Тарифный план</dt>
+          <dd class="mt-1">
+            <span class="inline-flex items-center rounded-md bg-primary/10 px-2.5 py-0.5 text-sm font-medium text-primary">
+              <%= @payment.metadata['plan']&.titleize || 'N/A' %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Сумма</dt>
+          <dd class="mt-1 text-xl font-bold text-foreground">
+            <%= number_to_currency(@payment.amount, unit: '₽', separator: ',', delimiter: ' ', format: '%n %u') %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Статус</dt>
+          <dd class="mt-1">
+            <% case @payment.status %>
+            <% when 'completed' %>
+              <span class="inline-flex items-center rounded-md bg-green-500/10 px-3 py-1 text-sm font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
+                Завершен
+              </span>
+            <% when 'pending', 'processing' %>
+              <span class="inline-flex items-center rounded-md bg-yellow-500/10 px-3 py-1 text-sm font-medium text-yellow-700 ring-1 ring-inset ring-yellow-600/20">
+                В обработке
+              </span>
+            <% when 'failed' %>
+              <span class="inline-flex items-center rounded-md bg-red-500/10 px-3 py-1 text-sm font-medium text-red-700 ring-1 ring-inset ring-red-600/20">
+                Ошибка
+              </span>
+            <% when 'refunded' %>
+              <span class="inline-flex items-center rounded-md bg-gray-500/10 px-3 py-1 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+                Возврат
+              </span>
+            <% else %>
+              <span class="inline-flex items-center rounded-md bg-gray-500/10 px-3 py-1 text-sm font-medium text-gray-700 ring-1 ring-inset ring-gray-600/20">
+                <%= @payment.status.titleize %>
+              </span>
+            <% end %>
+          </dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Payment Provider Info -->
+    <div class="bg-card border border-border rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-foreground mb-4">Информация от провайдера</h3>
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Провайдер</dt>
+          <dd class="mt-1 text-sm text-foreground font-semibold"><%= @payment.provider.upcase %></dd>
+        </div>
+        <% if @payment.provider_payment_id %>
+          <div>
+            <dt class="text-sm font-medium text-muted-foreground">ID платежа у провайдера</dt>
+            <dd class="mt-1 text-sm text-foreground font-mono"><%= @payment.provider_payment_id %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Дата создания</dt>
+          <dd class="mt-1 text-sm text-foreground"><%= @payment.created_at.strftime("%d.%m.%Y %H:%M:%S") %></dd>
+        </div>
+        <% if @payment.paid_at %>
+          <div>
+            <dt class="text-sm font-medium text-muted-foreground">Дата оплаты</dt>
+            <dd class="mt-1 text-sm text-foreground"><%= @payment.paid_at.strftime("%d.%m.%Y %H:%M:%S") %></dd>
+          </div>
+        <% end %>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Последнее обновление</dt>
+          <dd class="mt-1 text-sm text-foreground"><%= @payment.updated_at.strftime("%d.%m.%Y %H:%M:%S") %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Metadata -->
+    <% if @payment.metadata.present? %>
+      <div class="bg-card border border-border rounded-lg p-6 lg:col-span-2">
+        <h3 class="text-lg font-semibold text-foreground mb-4">Метаданные</h3>
+        <pre class="bg-muted rounded-lg p-4 overflow-x-auto"><code class="text-sm text-foreground"><%= JSON.pretty_generate(@payment.metadata) %></code></pre>
+      </div>
+    <% end %>
+
+    <!-- Subscription Info -->
+    <div class="bg-card border border-border rounded-lg p-6 lg:col-span-2">
+      <h3 class="text-lg font-semibold text-foreground mb-4">Информация о подписке</h3>
+      <dl class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Подписка</dt>
+          <dd class="mt-1 text-sm text-foreground">
+            <%= link_to @payment.subscription.plan.titleize, admin_subscription_path(@payment.subscription), class: "text-primary hover:underline" %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Статус подписки</dt>
+          <dd class="mt-1">
+            <% if @payment.subscription.active? %>
+              <span class="inline-flex items-center rounded-md bg-green-500/10 px-2 py-1 text-xs font-medium text-green-700">
+                Активна
+              </span>
+            <% else %>
+              <span class="inline-flex items-center rounded-md bg-red-500/10 px-2 py-1 text-xs font-medium text-red-700">
+                <%= @payment.subscription.status.titleize %>
+              </span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-muted-foreground">Действует до</dt>
+          <dd class="mt-1 text-sm text-foreground">
+            <%= @payment.subscription.current_period_end&.strftime("%d.%m.%Y") || 'N/A' %>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>
