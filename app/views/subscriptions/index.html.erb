@@ -1,10 +1,16 @@
-<div class="min-h-screen bg-background py-8 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="text-center mb-12">
-      <h1 class="text-4xl font-bold text-foreground mb-4">Тарифные планы</h1>
-      <p class="text-lg text-muted-foreground">Выберите подходящий тариф для вашего бизнеса</p>
-    </div>
+<div class="min-h-screen bg-background">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col lg:flex-row gap-8">
+      <!-- Sidebar -->
+      <%= render 'shared/settings_sidebar' %>
+
+      <!-- Main Content -->
+      <div class="flex-1 min-w-0 w-full">
+        <!-- Header -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-bold text-foreground mb-2">Тарифные планы</h1>
+          <p class="text-sm text-muted-foreground">Выберите подходящий тариф для вашего бизнеса</p>
+        </div>
 
     <!-- Current Subscription Status -->
     <% if @current_subscription %>
@@ -225,5 +231,7 @@
         </div>
       </div>
     <% end %>
+      </div>
+    </div>
   </div>
 </div>
