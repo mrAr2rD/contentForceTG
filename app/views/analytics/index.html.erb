@@ -108,6 +108,45 @@
       <canvas id="engagementChart" data-chart-data="<%= @engagement_chart_data.to_json %>"></canvas>
     </div>
 
+    <!-- Subscriber Growth Details -->
+    <% if @telegram_bots.any? %>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+        <% @telegram_bots.each do |bot| %>
+          <% latest_metric = bot.channel_subscriber_metrics.recent.first %>
+          <% if latest_metric %>
+            <div class="bg-card border border-border rounded-lg p-4">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h3 class="text-sm font-semibold text-foreground"><%= bot.channel_name || bot.bot_username %></h3>
+                  <p class="text-xs text-muted-foreground">@<%= bot.bot_username %></p>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-bold text-foreground"><%= number_with_delimiter(latest_metric.subscriber_count) %></p>
+                  <p class="text-xs text-muted-foreground">подписчиков</p>
+                </div>
+              </div>
+              <div class="grid grid-cols-3 gap-2 pt-3 border-t border-border">
+                <div class="text-center">
+                  <p class="text-sm font-semibold <%= latest_metric.subscriber_growth >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                    <%= latest_metric.subscriber_growth >= 0 ? '+' : '' %><%= number_with_delimiter(latest_metric.subscriber_growth) %>
+                  </p>
+                  <p class="text-xs text-muted-foreground">прирост</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-sm font-semibold text-foreground"><%= latest_metric.churn_rate.round(1) %>%</p>
+                  <p class="text-xs text-muted-foreground">отток</p>
+                </div>
+                <div class="text-center">
+                  <p class="text-sm font-semibold text-muted-foreground"><%= latest_metric.measured_at.strftime("%d.%m") %></p>
+                  <p class="text-xs text-muted-foreground">обновлено</p>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% end %>
+
     <!-- Top Posts -->
     <div class="bg-card border border-border rounded-lg">
       <div class="p-4 border-b border-border">
@@ -131,13 +170,20 @@
               </div>
               <div class="flex items-center gap-4 text-xs">
                 <div class="text-center">
-                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_views) %></p>
+                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_views || 0) %></p>
                   <p class="text-muted-foreground">просмотров</p>
                 </div>
                 <div class="text-center">
-                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_forwards) %></p>
+                  <p class="font-semibold text-foreground"><%= number_with_delimiter(post.max_forwards || 0) %></p>
                   <p class="text-muted-foreground">репостов</p>
                 </div>
+                <% last_analytics = post.post_analytics.recent.first %>
+                <% if last_analytics&.reactions.present? %>
+                  <div class="text-center">
+                    <p class="font-semibold text-foreground"><%= number_with_delimiter(last_analytics.reactions.values.sum) %></p>
+                    <p class="text-muted-foreground">реакций</p>
+                  </div>
+                <% end %>
               </div>
             <% end %>
           <% end %>
