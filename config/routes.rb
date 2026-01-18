@@ -90,7 +90,9 @@ Rails.application.routes.draw do
 
   # Static pages
   get 'pages/home'
-  
+  get 'terms', to: 'pages#terms', as: :terms
+  get 'privacy', to: 'pages#privacy', as: :privacy
+
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
     root to: "dashboard#index"
