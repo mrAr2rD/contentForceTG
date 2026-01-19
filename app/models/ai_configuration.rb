@@ -148,4 +148,9 @@ class AiConfiguration < ApplicationRecord
   def max_tokens
     super&.to_i || DEFAULT_MAX_TOKENS
   end
+
+  # Проверка, является ли модель бесплатной
+  def self.free_model?(model)
+    AVAILABLE_MODELS[model]&.dig(:tier) == :free
+  end
 end

@@ -92,6 +92,9 @@ module Api
       private
 
       def check_ai_limits
+        # Пропускаем проверку лимитов для бесплатных моделей
+        return if AiConfiguration.free_model?(params[:model])
+
         subscription = current_user.subscription
 
         unless subscription&.can_use?(:ai_generations_per_month)

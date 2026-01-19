@@ -10,17 +10,17 @@ module Ai
     end
 
     def generate(prompt:, context: {})
-      # Проверка лимитов тарифа
-      unless can_generate?
+      # Получаем модель из настроек проекта или глобальных настроек
+      model = context[:model] || @project&.ai_model || @config.default_model
+
+      # Проверка лимитов тарифа (только для платных моделей)
+      unless AiConfiguration.free_model?(model) || can_generate?
         return {
           content: nil,
           error: 'Превышен лимит AI генераций для вашего тарифа',
           success: false
         }
       end
-
-      # Получаем модель из настроек проекта или глобальных настроек
-      model = context[:model] || @project&.ai_model || @config.default_model
 
       # Получаем температуру из настроек проекта или глобальных
       temperature = @project&.ai_temperature || @config.temperature
@@ -215,6 +215,9 @@ module Ai
         cost: calculate_cost(response),
         purpose: :content_generation
       )
+
+      # Не списываем квоту для бесплатных моделей
+      return if AiConfiguration.free_model?(response[:model])
 
       if @user.subscription
         @user.subscription.increment_usage!(:ai_generations_per_month)
