@@ -12,7 +12,7 @@ module Webhooks
       end
 
       payment_id = params[:InvId]
-      payment = Payment.find_by(id: payment_id)
+      payment = Payment.find_by(invoice_number: payment_id)
 
       unless payment
         render json: { error: 'Payment not found' }, status: :not_found
@@ -42,7 +42,7 @@ module Webhooks
 
     # Success URL - redirect user here after payment
     def success
-      @payment = Payment.find_by(id: params[:InvId])
+      @payment = Payment.find_by(invoice_number: params[:InvId])
 
       if @payment&.completed?
         redirect_to subscriptions_path, notice: 'Оплата прошла успешно! Ваша подписка активирована.'
@@ -53,7 +53,7 @@ module Webhooks
 
     # Fail URL - redirect user here if payment failed
     def fail
-      payment = Payment.find_by(id: params[:InvId])
+      payment = Payment.find_by(invoice_number: params[:InvId])
       payment&.mark_as_failed!
 
       redirect_to subscriptions_path, alert: 'Оплата не прошла. Попробуйте еще раз.'

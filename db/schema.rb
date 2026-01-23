@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_24_005201) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -50,7 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
     t.jsonb "enabled_features", default: {}
     t.jsonb "fallback_models", default: ["gpt-3.5-turbo"]
     t.integer "max_tokens", default: 2000
-    t.string "openrouter_api_key"
+    t.text "openrouter_api_key"
     t.decimal "temperature", precision: 3, scale: 2, default: "0.7"
     t.datetime "updated_at", null: false
     t.index ["default_model"], name: "index_ai_configurations_on_default_model"
@@ -86,6 +86,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
     t.index ["telegram_bot_id"], name: "index_channel_subscriber_metrics_on_telegram_bot_id"
   end
 
+  create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.decimal "amount", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.integer "invoice_number"
+    t.jsonb "metadata", default: {}
+    t.datetime "paid_at"
+    t.string "provider", null: false
+    t.string "provider_payment_id"
+    t.integer "status", default: 0, null: false
+    t.uuid "subscription_id", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["invoice_number"], name: "index_payments_on_invoice_number", unique: true
+    t.index ["provider_payment_id"], name: "index_payments_on_provider_payment_id"
+    t.index ["status"], name: "index_payments_on_status"
+    t.index ["subscription_id"], name: "index_payments_on_subscription_id"
+    t.index ["user_id", "created_at"], name: "index_payments_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_payments_on_user_id"
+  end
+
   create_table "post_analytics", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.jsonb "button_clicks", default: {}
     t.datetime "created_at", null: false
@@ -103,16 +123,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
   end
 
   create_table "posts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.string "button_text"
+    t.string "button_url"
     t.text "content"
     t.datetime "created_at", null: false
-    t.uuid "project_id", null: false
+    t.integer "post_type", default: 0, null: false
+    t.uuid "project_id"
     t.datetime "published_at"
+    t.datetime "scheduled_at"
     t.integer "status"
-    t.uuid "telegram_bot_id", null: false
+    t.uuid "telegram_bot_id"
     t.bigint "telegram_message_id"
     t.string "title"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
+    t.index ["post_type"], name: "index_posts_on_post_type"
     t.index ["project_id"], name: "index_posts_on_project_id"
     t.index ["telegram_bot_id"], name: "index_posts_on_telegram_bot_id"
     t.index ["telegram_message_id"], name: "index_posts_on_telegram_message_id"
@@ -199,6 +224,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_15_215352) do
   add_foreign_key "ai_usage_logs", "projects"
   add_foreign_key "ai_usage_logs", "users"
   add_foreign_key "channel_subscriber_metrics", "telegram_bots"
+  add_foreign_key "payments", "subscriptions"
+  add_foreign_key "payments", "users"
   add_foreign_key "post_analytics", "posts"
   add_foreign_key "posts", "projects"
   add_foreign_key "posts", "telegram_bots"

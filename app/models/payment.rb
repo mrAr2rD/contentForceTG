@@ -15,6 +15,9 @@ class Payment < ApplicationRecord
     canceled: 5
   }, default: :pending
 
+  # Callbacks
+  before_create :generate_invoice_number
+
   # Validations
   validates :amount, presence: true, numericality: { greater_than: 0 }
   validates :provider, presence: true
@@ -54,5 +57,12 @@ class Payment < ApplicationRecord
   # Human-readable status
   def status_name
     I18n.t("payments.statuses.#{status}", default: status.humanize)
+  end
+
+  private
+
+  def generate_invoice_number
+    max_invoice = Payment.maximum(:invoice_number) || 0
+    self.invoice_number = max_invoice + 1
   end
 end

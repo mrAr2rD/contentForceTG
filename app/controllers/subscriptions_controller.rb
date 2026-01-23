@@ -58,7 +58,7 @@ class SubscriptionsController < ApplicationController
 
     plan = payment.metadata['plan']
     amount = payment.amount.to_f
-    inv_id = payment.id
+    inv_id = payment.invoice_number
     description = "Подписка ContentForce - #{plan.titleize}"
 
     # Generate signature: MD5(MerchantLogin:OutSum:InvId:Password#1)
