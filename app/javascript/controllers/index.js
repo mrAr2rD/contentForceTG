@@ -4,6 +4,12 @@
 
 import { application } from "./application"
 
+import ThemeController from "./theme_controller"
+application.register("theme", ThemeController)
+
+import SidebarController from "./sidebar_controller"
+application.register("sidebar", SidebarController)
+
 import PostEditorController from "./post_editor_controller"
 application.register("post-editor", PostEditorController)
 
