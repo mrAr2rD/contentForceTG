@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ContentForce** is a **monolithic Rails 8.0 application** for automating content creation and publishing to Telegram and social networks using AI. The system is built as a single, unified codebase with server-side rendering using Hotwire (Turbo + Stimulus).
+**ContentForce** is a **monolithic Rails 8.1 application** for automating content creation and publishing to Telegram and social networks using AI. The system is built as a single, unified codebase with server-side rendering using Hotwire (Turbo + Stimulus).
 
 ## Architecture Philosophy
 
@@ -19,8 +19,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Technology Stack
 
 ### Backend (Monolith)
-- **Framework**: Ruby on Rails 8.0 (монолит)
-- **Ruby Version**: 3.3.0
+- **Framework**: Ruby on Rails 8.1.2 (монолит)
+- **Ruby Version**: 3.4.6
 - **Database**: PostgreSQL 16 with UUID primary keys
 - **Cache/Queue**: Redis 7 + Solid Queue/Cache/Cable (Rails 8 defaults)
 - **Background Jobs**: Solid Queue (встроенный в Rails 8, вместо Sidekiq)
@@ -33,8 +33,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ### Frontend (Server-Side Rendering)
 - **JavaScript**: Hotwire (Turbo + Stimulus) - минимальный JS
-- **Дополнительно**: AlpineJS для простых интерактивных компонентов
-- **CSS**: Tailwind CSS 3.4
+- **CSS**: Tailwind CSS 4.x (с новым CSS-first конфигом)
 - **Build Tools**: esbuild for JS, Tailwind CLI for CSS
 - **Charts**: Chart.js для графиков аналитики
 - **Date Picker**: Flatpickr
@@ -260,12 +259,13 @@ Analytics::SnapshotChannelMetricsJob.set(wait_until: tomorrow_midnight).perform_
 ```ruby
 class PublishPostJob < ApplicationJob
   queue_as :default
-  retry_on Telegram::Bot::Exceptions::ResponseError,
-           wait: :exponentially_longer,
-           attempts: 3
+  retry_on StandardError, wait: :exponentially_longer, attempts: 3
 
   def perform(post_id)
     post = Post.find(post_id)
+    return unless post.scheduled? || post.draft?
+
+    # Post#publish! handles status update, published_at, and telegram_message_id
     post.publish!
   end
 end
@@ -313,7 +313,8 @@ Post (UUID)
   ├── belongs_to :telegram_bot (optional)
   ├── has_one_attached :image
   ├── has_many :post_analytics
-  └── enum status: [:draft, :scheduled, :published, :failed]
+  ├── enum status: [:draft, :scheduled, :published, :failed]
+  └── error_details (text) - хранит сообщение об ошибке при failed
 
 Subscription (UUID)
   ├── belongs_to :user
@@ -326,7 +327,7 @@ Subscription (UUID)
 **Hotwire-First Approach** - минимум JavaScript:
 - Большинство интерактивности через Turbo Frames и Turbo Streams
 - Stimulus controllers только для complex UI (editor, charts, calendar)
-- AlpineJS для простых dropdown, modals, toggles
+- Tailwind CSS 4.x для стилей (CSS-first configuration)
 
 **Three-Panel Layout** для post editor:
 - Left (30%): AI Chat interface - conversational AI assistant
@@ -383,6 +384,7 @@ Configuration в `AiConfiguration` model (singleton):
 3. **Context Awareness** - AI knows project settings, previous posts, brand voice
 4. **Usage Tracking** - All AI requests logged in `ai_usage_logs` table for billing/analytics
 5. **Subscription Limits** - Проверка лимитов перед каждым AI request
+6. **Free Models** - Бесплатные модели не расходуют лимит подписки (`AiConfiguration.free_model?`)
 
 ## Testing Strategy
 
@@ -458,10 +460,12 @@ ROBOKASSA_PASSWORD_2=<password>
 - **Rate Limiting**: Rack::Attack configured for API endpoints
 - **CSRF Protection**: Enabled for all forms, skipped only for webhooks
 - **Encrypted Attributes**: Bot tokens encrypted at rest with Rails `encrypts`
+- **XSS Prevention**: HTML sanitization in JS controllers before innerHTML usage
 - **Authentication**: Devise with secure defaults, Telegram OAuth
 - **Authorization**: Pundit policies for all resources
 - **Security Scanning**: Brakeman in CI/CD pipeline
 - **Input Validation**: Strong parameters, URL format validation
+- **Database Indexes**: Unique index on `bot_token` for fast webhook lookup
 
 ## Deployment (Monolithic)
 
@@ -594,6 +598,20 @@ Run `rubocop -a` to auto-fix style issues before committing.
 
 ## Support and Documentation
 
-- **GitHub Issues**: https://github.com/your-username/contentforce/issues
-- **PRD**: See `PRD.md` for full product requirements
-- **Roadmap**: See `ROADMAP.md` for development plan
+- **GitHub Issues**: https://github.com/mrAr2rD/contentForceTG/issues
+
+---
+
+## Changelog
+
+### 2026-02-06: Security & Performance Audit
+
+**Исправленные проблемы:**
+- ✅ Включено шифрование `bot_token` в TelegramBot
+- ✅ Исправлена XSS уязвимость в `chat_controller.js` (HTML sanitization)
+- ✅ Исправлен race condition в `PublishPostJob` (убрано дублирование статуса)
+- ✅ Добавлен уникальный индекс на `telegram_bots.bot_token`
+- ✅ Исправлен N+1 в `AnalyticsController#get_top_posts`
+- ✅ Добавлено поле `error_details` в Post для хранения ошибок
+- ✅ Удалён неиспользуемый `hello_controller.js`
+- ✅ Обновлены версии в документации (Ruby 3.4.6, Rails 8.1.2, Tailwind 4.x)
