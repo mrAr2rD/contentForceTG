@@ -4,7 +4,8 @@ Rails.application.routes.draw do
 
   # Devise routes with custom controllers
   devise_for :users, controllers: {
-    omniauth_callbacks: 'users/omniauth_callbacks'
+    omniauth_callbacks: 'users/omniauth_callbacks',
+    registrations: 'users/registrations'
   }
 
   # Authenticated root - Dashboard
