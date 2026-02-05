@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_24_005201) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_06_000612) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -127,6 +127,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_24_005201) do
     t.string "button_url"
     t.text "content"
     t.datetime "created_at", null: false
+    t.text "error_details"
     t.integer "post_type", default: 0, null: false
     t.uuid "project_id"
     t.datetime "published_at"
@@ -189,6 +190,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_24_005201) do
     t.datetime "updated_at", null: false
     t.boolean "verified", default: false, null: false
     t.datetime "verified_at"
+    t.index ["bot_token"], name: "index_telegram_bots_on_bot_token", unique: true
     t.index ["channel_id"], name: "index_telegram_bots_on_channel_id"
     t.index ["project_id"], name: "index_telegram_bots_on_project_id"
     t.index ["verified"], name: "index_telegram_bots_on_verified"

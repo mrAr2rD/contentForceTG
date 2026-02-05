@@ -65,7 +65,7 @@ class Post < ApplicationRecord
   end
 
   def mark_as_failed!(error_message = nil)
-    update!(status: :failed)
+    update!(status: :failed, error_details: error_message)
   end
 
   def reset_to_draft!

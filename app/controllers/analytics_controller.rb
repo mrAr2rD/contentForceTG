@@ -8,9 +8,9 @@ class AnalyticsController < ApplicationController
     @projects = current_user.projects.active
     @selected_project = if params[:project_id].present?
                           current_user.projects.find(params[:project_id])
-                        else
+    else
                           @projects.first
-                        end
+    end
 
     return unless @selected_project
 
@@ -138,8 +138,10 @@ class AnalyticsController < ApplicationController
     return Post.none unless @selected_project
 
     # Get posts with their latest analytics
+    # Using includes to prevent N+1 when accessing associations in views
     @selected_project.posts
                      .published
+                     .includes(:telegram_bot)
                      .joins(:post_analytics)
                      .select("posts.*, MAX(post_analytics.views) as max_views, MAX(post_analytics.forwards) as max_forwards")
                      .group("posts.id")

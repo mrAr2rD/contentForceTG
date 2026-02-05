@@ -3,8 +3,8 @@ class TelegramBot < ApplicationRecord
   belongs_to :project
   has_many :posts, dependent: :nullify
   has_many :channel_subscriber_metrics, dependent: :destroy
-  # Encryption - временно отключено для разработки
-  # encrypts :bot_token
+  # Encryption for sensitive data
+  encrypts :bot_token
 
   # Validations
   validates :bot_token, presence: true

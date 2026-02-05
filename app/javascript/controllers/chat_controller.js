@@ -101,15 +101,28 @@ export default class extends Controller {
         : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50"
     }`
 
-    const formattedText = text
+    // Safe HTML rendering with sanitization
+    messageDiv.innerHTML = this.sanitizeAndFormatMarkdown(text)
+    this.messagesTarget.appendChild(messageDiv)
+    this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight
+  }
+
+  // Sanitize user input and format basic markdown safely
+  sanitizeAndFormatMarkdown(text) {
+    // First, escape all HTML to prevent XSS
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+
+    // Then apply safe markdown formatting (only on escaped text)
+    return escaped
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900 dark:text-zinc-50">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
       .replace(/`(.+?)`/g, '<code class="bg-white dark:bg-zinc-900 px-1.5 py-0.5 rounded text-xs font-mono text-zinc-900 dark:text-zinc-100">$1</code>')
       .replace(/\n/g, '<br>')
-
-    messageDiv.innerHTML = formattedText
-    this.messagesTarget.appendChild(messageDiv)
-    this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight
   }
 
   getProjectId() {
