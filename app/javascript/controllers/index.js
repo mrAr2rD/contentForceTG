@@ -4,9 +4,6 @@
 
 import { application } from "./application"
 
-import HelloController from "./hello_controller"
-application.register("hello", HelloController)
-
 import PostEditorController from "./post_editor_controller"
 application.register("post-editor", PostEditorController)
 
