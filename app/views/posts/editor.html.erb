@@ -2,6 +2,8 @@
      data-chat-project-id-value="<%= @project&.id %>"
      data-chat-ai-model-value="<%= @project&.ai_model || 'anthropic/claude-3.5-sonnet' %>"
      data-post-editor-bots-value="<%= @telegram_bots.map { |bot| { id: bot.id, channel_name: bot.channel_name || bot.bot_username } }.to_json %>"
+     data-post-editor-post-id-value="<%= @post.id %>"
+     data-post-editor-remove-image-url-value="<%= @post.persisted? ? remove_image_post_path(@post) : '' %>"
      class="h-screen flex flex-col bg-white dark:bg-zinc-950">
   <!-- Header - Notion style -->
   <header class="h-14 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between bg-white dark:bg-zinc-950">

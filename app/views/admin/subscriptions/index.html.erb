@@ -1,0 +1,76 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Подписки</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Управление подписками пользователей</p>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="flex gap-4 flex-wrap">
+    <%= link_to "Все", admin_subscriptions_path, class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:plan].blank? && params[:status].blank? ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <% Subscription.plans.keys.each do |plan| %>
+      <%= link_to plan.titleize, admin_subscriptions_path(plan: plan), class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:plan] == plan ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <% end %>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Пользователь</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">План</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Период до</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">AI запросов</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @subscriptions.each do |subscription| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+                <%= link_to subscription.user.email, admin_user_path(subscription.user), class: "text-primary-600 hover:underline" %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% plan_colors = { 'free' => 'bg-zinc-100 text-zinc-700', 'starter' => 'bg-blue-100 text-blue-700', 'pro' => 'bg-purple-100 text-purple-700', 'business' => 'bg-amber-100 text-amber-700' } %>
+              <span class="px-2 py-1 text-xs font-medium rounded <%= plan_colors[subscription.plan] %>">
+                <%= subscription.plan.titleize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% status_colors = { 'active' => 'bg-green-100 text-green-700', 'canceled' => 'bg-red-100 text-red-700', 'past_due' => 'bg-orange-100 text-orange-700', 'trialing' => 'bg-blue-100 text-blue-700' } %>
+              <span class="px-2 py-1 text-xs font-medium rounded <%= status_colors[subscription.status] %>">
+                <%= subscription.status.titleize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <% if subscription.current_period_end %>
+                <%= subscription.current_period_end.strftime('%d.%m.%Y') %>
+              <% else %>
+                —
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= subscription.usage_for(:ai_generations_per_month) %> / <%= subscription.limit_for(:ai_generations_per_month) == Float::INFINITY ? '∞' : subscription.limit_for(:ai_generations_per_month) %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <%= link_to "Просмотр", admin_subscription_path(subscription), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              <%= link_to "Изменить", edit_admin_subscription_path(subscription), class: "text-zinc-600 dark:text-zinc-400 hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @subscriptions.empty? %>
+      <div class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
+        Подписки не найдены
+      </div>
+    <% end %>
+  </div>
+
+  <%= paginate @subscriptions if @subscriptions.respond_to?(:total_pages) && @subscriptions.total_pages > 1 %>
+</div>

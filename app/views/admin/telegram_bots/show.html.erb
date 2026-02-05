@@ -1,0 +1,86 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">@<%= @telegram_bot.bot_username %></h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Telegram бот</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Назад", admin_telegram_bots_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" %>
+      <%= button_to "Удалить", admin_telegram_bot_path(@telegram_bot), method: :delete, data: { turbo_confirm: "Удалить бота?" }, class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Информация о боте -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Информация</h3>
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Username</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">@<%= @telegram_bot.bot_username %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Канал</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @telegram_bot.channel_name.presence || @telegram_bot.channel_id.presence || '—' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Channel ID</dt>
+          <dd class="text-sm font-mono text-zinc-900 dark:text-zinc-50"><%= @telegram_bot.channel_id || '—' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Статус</dt>
+          <dd class="mt-1">
+            <% if @telegram_bot.verified? %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700">Верифицирован</span>
+            <% else %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700">Не верифицирован</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Проект</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <% if @telegram_bot.project %>
+              <%= link_to @telegram_bot.project.name, admin_project_path(@telegram_bot.project), class: "text-primary-600 hover:underline" %>
+            <% else %>
+              <span class="text-zinc-400">Без проекта</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Создан</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @telegram_bot.created_at.strftime('%d.%m.%Y %H:%M') %></dd>
+        </div>
+        <% if @telegram_bot.verified_at %>
+          <div>
+            <dt class="text-sm text-zinc-500 dark:text-zinc-400">Верифицирован</dt>
+            <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @telegram_bot.verified_at.strftime('%d.%m.%Y %H:%M') %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Статистика -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Статистика</h3>
+      <dl class="space-y-3">
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Всего постов</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @telegram_bot.posts.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Опубликовано</dt>
+          <dd class="text-sm font-medium text-green-600"><%= @telegram_bot.posts.published.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Запланировано</dt>
+          <dd class="text-sm font-medium text-blue-600"><%= @telegram_bot.posts.scheduled.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">С ошибками</dt>
+          <dd class="text-sm font-medium text-red-600"><%= @telegram_bot.posts.failed.count %></dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</div>

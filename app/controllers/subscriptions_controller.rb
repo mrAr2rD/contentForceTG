@@ -20,63 +20,67 @@ class SubscriptionsController < ApplicationController
     end
 
     if plan == :free
-      redirect_to subscriptions_path, alert: 'Вы уже на бесплатном тарифе'
+      if current_user.subscription.plan == 'free'
+        redirect_to subscriptions_path, alert: 'Вы уже на бесплатном тарифе'
+      else
+        # Позволяем downgrade на бесплатный план
+        redirect_to action: :downgrade
+      end
+      return
+    end
+
+    # Проверяем настройки Robokassa
+    unless robokassa_configured?
+      redirect_to subscriptions_path, alert: 'Платежная система не настроена. Обратитесь к администратору.', status: :see_other
       return
     end
 
     # Create payment for the subscription
-    @payment = current_user.payments.create!(
-      subscription: current_user.subscription,
-      amount: Subscription::PLAN_PRICES[plan],
-      provider: 'robokassa',
-      status: :pending,
-      metadata: {
-        plan: plan.to_s,
-        user_email: current_user.email
-      }
-    )
+    begin
+      @payment = current_user.payments.create!(
+        subscription: current_user.subscription,
+        amount: Subscription::PLAN_PRICES[plan],
+        provider: 'robokassa',
+        status: :pending,
+        metadata: {
+          plan: plan.to_s,
+          user_email: current_user.email
+        }
+      )
 
-    # Redirect to Robokassa payment gateway
-    redirect_to robokassa_payment_url(@payment), allow_other_host: true
+      # Redirect to Robokassa payment gateway
+      payment_url = PaymentConfiguration.current.generate_payment_url(@payment)
+      redirect_to payment_url, allow_other_host: true
+    rescue ActiveRecord::RecordInvalid => e
+      redirect_to subscriptions_path, alert: "Ошибка при создании платежа: #{e.message}", status: :see_other
+    end
   end
 
   def downgrade
-    current_user.subscription.update!(plan: :free)
-    redirect_to subscriptions_path, notice: 'Вы перешли на бесплатный тариф'
+    subscription = current_user.subscription
+
+    if subscription.plan == 'free'
+      redirect_to subscriptions_path, alert: 'Вы уже на бесплатном тарифе', status: :see_other
+      return
+    end
+
+    subscription.update!(
+      plan: :free,
+      current_period_end: Time.current
+    )
+    subscription.reset_usage!
+
+    redirect_to subscriptions_path, notice: 'Вы перешли на бесплатный тариф', status: :see_other
   end
 
   def cancel
     current_user.subscription.update!(status: :canceled)
-    redirect_to subscriptions_path, notice: 'Подписка отменена'
+    redirect_to subscriptions_path, notice: 'Подписка отменена', status: :see_other
   end
 
   private
 
-  def robokassa_payment_url(payment)
-    # Robokassa payment URL generation
-    # This will be implemented in Robokassa service
-    merchant_login = ENV['ROBOKASSA_MERCHANT_LOGIN']
-    password1 = ENV['ROBOKASSA_PASSWORD_1']
-
-    plan = payment.metadata['plan']
-    amount = payment.amount.to_f
-    inv_id = payment.invoice_number
-    description = "Подписка ContentForce - #{plan.titleize}"
-
-    # Generate signature: MD5(MerchantLogin:OutSum:InvId:Password#1)
-    signature_string = "#{merchant_login}:#{amount}:#{inv_id}:#{password1}"
-    signature = Digest::MD5.hexdigest(signature_string)
-
-    # Build payment URL
-    params = {
-      MerchantLogin: merchant_login,
-      OutSum: amount,
-      InvId: inv_id,
-      Description: description,
-      SignatureValue: signature,
-      IsTest: Rails.env.production? ? 0 : 1
-    }
-
-    "https://auth.robokassa.ru/Merchant/Index.aspx?#{params.to_query}"
+  def robokassa_configured?
+    PaymentConfiguration.current.configured?
   end
 end

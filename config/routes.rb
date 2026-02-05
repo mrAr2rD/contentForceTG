@@ -32,6 +32,7 @@ Rails.application.routes.draw do
     member do
       post :publish
       post :schedule
+      delete :remove_image
     end
   end
 
@@ -107,6 +108,9 @@ Rails.application.routes.draw do
 
     # AI Settings (singleton resource)
     resource :ai_settings, only: [:edit, :update]
+
+    # Payment Settings (Robokassa)
+    resource :payment_settings, only: [:edit, :update]
   end
   
   # Rails health check

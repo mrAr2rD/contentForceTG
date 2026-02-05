@@ -20,6 +20,7 @@ class Post < ApplicationRecord
   validates :button_text, presence: true, length: { maximum: 64 }, if: :image_button?
   validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
   validate :telegram_caption_length, unless: :draft?
+  validate :image_required_for_image_posts, unless: :draft?
 
   # Callbacks
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
@@ -102,6 +103,13 @@ class Post < ApplicationRecord
     if (image? || image_button?) && content.length > 1024
       errors.add(:content, "слишком длинный для Telegram (максимум 1024 символа для постов с картинкой, сейчас #{content.length})")
     end
+  end
+
+  def image_required_for_image_posts
+    return if text?
+    return if image.attached?
+
+    errors.add(:image, "обязательно для постов с изображением")
   end
 
   def schedule_analytics_updates

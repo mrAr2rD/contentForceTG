@@ -9,7 +9,9 @@ export default class extends Controller {
   ]
 
   static values = {
-    bots: Array
+    bots: Array,
+    postId: String,
+    removeImageUrl: String
   }
 
   connect() {
@@ -245,17 +247,44 @@ export default class extends Controller {
   }
 
   // Remove image
-  removeImage(event) {
+  async removeImage(event) {
     event.preventDefault()
+
+    // Если пост сохранён и есть URL для удаления - вызываем сервер
+    if (this.hasRemoveImageUrlValue && this.removeImageUrlValue) {
+      try {
+        const response = await fetch(this.removeImageUrlValue, {
+          method: 'DELETE',
+          headers: {
+            'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.content,
+            'Accept': 'application/json'
+          }
+        })
+
+        if (!response.ok) {
+          console.error('Failed to remove image on server')
+        }
+      } catch (error) {
+        console.error('Error removing image:', error)
+      }
+    }
+
+    // Обновляем UI
     if (this.hasImagePreviewTarget) {
       this.imagePreviewTarget.classList.add('hidden')
-      // Update char count to reflect text limit (4096 chars)
       this.updateCharCount(this.contentEditorTarget.value.length)
     }
-    // Find and clear file input
+
+    // Очищаем file input
     const fileInput = this.element.querySelector('input[type="file"]')
     if (fileInput) {
       fileInput.value = ''
+    }
+
+    // Переключаем тип поста на текстовый
+    if (this.hasPostTypeTarget && this.postTypeTarget.value !== 'text') {
+      this.postTypeTarget.value = 'text'
+      this.toggleButtonFields()
     }
   }
 

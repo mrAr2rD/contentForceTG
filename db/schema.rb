@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_06_000612) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_06_000613) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -84,6 +84,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_000612) do
     t.index ["measured_at"], name: "index_channel_subscriber_metrics_on_measured_at"
     t.index ["telegram_bot_id", "measured_at"], name: "idx_on_telegram_bot_id_measured_at_8fab0e2fc4"
     t.index ["telegram_bot_id"], name: "index_channel_subscriber_metrics_on_telegram_bot_id"
+  end
+
+  create_table "payment_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.boolean "enabled", default: false, null: false
+    t.string "merchant_login"
+    t.string "password_1"
+    t.string "password_2"
+    t.boolean "test_mode", default: true, null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "payments", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|

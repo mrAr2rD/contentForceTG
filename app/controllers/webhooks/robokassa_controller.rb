@@ -6,7 +6,8 @@ module Webhooks
 
     # Result URL - called after successful payment
     def result
-      unless valid_signature?(params, ENV['ROBOKASSA_PASSWORD_2'])
+      config = PaymentConfiguration.current
+      unless config.valid_result_signature?(params[:OutSum], params[:InvId], params[:SignatureValue])
         render json: { error: 'Invalid signature' }, status: :forbidden
         return
       end
@@ -21,7 +22,7 @@ module Webhooks
 
       # Update payment status
       payment.mark_as_completed!
-      payment.update!(provider_payment_id: params[:OutSum])
+      payment.update!(provider_payment_id: "robokassa_#{params[:InvId]}_#{Time.current.to_i}")
 
       # Upgrade user subscription
       plan = payment.metadata['plan'].to_sym
@@ -59,16 +60,5 @@ module Webhooks
       redirect_to subscriptions_path, alert: 'Оплата не прошла. Попробуйте еще раз.'
     end
 
-    private
-
-    def valid_signature?(params, password)
-      # Signature validation: MD5(OutSum:InvId:Password#2)
-      out_sum = params[:OutSum]
-      inv_id = params[:InvId]
-      signature_string = "#{out_sum}:#{inv_id}:#{password}"
-      expected_signature = Digest::MD5.hexdigest(signature_string).upcase
-
-      params[:SignatureValue]&.upcase == expected_signature
-    end
   end
 end

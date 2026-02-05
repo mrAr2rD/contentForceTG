@@ -2,7 +2,7 @@
 
 class PostsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule, :remove_image]
   before_action :set_project, only: [:new, :create]
   layout "dashboard", except: [:editor]
 
@@ -86,6 +86,21 @@ class PostsController < ApplicationController
     end
   rescue StandardError => e
     redirect_to @post, alert: "Ошибка планирования: #{e.message}"
+  end
+
+  def remove_image
+    authorize @post, :update?
+
+    if @post.image.attached?
+      @post.image.purge
+      # Если тип поста требует картинку, меняем на текстовый
+      @post.update!(post_type: :text) if @post.image? || @post.image_button?
+    end
+
+    respond_to do |format|
+      format.html { redirect_back fallback_location: @post, notice: 'Изображение удалено' }
+      format.json { render json: { success: true } }
+    end
   end
 
   # Editor view - трехпанельный интерфейс

@@ -62,7 +62,10 @@ class Payment < ApplicationRecord
   private
 
   def generate_invoice_number
-    max_invoice = Payment.maximum(:invoice_number) || 0
-    self.invoice_number = max_invoice + 1
+    # Используем timestamp + random для избежания race condition
+    # Формат: YYYYMMDD + 6 случайных цифр
+    date_part = Time.current.strftime('%Y%m%d')
+    random_part = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
+    self.invoice_number = "#{date_part}#{random_part}".to_i
   end
 end
