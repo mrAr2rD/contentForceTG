@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class PaymentConfiguration < ApplicationRecord
-  # Шифрование паролей
-  encrypts :password_1
-  encrypts :password_2
+  # Примечание: шифрование отключено пока не настроен RAILS_MASTER_KEY в production
+  # encrypts :password_1
+  # encrypts :password_2
 
   # Валидации
   validates :merchant_login, presence: true, if: :enabled?
