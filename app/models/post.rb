@@ -6,9 +6,6 @@ class Post < ApplicationRecord
   has_one_attached :image
   has_many :post_analytics, dependent: :destroy
 
-  # Callbacks for manual purge (bypass Solid Queue until tables exist)
-  before_destroy :purge_image_attachment
-
   # Enums
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft
   enum :post_type, { text: 0, image: 1, image_button: 2 }, default: :text
@@ -21,8 +18,11 @@ class Post < ApplicationRecord
   validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
   validate :telegram_caption_length, unless: :draft?
   validate :image_required_for_image_posts, unless: :draft?
+  validate :validate_image_size, if: -> { image.attached? }
+  validate :validate_image_format, if: -> { image.attached? }
 
   # Callbacks
+  before_destroy :purge_image_attachment
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
 
   # Scopes
@@ -110,6 +110,19 @@ class Post < ApplicationRecord
     return if image.attached?
 
     errors.add(:image, "обязательно для постов с изображением")
+  end
+
+  def validate_image_size
+    return unless image.blob.byte_size > 10.megabytes
+
+    errors.add(:image, "должно быть не больше 10MB (текущий размер: #{(image.blob.byte_size / 1024.0 / 1024).round(2)}MB)")
+  end
+
+  def validate_image_format
+    allowed_types = %w[image/jpeg image/png image/webp image/gif]
+    return if allowed_types.include?(image.content_type)
+
+    errors.add(:image, "должно быть JPEG, PNG, WebP или GIF (получено: #{image.content_type})")
   end
 
   def schedule_analytics_updates

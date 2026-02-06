@@ -12,7 +12,7 @@ class ProjectsController < ApplicationController
   def show
     authorize @project
     @telegram_bots = @project.telegram_bots.order(created_at: :desc)
-    @recent_posts = @project.posts.order(created_at: :desc).limit(10)
+    @recent_posts = @project.posts.includes(:user, :telegram_bot).order(created_at: :desc).limit(10)
   end
 
   def new

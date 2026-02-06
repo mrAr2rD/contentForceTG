@@ -141,7 +141,7 @@ module Ai
 
         # Добавляем стиль написания из настроек проекта
         if @project.writing_style.present?
-          base_prompt += "\nСтиль написания: #{@project.ai_system_prompt}"
+          base_prompt += "\nСтиль написания: #{@project.writing_style}"
         end
 
         base_prompt += "\nОписание: #{@project.description}" if @project.description.present?

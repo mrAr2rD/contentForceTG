@@ -20,25 +20,34 @@ module Webhooks
         return
       end
 
-      # Update payment status
-      payment.mark_as_completed!
-      payment.update!(provider_payment_id: "robokassa_#{params[:InvId]}_#{Time.current.to_i}")
+      # Обновляем платёж и подписку в транзакции для целостности данных
+      begin
+        ActiveRecord::Base.transaction do
+          # Update payment status
+          payment.mark_as_completed!
+          payment.update!(provider_payment_id: "robokassa_#{params[:InvId]}_#{Time.current.to_i}")
 
-      # Upgrade user subscription
-      plan = payment.metadata['plan'].to_sym
-      subscription = payment.subscription
+          # Upgrade user subscription
+          plan = payment.metadata['plan'].to_sym
+          subscription = payment.subscription
 
-      subscription.update!(
-        plan: plan,
-        status: :active,
-        current_period_start: Time.current,
-        current_period_end: 1.month.from_now
-      )
+          subscription.update!(
+            plan: plan,
+            status: :active,
+            current_period_start: Time.current,
+            current_period_end: 1.month.from_now
+          )
 
-      # Reset usage counters
-      subscription.reset_usage!
+          # Reset usage counters
+          subscription.reset_usage!
+        end
 
-      render plain: "OK#{payment_id}", status: :ok
+        render plain: "OK#{payment_id}", status: :ok
+      rescue StandardError => e
+        Rails.logger.error("Robokassa payment processing failed: #{e.message}")
+        Rails.logger.error(e.backtrace.first(5).join("\n"))
+        render json: { error: 'Payment processing failed' }, status: :internal_server_error
+      end
     end
 
     # Success URL - redirect user here after payment

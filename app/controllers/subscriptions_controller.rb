@@ -4,6 +4,7 @@ class SubscriptionsController < ApplicationController
   layout "dashboard"
 
   before_action :authenticate_user!
+  before_action :ensure_subscription
 
   def index
     @current_subscription = current_user.subscription
@@ -79,6 +80,13 @@ class SubscriptionsController < ApplicationController
   end
 
   private
+
+  # Гарантируем наличие подписки для старых пользователей
+  def ensure_subscription
+    return if current_user.subscription.present?
+
+    current_user.create_subscription!(plan: :free, status: :active)
+  end
 
   def robokassa_configured?
     PaymentConfiguration.current.configured?

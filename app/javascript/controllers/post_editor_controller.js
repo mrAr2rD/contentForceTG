@@ -221,29 +221,44 @@ export default class extends Controller {
     }
   }
 
-  // Preview uploaded image
+  // Preview uploaded image with validation
   previewImage(event) {
     const file = event.target.files[0]
-    if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        if (this.hasImagePreviewTarget) {
-          // Try to find img element
-          let img = this.imagePreviewTarget.querySelector('img')
-          if (!img && this.hasImagePreviewImgTarget) {
-            img = this.imagePreviewImgTarget
-          }
+    if (!file) return
 
-          if (img) {
-            img.src = e.target.result
-            this.imagePreviewTarget.classList.remove('hidden')
-            // Update char count to reflect caption limit (1024 chars)
-            this.updateCharCount(this.contentEditorTarget.value.length)
-          }
+    // Валидация размера файла (максимум 10MB)
+    const maxSize = 10 * 1024 * 1024
+    if (file.size > maxSize) {
+      alert(`Файл слишком большой: ${(file.size / 1024 / 1024).toFixed(2)}MB (максимум: 10MB)`)
+      event.target.value = ''
+      return
+    }
+
+    // Валидация типа файла
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!allowedTypes.includes(file.type)) {
+      alert(`Неподдерживаемый формат: ${file.type}. Допускаются только JPEG, PNG, WebP, GIF`)
+      event.target.value = ''
+      return
+    }
+
+    // Показываем превью
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (this.hasImagePreviewTarget) {
+        let img = this.imagePreviewTarget.querySelector('img')
+        if (!img && this.hasImagePreviewImgTarget) {
+          img = this.imagePreviewImgTarget
+        }
+
+        if (img) {
+          img.src = e.target.result
+          this.imagePreviewTarget.classList.remove('hidden')
+          this.updateCharCount(this.contentEditorTarget.value.length)
         }
       }
-      reader.readAsDataURL(file)
     }
+    reader.readAsDataURL(file)
   }
 
   // Remove image

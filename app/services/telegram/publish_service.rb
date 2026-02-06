@@ -48,8 +48,8 @@ module Telegram
         parse_mode: 'HTML'
       }
 
-      # Добавляем кнопку если есть (для текстовых постов с кнопкой)
-      if @post.respond_to?(:button_text) && @post.button_text.present?
+      # Добавляем кнопку если есть и URL валиден (для текстовых постов с кнопкой)
+      if @post.respond_to?(:button_text) && @post.button_text.present? && @post.button_url.present?
         params[:reply_markup] = {
           inline_keyboard: [[
             { text: @post.button_text, url: @post.button_url }
@@ -69,8 +69,8 @@ module Telegram
         parse_mode: 'HTML'
       }
 
-      # Добавляем кнопку для image_button типа
-      if @post.post_type == 'image_button' && @post.button_text.present?
+      # Добавляем кнопку для image_button типа (только если URL валиден)
+      if @post.post_type == 'image_button' && @post.button_text.present? && @post.button_url.present?
         params[:reply_markup] = {
           inline_keyboard: [[
             { text: @post.button_text, url: @post.button_url }

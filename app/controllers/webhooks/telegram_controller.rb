@@ -158,29 +158,31 @@ module Webhooks
       Rails.logger.info("Button click tracked for post #{post.id}: #{callback_data}")
     end
 
-    # Helper: Update or create post analytics
+    # Helper: Update or create post analytics (с блокировкой для предотвращения race condition)
     def update_post_analytics(post, data)
-      last_analytics = post.post_analytics.recent.first
+      post.with_lock do
+        last_analytics = post.post_analytics.recent.first
 
-      # If last analytics was created within 5 minutes, update it
-      # Otherwise create new record
-      if last_analytics && last_analytics.measured_at > 5.minutes.ago
-        last_analytics.update!(
-          views: data[:views] || last_analytics.views,
-          forwards: data[:forwards] || last_analytics.forwards,
-          reactions: data[:reactions] || last_analytics.reactions,
-          button_clicks: data[:button_clicks] || last_analytics.button_clicks,
-          measured_at: data[:measured_at] || Time.current
-        )
-      else
-        post.post_analytics.create!(
-          telegram_message_id: post.telegram_message_id,
-          views: data[:views] || last_analytics&.views || 0,
-          forwards: data[:forwards] || last_analytics&.forwards || 0,
-          reactions: data[:reactions] || last_analytics&.reactions || {},
-          button_clicks: data[:button_clicks] || last_analytics&.button_clicks || {},
-          measured_at: data[:measured_at] || Time.current
-        )
+        # If last analytics was created within 5 minutes, update it
+        # Otherwise create new record
+        if last_analytics && last_analytics.measured_at > 5.minutes.ago
+          last_analytics.update!(
+            views: data[:views] || last_analytics.views,
+            forwards: data[:forwards] || last_analytics.forwards,
+            reactions: data[:reactions] || last_analytics.reactions || {},
+            button_clicks: data[:button_clicks] || last_analytics.button_clicks || {},
+            measured_at: data[:measured_at] || Time.current
+          )
+        else
+          post.post_analytics.create!(
+            telegram_message_id: post.telegram_message_id,
+            views: data[:views] || last_analytics&.views || 0,
+            forwards: data[:forwards] || last_analytics&.forwards || 0,
+            reactions: data[:reactions] || last_analytics&.reactions || {},
+            button_clicks: data[:button_clicks] || last_analytics&.button_clicks || {},
+            measured_at: data[:measured_at] || Time.current
+          )
+        end
       end
     end
 
