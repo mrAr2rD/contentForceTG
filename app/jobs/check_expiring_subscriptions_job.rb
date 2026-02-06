@@ -42,7 +42,7 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
     # Проверяем, не отправляли ли уже уведомление
     return if already_notified?(subscription.user, 'subscription_expiring', days_remaining)
 
-    Notification::DispatcherService.dispatch!(
+    Notifications::DispatcherService.dispatch!(
       user: subscription.user,
       event_type: 'subscription_expiring',
       context: {
@@ -59,7 +59,7 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
     return if already_notified?(subscription.user, 'subscription_expired', 0)
 
     # Отправляем уведомление об истечении
-    Notification::DispatcherService.dispatch!(
+    Notifications::DispatcherService.dispatch!(
       user: subscription.user,
       event_type: 'subscription_expired',
       context: {

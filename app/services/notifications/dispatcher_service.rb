@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Notification
+module Notifications
   # Сервис для отправки уведомлений
   # Находит шаблоны, рендерит и создаёт уведомления
   class DispatcherService
