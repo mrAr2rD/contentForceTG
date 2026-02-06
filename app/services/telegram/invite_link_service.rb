@@ -86,11 +86,10 @@ module Telegram
     # Синхронизировать статистику конкретной ссылки
     def sync_link_stats(invite_link)
       # Подсчитываем события по ссылке
-      joins = invite_link.subscriber_events.joins.count
-      leaves = invite_link.subscriber_events.where(event_type: %w[left kicked]).count
+      join_count = invite_link.subscriber_events.joined.count
 
       invite_link.update!(
-        join_count: joins
+        join_count: join_count
       )
     end
 

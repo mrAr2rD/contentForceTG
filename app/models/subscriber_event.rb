@@ -15,10 +15,10 @@ class SubscriberEvent < ApplicationRecord
   validates :event_at, presence: true
 
   # Scopes
-  scope :joins, -> { where(event_type: 'joined') }
-  scope :leaves, -> { where(event_type: 'left') }
-  scope :kicks, -> { where(event_type: 'kicked') }
-  scope :bans, -> { where(event_type: 'banned') }
+  scope :joined, -> { where(event_type: 'joined') }
+  scope :left_channel, -> { where(event_type: 'left') }
+  scope :kicked, -> { where(event_type: 'kicked') }
+  scope :banned, -> { where(event_type: 'banned') }
 
   scope :today, -> { where('event_at >= ?', Time.current.beginning_of_day) }
   scope :this_week, -> { where('event_at >= ?', 1.week.ago) }
@@ -89,10 +89,10 @@ class SubscriberEvent < ApplicationRecord
   def self.stats_for_period(from:, to:)
     events = by_date_range(from, to)
     {
-      total_joins: events.joins.count,
-      total_leaves: events.leaves.count,
-      total_kicks: events.kicks.count,
-      net_growth: events.joins.count - events.leaves.count - events.kicks.count,
+      total_joins: events.joined.count,
+      total_leaves: events.left_channel.count,
+      total_kicks: events.kicked.count,
+      net_growth: events.joined.count - events.left_channel.count - events.kicked.count,
       by_day: events.group_by_day(:event_at).count
     }
   end
