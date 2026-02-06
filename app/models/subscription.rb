@@ -2,6 +2,7 @@
 
 class Subscription < ApplicationRecord
   belongs_to :user
+  belongs_to :plan_record, class_name: 'Plan', foreign_key: 'plan_id', optional: true
   has_many :payments, dependent: :destroy
 
   # Enums
@@ -71,7 +72,36 @@ class Subscription < ApplicationRecord
   end
 
   def limit_for(feature)
-    PLAN_LIMITS.dig(plan.to_sym, feature) || 0
+    # Сначала проверяем план из БД, затем fallback на константы
+    if plan_record.present?
+      plan_record.limit_for(feature)
+    else
+      value = PLAN_LIMITS.dig(plan.to_sym, feature)
+      return Float::INFINITY if value == -1
+      value || 0
+    end
+  end
+
+  # Цена текущего плана
+  def price
+    plan_record&.price || PLAN_PRICES[plan.to_sym] || 0
+  end
+
+  # Название плана
+  def plan_name
+    plan_record&.name || plan.to_s.titleize
+  end
+
+  # Бесплатный ли план
+  def free_plan?
+    plan_record&.free? || plan.to_sym == :free
+  end
+
+  # Привязать план из БД по slug
+  def assign_plan!(slug)
+    self.plan_record = Plan.find_by_slug(slug)
+    self.plan = slug.to_s
+    save!
   end
 
   def usage_for(feature)

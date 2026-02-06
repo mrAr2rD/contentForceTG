@@ -25,6 +25,7 @@ module Webhooks
       process_edited_channel_post(telegram_bot, update['edited_channel_post']) if update['edited_channel_post'].present?
       process_message_reaction(telegram_bot, update['message_reaction']) if update['message_reaction'].present?
       process_chat_member(telegram_bot, update['my_chat_member']) if update['my_chat_member'].present?
+      process_chat_member(telegram_bot, update['chat_member']) if update['chat_member'].present?
       process_callback_query(telegram_bot, update['callback_query']) if update['callback_query'].present?
 
       head :ok
@@ -124,14 +125,42 @@ module Webhooks
       old_status = member_data.dig('old_chat_member', 'status')
       new_status = member_data.dig('new_chat_member', 'status')
 
+      # Создаём событие подписчика для детальной аналитики
+      create_subscriber_event(bot, member_data)
+
       # Track subscriber changes
       if subscriber_joined?(old_status, new_status)
         increment_subscriber_count(bot, 1)
+        update_invite_link_stats(bot, member_data)
         Rails.logger.info("New subscriber for bot #{bot.id}")
       elsif subscriber_left?(old_status, new_status)
         increment_subscriber_count(bot, -1)
         Rails.logger.info("Lost subscriber for bot #{bot.id}")
       end
+    end
+
+    # Создать событие подписчика для детальной аналитики
+    def create_subscriber_event(bot, member_data)
+      SubscriberEvent.create_from_webhook(
+        telegram_bot: bot,
+        update: { 'chat_member' => member_data }
+      )
+    rescue StandardError => e
+      Rails.logger.error("Failed to create subscriber event: #{e.message}")
+    end
+
+    # Обновить статистику invite link при вступлении
+    def update_invite_link_stats(bot, member_data)
+      invite_link_url = member_data.dig('invite_link', 'invite_link')
+      return unless invite_link_url
+
+      invite_link = InviteLink.find_by(invite_link: invite_link_url)
+      return unless invite_link
+
+      invite_link.increment_join_count!
+      Rails.logger.info("Incremented join count for invite link #{invite_link.id}")
+    rescue StandardError => e
+      Rails.logger.error("Failed to update invite link stats: #{e.message}")
     end
 
     # Process callback queries (button clicks)

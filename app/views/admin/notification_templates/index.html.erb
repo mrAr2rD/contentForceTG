@@ -1,0 +1,85 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Шаблоны уведомлений</h2>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Настройка текстов email и Telegram уведомлений</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <%= link_to load_defaults_admin_notification_templates_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        Загрузить дефолты
+      <% end %>
+      <%= link_to new_admin_notification_template_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Добавить шаблон
+      <% end %>
+    </div>
+  </div>
+
+  <% @grouped_templates.each do |event_type, templates| %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50"><%= event_type.humanize %></h3>
+      </div>
+
+      <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% templates.each do |template| %>
+          <div class="p-6 hover:bg-zinc-50 dark:hover:bg-zinc-900">
+            <div class="flex items-start justify-between">
+              <div class="flex-1">
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium <%= template.channel == 'email' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400' %>">
+                    <%= template.channel == 'email' ? 'Email' : 'Telegram' %>
+                  </span>
+                  <% if template.active? %>
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
+                      Активен
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                      Неактивен
+                    </span>
+                  <% end %>
+                </div>
+                <% if template.subject.present? %>
+                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-1">
+                    <%= template.subject %>
+                  </p>
+                <% end %>
+                <p class="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2">
+                  <%= truncate(template.body_template, length: 150) %>
+                </p>
+              </div>
+              <div class="flex items-center gap-2 ml-4">
+                <%= link_to edit_admin_notification_template_path(template), class: "p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                <% end %>
+                <%= link_to admin_notification_template_path(template), method: :delete, data: { confirm: 'Удалить шаблон?' }, class: "p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400" do %>
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @grouped_templates.empty? %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-12 text-center">
+      <svg class="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+      </svg>
+      <p class="text-zinc-600 dark:text-zinc-400 mb-4">Шаблоны пока не созданы</p>
+      <%= link_to 'Загрузить дефолтные шаблоны', load_defaults_admin_notification_templates_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors" %>
+    </div>
+  <% end %>
+</div>

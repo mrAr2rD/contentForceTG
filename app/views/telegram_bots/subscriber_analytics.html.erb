@@ -1,0 +1,105 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Аналитика подписчиков</h2>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Канал: <%= @telegram_bot.channel_name || @telegram_bot.channel_id %>
+      </p>
+    </div>
+    <div class="flex items-center gap-2">
+      <%= link_to '7 дней', subscriber_analytics_project_telegram_bot_path(@project, @telegram_bot, period: 7), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 7 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+      <%= link_to '30 дней', subscriber_analytics_project_telegram_bot_path(@project, @telegram_bot, period: 30), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 30 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+      <%= link_to '90 дней', subscriber_analytics_project_telegram_bot_path(@project, @telegram_bot, period: 90), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 90 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+    </div>
+  </div>
+
+  <!-- Метрики -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Новых подписчиков</p>
+      <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">+<%= @stats[:total_joins] %></p>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Отписались</p>
+      <p class="text-2xl font-bold text-red-600 dark:text-red-400 mt-1">-<%= @stats[:total_leaves] %></p>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Исключены</p>
+      <p class="text-2xl font-bold text-zinc-600 dark:text-zinc-400 mt-1"><%= @stats[:total_kicks] %></p>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Чистый прирост</p>
+      <p class="text-2xl font-bold <%= @stats[:net_growth] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %> mt-1">
+        <%= @stats[:net_growth] >= 0 ? '+' : '' %><%= @stats[:net_growth] %>
+      </p>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Топ источников -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Топ источников</h3>
+        <%= link_to 'Все ссылки', project_telegram_bot_invite_links_path(@project, @telegram_bot), class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" %>
+      </div>
+      <% if @invite_links.any? %>
+        <div class="space-y-3">
+          <% @invite_links.each do |link| %>
+            <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+              <div>
+                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= link.name || link.source || 'Без названия' %></p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400"><%= link.source %></p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm font-semibold text-zinc-900 dark:text-zinc-50"><%= link.join_count %></p>
+                <p class="text-xs text-zinc-500 dark:text-zinc-400"><%= link.conversion_rate %>% осталось</p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет данных о пригласительных ссылках</p>
+      <% end %>
+    </div>
+
+    <!-- Последние события -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Последние события</h3>
+      <% if @subscriber_events.any? %>
+        <div class="space-y-3 max-h-80 overflow-y-auto">
+          <% @subscriber_events.limit(20).each do |event| %>
+            <div class="flex items-center justify-between py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+              <div class="flex items-center gap-3">
+                <% if event.join? %>
+                  <span class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+                    </svg>
+                  </span>
+                <% else %>
+                  <span class="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                    <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6"/>
+                    </svg>
+                  </span>
+                <% end %>
+                <div>
+                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= event.display_name %></p>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                    <%= event.join? ? 'Подписался' : 'Отписался' %>
+                    <% if event.invite_link %>
+                      через <%= event.invite_link.name || event.invite_link.source %>
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+              <span class="text-xs text-zinc-400 dark:text-zinc-500"><%= time_ago_in_words(event.event_at) %> назад</span>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет событий за выбранный период</p>
+      <% end %>
+    </div>
+  </div>
+</div>

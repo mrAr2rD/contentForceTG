@@ -11,6 +11,10 @@ module Admin
 
       @recent_users = User.order(created_at: :desc).limit(5)
       @recent_posts = Post.order(created_at: :desc).limit(5)
+
+      # ROI данные за последние 30 дней
+      @roi_calculator = Analytics::RoiCalculatorService.new(period: 30.days)
+      @roi_summary = @roi_calculator.calculate
     end
   end
 end

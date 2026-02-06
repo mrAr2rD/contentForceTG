@@ -1,0 +1,80 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">AI Модели</h2>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Управление моделями и ценами OpenRouter</p>
+    </div>
+    <%= link_to sync_defaults_admin_ai_models_path, method: :post, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Синхронизировать с дефолтами
+    <% end %>
+  </div>
+
+  <% %w[free starter pro business].each do |tier| %>
+    <% models = @grouped_models[tier] || [] %>
+    <% next if models.empty? %>
+
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+      <div class="px-6 py-4 bg-zinc-50 dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 capitalize">
+          <%= tier == 'free' ? 'Бесплатные' : tier.titleize %> модели
+        </h3>
+      </div>
+
+      <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+        <thead>
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Модель</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Провайдер</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Input $/1K</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Output $/1K</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Статус</th>
+            <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Действия</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% models.each do |model| %>
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900">
+              <td class="px-6 py-4">
+                <div>
+                  <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= model.name %></p>
+                  <p class="text-xs text-zinc-500 dark:text-zinc-400 font-mono"><%= model.model_id %></p>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="text-sm text-zinc-600 dark:text-zinc-400"><%= model.provider %></span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="text-sm font-mono <%= model.free? ? 'text-green-600 dark:text-green-400' : 'text-zinc-900 dark:text-zinc-50' %>">
+                  <%= model.free? ? 'FREE' : "$#{model.input_cost_per_1k}" %>
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="text-sm font-mono <%= model.free? ? 'text-green-600 dark:text-green-400' : 'text-zinc-900 dark:text-zinc-50' %>">
+                  <%= model.free? ? 'FREE' : "$#{model.output_cost_per_1k}" %>
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <% if model.active? %>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">
+                    Активна
+                  </span>
+                <% else %>
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-400">
+                    Неактивна
+                  </span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-right space-x-2">
+                <%= link_to 'Изменить', edit_admin_ai_model_path(model), class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" %>
+                <%= link_to model.active? ? 'Отключить' : 'Включить', toggle_active_admin_ai_model_path(model), method: :patch, class: "text-sm text-zinc-600 dark:text-zinc-400 hover:underline" %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+</div>

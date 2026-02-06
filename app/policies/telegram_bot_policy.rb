@@ -33,6 +33,10 @@ class TelegramBotPolicy < ApplicationPolicy
     user_owns_project? || user.admin?
   end
 
+  def subscriber_analytics?
+    user_owns_project? || user.admin?
+  end
+
   private
 
   def user_owns_project?

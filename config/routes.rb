@@ -47,7 +47,10 @@ Rails.application.routes.draw do
     resources :telegram_bots do
       member do
         post :verify
+        get :subscriber_analytics
       end
+
+      resources :invite_links, only: [:index, :new, :create, :destroy]
     end
 
     # Nested posts (only new/create, other actions use top-level routes)
@@ -111,6 +114,29 @@ Rails.application.routes.draw do
 
     # Payment Settings (Robokassa)
     resource :payment_settings, only: [:edit, :update]
+
+    # Тарифные планы
+    resources :plans
+
+    # AI модели с ценами
+    resources :ai_models, only: [:index, :edit, :update] do
+      member do
+        patch :toggle_active
+      end
+      collection do
+        post :sync_defaults
+      end
+    end
+
+    # ROI дашборд
+    get 'roi', to: 'roi#index'
+
+    # Шаблоны уведомлений
+    resources :notification_templates do
+      collection do
+        post :load_defaults
+      end
+    end
   end
   
   # Rails health check

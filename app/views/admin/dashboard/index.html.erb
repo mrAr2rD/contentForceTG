@@ -63,24 +63,68 @@
     </div>
   </div>
 
-  <!-- Quick Actions -->
-  <div class="bg-gradient-to-r from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 border border-primary-700 dark:border-primary-600 rounded-lg p-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h3 class="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          AI Настройки
-        </h3>
-        <p class="text-sm text-primary-100">Настройте OpenRouter API и глобальные параметры AI</p>
-      </div>
-      <%= link_to edit_admin_ai_settings_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-white text-primary-700 rounded-lg text-sm font-semibold hover:bg-primary-50 transition-colors" do %>
-        Настроить
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
-        </svg>
+  <!-- ROI Widget -->
+  <% if @roi_summary %>
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">ROI за 30 дней</h3>
+      <%= link_to admin_roi_path, class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" do %>
+        Подробнее →
       <% end %>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="text-center">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Расходы AI</p>
+        <p class="text-xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_summary[:ai_costs][:total_rub].to_i) %> ₽</p>
+      </div>
+      <div class="text-center">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Доходы</p>
+        <p class="text-xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_summary[:revenue][:total].to_i) %> ₽</p>
+      </div>
+      <div class="text-center">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Прибыль</p>
+        <p class="text-xl font-bold <%= @roi_summary[:roi][:profitable] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+          <%= @roi_summary[:roi][:profit] >= 0 ? '+' : '' %><%= number_with_delimiter(@roi_summary[:roi][:profit].to_i) %> ₽
+        </p>
+      </div>
+      <div class="text-center">
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">ROI</p>
+        <p class="text-xl font-bold text-zinc-900 dark:text-zinc-50">
+          <% if @roi_summary[:roi][:roi_percent] == Float::INFINITY %>∞<% else %><%= @roi_summary[:roi][:roi_percent] %>%<% end %>
+        </p>
+      </div>
+    </div>
+  </div>
+  <% end %>
+
+  <!-- Quick Actions Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- AI Настройки -->
+    <div class="bg-gradient-to-br from-primary-600 to-primary-700 dark:from-primary-500 dark:to-primary-600 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-white mb-1">AI Настройки</h3>
+      <p class="text-xs text-primary-100 mb-3">OpenRouter API</p>
+      <%= link_to 'Настроить', edit_admin_ai_settings_path, class: "inline-flex items-center text-xs font-medium text-white hover:underline" %>
+    </div>
+
+    <!-- Тарифы -->
+    <div class="bg-gradient-to-br from-green-600 to-green-700 dark:from-green-500 dark:to-green-600 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-white mb-1">Тарифы</h3>
+      <p class="text-xs text-green-100 mb-3">Цены и лимиты</p>
+      <%= link_to 'Управление', admin_plans_path, class: "inline-flex items-center text-xs font-medium text-white hover:underline" %>
+    </div>
+
+    <!-- AI Модели -->
+    <div class="bg-gradient-to-br from-purple-600 to-purple-700 dark:from-purple-500 dark:to-purple-600 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-white mb-1">AI Модели</h3>
+      <p class="text-xs text-purple-100 mb-3">Цены токенов</p>
+      <%= link_to 'Управление', admin_ai_models_path, class: "inline-flex items-center text-xs font-medium text-white hover:underline" %>
+    </div>
+
+    <!-- Уведомления -->
+    <div class="bg-gradient-to-br from-blue-600 to-blue-700 dark:from-blue-500 dark:to-blue-600 rounded-lg p-4">
+      <h3 class="text-sm font-semibold text-white mb-1">Уведомления</h3>
+      <p class="text-xs text-blue-100 mb-3">Шаблоны сообщений</p>
+      <%= link_to 'Управление', admin_notification_templates_path, class: "inline-flex items-center text-xs font-medium text-white hover:underline" %>
     </div>
   </div>
 

@@ -1,0 +1,99 @@
+<%= form_with model: [:admin, plan], class: "space-y-6" do |f| %>
+  <% if plan.errors.any? %>
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <ul class="list-disc list-inside text-sm text-red-600 dark:text-red-400">
+        <% plan.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 space-y-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Основная информация</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <%= f.label :slug, 'Slug (идентификатор)', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+        <%= f.text_field :slug, class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50", placeholder: "free, starter, pro..." %>
+      </div>
+
+      <div>
+        <%= f.label :name, 'Название', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+        <%= f.text_field :name, class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+      </div>
+
+      <div>
+        <%= f.label :price, 'Цена (₽/месяц)', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+        <%= f.number_field :price, step: 1, min: 0, class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+      </div>
+
+      <div>
+        <%= f.label :position, 'Позиция сортировки', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+        <%= f.number_field :position, min: 0, class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= f.check_box :active, class: "w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-primary-600" %>
+      <%= f.label :active, 'Активен (доступен для новых подписок)', class: "text-sm text-zinc-700 dark:text-zinc-300" %>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 space-y-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Лимиты</h3>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Используйте -1 для безлимитного значения</p>
+
+    <%= f.fields_for :limits, OpenStruct.new(plan.limits || {}) do |limits| %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <%= limits.label :projects, 'Проекты', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= limits.number_field :projects, value: plan.limits&.dig('projects'), class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+
+        <div>
+          <%= limits.label :bots, 'Боты', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= limits.number_field :bots, value: plan.limits&.dig('bots'), class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+
+        <div>
+          <%= limits.label :posts_per_month, 'Постов/месяц', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= limits.number_field :posts_per_month, value: plan.limits&.dig('posts_per_month'), class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+
+        <div>
+          <%= limits.label :ai_generations_per_month, 'AI генерации/месяц', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= limits.number_field :ai_generations_per_month, value: plan.limits&.dig('ai_generations_per_month'), class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+
+        <div>
+          <%= limits.label :ai_image_generations_per_month, 'AI изображений/месяц', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= limits.number_field :ai_image_generations_per_month, value: plan.limits&.dig('ai_image_generations_per_month'), class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 space-y-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Фичи</h3>
+
+    <%= f.fields_for :features, OpenStruct.new(plan.features || {}) do |features| %>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <%= features.label :analytics, 'Уровень аналитики', class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1" %>
+          <%= features.select :analytics, [['Basic', 'basic'], ['Full', 'full'], ['Advanced', 'advanced'], ['Premium', 'premium']], { selected: plan.features&.dig('analytics') }, class: "w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-50" %>
+        </div>
+
+        <div class="flex items-center gap-2 pt-6">
+          <%= features.check_box :priority_support, checked: plan.features&.dig('priority_support'), class: "w-4 h-4 rounded border-zinc-300 dark:border-zinc-700 text-primary-600" %>
+          <%= features.label :priority_support, 'Приоритетная поддержка', class: "text-sm text-zinc-700 dark:text-zinc-300" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="flex items-center gap-4">
+    <%= f.submit plan.persisted? ? 'Сохранить' : 'Создать', class: "px-6 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 transition-colors cursor-pointer" %>
+    <%= link_to 'Отмена', admin_plans_path, class: "px-6 py-2 border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg text-sm font-medium hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors" %>
+  </div>
+<% end %>

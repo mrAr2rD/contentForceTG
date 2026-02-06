@@ -207,17 +207,24 @@ module Ai
     def track_usage(response)
       return unless @user
 
+      usage = response[:usage]
+      cost_data = calculate_cost(response)
+
       AiUsageLog.create!(
         user: @user,
         project: @project,
         model_used: response[:model],
-        tokens_used: response[:usage][:total_tokens],
-        cost: calculate_cost(response),
+        tokens_used: usage[:total_tokens],
+        input_tokens: usage[:prompt_tokens] || 0,
+        output_tokens: usage[:completion_tokens] || 0,
+        input_cost: cost_data[:input_cost],
+        output_cost: cost_data[:output_cost],
+        cost: cost_data[:total_cost],
         purpose: :content_generation
       )
 
       # Не списываем квоту для бесплатных моделей
-      return if AiConfiguration.free_model?(response[:model])
+      return if AiModel.free_model?(response[:model])
 
       if @user.subscription
         @user.subscription.increment_usage!(:ai_generations_per_month)
@@ -231,21 +238,37 @@ module Ai
     end
 
     def calculate_cost(response)
-      model_info = AiConfiguration::AVAILABLE_MODELS[response[:model]]
-      return 0 unless model_info
-      return 0 unless model_info[:cost_per_1k_tokens] # Return 0 if no cost info available
-
       usage = response[:usage]
-      return 0 unless usage # Return 0 if no usage data
+      return { input_cost: 0, output_cost: 0, total_cost: 0 } unless usage
 
       input_tokens = usage[:prompt_tokens] || 0
       output_tokens = usage[:completion_tokens] || 0
 
-      cost_info = model_info[:cost_per_1k_tokens]
-      input_cost = (input_tokens / 1000.0) * (cost_info[:input] || 0)
-      output_cost = (output_tokens / 1000.0) * (cost_info[:output] || 0)
+      # Ищем модель в БД, если нет - используем дефолты
+      ai_model = AiModel.find_by(model_id: response[:model])
 
-      input_cost + output_cost
+      if ai_model
+        ai_model.calculate_cost(input_tokens, output_tokens)
+      else
+        # Fallback на дефолтные цены из AiModel::DEFAULTS
+        defaults = AiModel::DEFAULTS[response[:model]]
+        if defaults
+          input_cost_per_1k = defaults[:input_cost_per_1k] || 0
+          output_cost_per_1k = defaults[:output_cost_per_1k] || 0
+        else
+          input_cost_per_1k = 0
+          output_cost_per_1k = 0
+        end
+
+        input_cost = (input_tokens.to_f / 1000) * input_cost_per_1k
+        output_cost = (output_tokens.to_f / 1000) * output_cost_per_1k
+
+        {
+          input_cost: input_cost.round(6),
+          output_cost: output_cost.round(6),
+          total_cost: (input_cost + output_cost).round(6)
+        }
+      end
     end
   end
 

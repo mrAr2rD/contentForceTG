@@ -1,0 +1,180 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">ROI Dashboard</h2>
+      <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+        Анализ расходов на AI и доходов от подписок
+        (<%= @roi_data[:period][:from].strftime('%d.%m.%Y') %> - <%= @roi_data[:period][:to].strftime('%d.%m.%Y') %>)
+      </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <%= link_to '7 дней', admin_roi_path(period: 7), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 7 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+      <%= link_to '30 дней', admin_roi_path(period: 30), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 30 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+      <%= link_to '90 дней', admin_roi_path(period: 90), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 90 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+    </div>
+  </div>
+
+  <!-- Главные метрики -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <!-- Расходы AI -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Расходы AI</span>
+        <div class="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
+          <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"/>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <%= number_with_delimiter(@roi_data[:ai_costs][:total_rub].to_i) %> ₽
+      </p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+        $<%= @roi_data[:ai_costs][:total_usd].round(4) %> USD
+      </p>
+    </div>
+
+    <!-- Доходы -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Доходы</span>
+        <div class="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
+          <svg class="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <%= number_with_delimiter(@roi_data[:revenue][:total].to_i) %> ₽
+      </p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+        <%= @roi_data[:revenue][:payments_count] %> платежей
+      </p>
+    </div>
+
+    <!-- Прибыль -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Прибыль</span>
+        <div class="w-10 h-10 <%= @roi_data[:roi][:profitable] ? 'bg-green-100 dark:bg-green-900/20' : 'bg-red-100 dark:bg-red-900/20' %> rounded-full flex items-center justify-center">
+          <svg class="w-5 h-5 <%= @roi_data[:roi][:profitable] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold <%= @roi_data[:roi][:profitable] ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+        <%= @roi_data[:roi][:profit] >= 0 ? '+' : '' %><%= number_with_delimiter(@roi_data[:roi][:profit].to_i) %> ₽
+      </p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+        После вычета расходов AI
+      </p>
+    </div>
+
+    <!-- ROI -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">ROI</span>
+        <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/20 rounded-full flex items-center justify-center">
+          <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">
+        <% if @roi_data[:roi][:roi_percent] == Float::INFINITY %>
+          ∞
+        <% else %>
+          <%= @roi_data[:roi][:roi_percent] %>%
+        <% end %>
+      </p>
+      <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+        Return on Investment
+      </p>
+    </div>
+  </div>
+
+  <!-- Детали расходов -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Использование AI -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Использование AI</h3>
+      <div class="space-y-4">
+        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-sm text-zinc-600 dark:text-zinc-400">Всего запросов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:requests_count]) %></span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-sm text-zinc-600 dark:text-zinc-400">Input токенов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:input_tokens]) %></span>
+        </div>
+        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-sm text-zinc-600 dark:text-zinc-400">Output токенов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:output_tokens]) %></span>
+        </div>
+        <div class="flex justify-between items-center py-2">
+          <span class="text-sm text-zinc-600 dark:text-zinc-400">Средняя стоимость запроса</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50">$<%= @roi_data[:ai_costs][:average_cost_per_request].round(6) %></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Расходы по моделям -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Расходы по моделям</h3>
+      <div class="space-y-3">
+        <% @roi_data[:breakdown_by_model].first(5).each do |model_data| %>
+          <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800 last:border-0">
+            <div>
+              <span class="text-sm text-zinc-900 dark:text-zinc-50"><%= model_data[:model] %></span>
+              <p class="text-xs text-zinc-500 dark:text-zinc-400"><%= number_with_delimiter(model_data[:requests_count]) %> запросов</p>
+            </div>
+            <span class="text-sm font-medium <%= model_data[:total_cost].zero? ? 'text-green-600 dark:text-green-400' : 'text-zinc-900 dark:text-zinc-50' %>">
+              <%= model_data[:total_cost].zero? ? 'FREE' : "$#{model_data[:total_cost].round(4)}" %>
+            </span>
+          </div>
+        <% end %>
+        <% if @roi_data[:breakdown_by_model].empty? %>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет данных за выбранный период</p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Дневная статистика -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Статистика по дням</h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+        <thead>
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Дата</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Расходы AI (₽)</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Доходы (₽)</th>
+            <th class="px-4 py-2 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase">Прибыль</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @roi_data[:daily_stats].last(10).reverse.each do |day| %>
+            <% profit = day[:revenue] - day[:ai_cost_rub] %>
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900">
+              <td class="px-4 py-2 text-sm text-zinc-900 dark:text-zinc-50"><%= day[:date].strftime('%d.%m.%Y') rescue day[:date] %></td>
+              <td class="px-4 py-2 text-sm text-right text-zinc-600 dark:text-zinc-400"><%= number_with_delimiter(day[:ai_cost_rub].to_i) %></td>
+              <td class="px-4 py-2 text-sm text-right text-zinc-600 dark:text-zinc-400"><%= number_with_delimiter(day[:revenue].to_i) %></td>
+              <td class="px-4 py-2 text-sm text-right font-medium <%= profit >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+                <%= profit >= 0 ? '+' : '' %><%= number_with_delimiter(profit.to_i) %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @roi_data[:daily_stats].empty? %>
+            <tr>
+              <td colspan="4" class="px-4 py-8 text-center text-sm text-zinc-500 dark:text-zinc-400">
+                Нет данных за выбранный период
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

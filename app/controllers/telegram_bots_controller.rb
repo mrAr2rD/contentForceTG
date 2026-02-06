@@ -3,7 +3,7 @@
 class TelegramBotsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project
-  before_action :set_telegram_bot, only: [:show, :edit, :update, :destroy, :verify]
+  before_action :set_telegram_bot, only: [:show, :edit, :update, :destroy, :verify, :subscriber_analytics]
   layout "dashboard"
 
   def index
@@ -61,12 +61,29 @@ class TelegramBotsController < ApplicationController
 
     begin
       Telegram::VerifyService.new(@telegram_bot).verify!
-      redirect_to project_telegram_bot_path(@project, @telegram_bot), 
+      redirect_to project_telegram_bot_path(@project, @telegram_bot),
                   notice: 'Бот успешно верифицирован!'
     rescue StandardError => e
-      redirect_to project_telegram_bot_path(@project, @telegram_bot), 
+      redirect_to project_telegram_bot_path(@project, @telegram_bot),
                   alert: "Ошибка верификации: #{e.message}"
     end
+  end
+
+  def subscriber_analytics
+    authorize @telegram_bot
+
+    @period = params[:period]&.to_i || 30
+    @from = @period.days.ago
+    @to = Time.current
+
+    @subscriber_events = @telegram_bot.subscriber_events
+                                       .by_date_range(@from, @to)
+                                       .order(event_at: :desc)
+
+    @stats = SubscriberEvent.where(telegram_bot: @telegram_bot)
+                            .stats_for_period(from: @from, to: @to)
+
+    @invite_links = @telegram_bot.invite_links.with_joins.order(join_count: :desc).limit(10)
   end
 
   private
