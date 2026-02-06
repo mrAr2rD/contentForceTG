@@ -2,6 +2,7 @@
 
 module Admin
   class NotificationTemplatesController < Admin::ApplicationController
+    before_action :check_table_exists
     before_action :set_template, only: [:show, :edit, :update, :destroy]
 
     def index
@@ -73,6 +74,13 @@ module Admin
       params.require(:notification_template).permit(
         :event_type, :channel, :subject, :body_template, :active
       )
+    end
+
+    def check_table_exists
+      return if NotificationTemplate.table_exists?
+
+      redirect_to admin_root_path,
+                  alert: 'Таблица notification_templates не существует. Выполните миграции: bin/rails db:migrate'
     end
   end
 end

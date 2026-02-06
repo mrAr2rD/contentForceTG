@@ -8,6 +8,7 @@ module Analytics
       @period = period
       @from = period.ago
       @to = Time.current
+      @has_detailed_costs = check_detailed_costs_columns
     end
 
     # Основной метод расчёта
@@ -23,13 +24,17 @@ module Analytics
         roi: calculate_roi,
         breakdown_by_model: costs_by_model,
         breakdown_by_provider: costs_by_provider,
-        daily_stats: daily_stats
+        daily_stats: daily_stats,
+        migrations_pending: !@has_detailed_costs
       }
     end
 
     # Общие расходы на AI
     def total_ai_costs
-      ai_usage_logs.sum(:cost) + ai_usage_logs.sum(:input_cost) + ai_usage_logs.sum(:output_cost)
+      base_cost = ai_usage_logs.sum(:cost)
+      return base_cost unless @has_detailed_costs
+
+      base_cost + ai_usage_logs.sum(:input_cost).to_f + ai_usage_logs.sum(:output_cost).to_f
     end
 
     # Общие доходы
@@ -48,16 +53,21 @@ module Analytics
     end
 
     def ai_costs_data
-      {
+      data = {
         total: total_ai_costs.round(2),
         total_usd: total_ai_costs.round(6),
         total_rub: (total_ai_costs * usd_to_rub_rate).round(2),
         requests_count: ai_usage_logs.count,
         tokens_used: ai_usage_logs.sum(:tokens_used),
-        input_tokens: ai_usage_logs.sum(:input_tokens),
-        output_tokens: ai_usage_logs.sum(:output_tokens),
         average_cost_per_request: average_cost_per_request
       }
+
+      if @has_detailed_costs
+        data[:input_tokens] = ai_usage_logs.sum(:input_tokens)
+        data[:output_tokens] = ai_usage_logs.sum(:output_tokens)
+      end
+
+      data
     end
 
     def revenue_data
@@ -84,13 +94,19 @@ module Analytics
     end
 
     def costs_by_model
+      cost_expression = if @has_detailed_costs
+                          'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as total_cost'
+                        else
+                          'SUM(cost) as total_cost'
+                        end
+
       ai_usage_logs
         .group(:model_used)
         .select(
           'model_used',
           'COUNT(*) as requests_count',
           'SUM(tokens_used) as total_tokens',
-          'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as total_cost'
+          cost_expression
         )
         .map do |record|
           {
@@ -123,9 +139,15 @@ module Analytics
 
     def daily_stats
       # Получаем дневную статистику
+      cost_expression = if @has_detailed_costs
+                          "cost + COALESCE(input_cost, 0) + COALESCE(output_cost, 0)"
+                        else
+                          "cost"
+                        end
+
       costs_by_day = ai_usage_logs
         .group("DATE(created_at)")
-        .sum("cost + COALESCE(input_cost, 0) + COALESCE(output_cost, 0)")
+        .sum(cost_expression)
 
       revenue_by_day = completed_payments
         .group("DATE(created_at)")
@@ -176,6 +198,13 @@ module Analytics
     # Курс USD к RUB (можно сделать настраиваемым)
     def usd_to_rub_rate
       @usd_to_rub_rate ||= ENV.fetch('USD_TO_RUB_RATE', 90).to_f
+    end
+
+    # Проверяем, есть ли колонки для детальных расходов
+    def check_detailed_costs_columns
+      AiUsageLog.column_names.include?('input_cost')
+    rescue StandardError
+      false
     end
   end
 end

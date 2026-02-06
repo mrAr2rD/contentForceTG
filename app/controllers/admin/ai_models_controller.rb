@@ -2,6 +2,7 @@
 
 module Admin
   class AiModelsController < Admin::ApplicationController
+    before_action :check_table_exists
     before_action :set_ai_model, only: [:edit, :update, :toggle_active]
 
     def index
@@ -46,6 +47,13 @@ module Admin
         :name, :provider, :tier, :active,
         :input_cost_per_1k, :output_cost_per_1k, :max_tokens
       )
+    end
+
+    def check_table_exists
+      return if AiModel.table_exists?
+
+      redirect_to admin_root_path,
+                  alert: 'Таблица ai_models не существует. Выполните миграции: bin/rails db:migrate'
     end
   end
 end

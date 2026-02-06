@@ -4,7 +4,9 @@
       <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">ROI Dashboard</h2>
       <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         Анализ расходов на AI и доходов от подписок
-        (<%= @roi_data[:period][:from].strftime('%d.%m.%Y') %> - <%= @roi_data[:period][:to].strftime('%d.%m.%Y') %>)
+        <% if @roi_data %>
+          (<%= @roi_data[:period][:from].strftime('%d.%m.%Y') %> - <%= @roi_data[:period][:to].strftime('%d.%m.%Y') %>)
+        <% end %>
       </p>
     </div>
 
@@ -14,6 +16,23 @@
       <%= link_to '90 дней', admin_roi_path(period: 90), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 90 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
     </div>
   </div>
+
+  <% if @roi_error %>
+    <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6">
+      <div class="flex items-center gap-3">
+        <svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
+        <div>
+          <h3 class="font-medium text-amber-800 dark:text-amber-200">Ошибка загрузки данных</h3>
+          <p class="text-sm text-amber-700 dark:text-amber-300 mt-1"><%= @roi_error %></p>
+          <p class="text-sm text-amber-600 dark:text-amber-400 mt-2">Выполните миграции: <code class="bg-amber-200 dark:bg-amber-800 px-1 rounded">bin/rails db:migrate</code></p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @roi_data %>
 
   <!-- Главные метрики -->
   <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -105,6 +124,11 @@
           <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:requests_count]) %></span>
         </div>
         <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800">
+          <span class="text-sm text-zinc-600 dark:text-zinc-400">Всего токенов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:tokens_used]) %></span>
+        </div>
+        <% if @roi_data[:ai_costs][:input_tokens] %>
+        <div class="flex justify-between items-center py-2 border-b border-zinc-100 dark:border-zinc-800">
           <span class="text-sm text-zinc-600 dark:text-zinc-400">Input токенов</span>
           <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:input_tokens]) %></span>
         </div>
@@ -112,6 +136,7 @@
           <span class="text-sm text-zinc-600 dark:text-zinc-400">Output токенов</span>
           <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@roi_data[:ai_costs][:output_tokens]) %></span>
         </div>
+        <% end %>
         <div class="flex justify-between items-center py-2">
           <span class="text-sm text-zinc-600 dark:text-zinc-400">Средняя стоимость запроса</span>
           <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50">$<%= @roi_data[:ai_costs][:average_cost_per_request].round(6) %></span>
@@ -177,4 +202,5 @@
       </table>
     </div>
   </div>
+  <% end %>
 </div>

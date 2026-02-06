@@ -64,10 +64,24 @@
   </div>
 
   <!-- ROI Widget -->
-  <% if @roi_summary %>
+  <% if @roi_error %>
+  <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+    <div class="flex items-center gap-3">
+      <svg class="w-5 h-5 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+      </svg>
+      <p class="text-sm text-amber-800 dark:text-amber-200"><%= @roi_error %></p>
+    </div>
+  </div>
+  <% elsif @roi_summary %>
   <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
     <div class="flex items-center justify-between mb-4">
-      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">ROI за 30 дней</h3>
+      <div class="flex items-center gap-2">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">ROI за 30 дней</h3>
+        <% if @roi_summary[:migrations_pending] %>
+          <span class="px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 rounded">Миграции ожидают</span>
+        <% end %>
+      </div>
       <%= link_to admin_roi_path, class: "text-sm text-primary-600 dark:text-primary-400 hover:underline" do %>
         Подробнее →
       <% end %>

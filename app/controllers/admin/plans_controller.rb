@@ -2,6 +2,7 @@
 
 module Admin
   class PlansController < Admin::ApplicationController
+    before_action :check_table_exists
     before_action :set_plan, only: [:show, :edit, :update, :destroy]
 
     def index
@@ -55,6 +56,13 @@ module Admin
         limits: [:projects, :bots, :posts_per_month, :ai_generations_per_month, :ai_image_generations_per_month],
         features: [:analytics, :priority_support]
       )
+    end
+
+    def check_table_exists
+      return if Plan.table_exists?
+
+      redirect_to admin_root_path,
+                  alert: 'Таблица plans не существует. Выполните миграции: bin/rails db:migrate'
     end
   end
 end
