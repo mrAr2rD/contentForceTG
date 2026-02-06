@@ -8,7 +8,8 @@ module Analytics
       @period = period
       @from = period.ago
       @to = Time.current
-      @has_detailed_costs = check_detailed_costs_columns
+      @has_cost_column = check_cost_column
+      @has_detailed_costs = @has_cost_column && check_detailed_costs_columns
     end
 
     # Основной метод расчёта
@@ -25,12 +26,14 @@ module Analytics
         breakdown_by_model: costs_by_model,
         breakdown_by_provider: costs_by_provider,
         daily_stats: daily_stats,
-        migrations_pending: !@has_detailed_costs
+        migrations_pending: !@has_cost_column || !@has_detailed_costs
       }
     end
 
     # Общие расходы на AI
     def total_ai_costs
+      return 0 unless @has_cost_column
+
       base_cost = ai_usage_logs.sum(:cost)
       return base_cost unless @has_detailed_costs
 
@@ -53,12 +56,13 @@ module Analytics
     end
 
     def ai_costs_data
+      total = total_ai_costs
       data = {
-        total: total_ai_costs.round(2),
-        total_usd: total_ai_costs.round(6),
-        total_rub: (total_ai_costs * usd_to_rub_rate).round(2),
+        total: total.round(2),
+        total_usd: total.round(6),
+        total_rub: (total * usd_to_rub_rate).round(2),
         requests_count: ai_usage_logs.count,
-        tokens_used: ai_usage_logs.sum(:tokens_used),
+        tokens_used: @has_cost_column ? ai_usage_logs.sum(:tokens_used) : 0,
         average_cost_per_request: average_cost_per_request
       }
 
@@ -94,6 +98,8 @@ module Analytics
     end
 
     def costs_by_model
+      return [] unless @has_cost_column
+
       cost_expression = if @has_detailed_costs
                           'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as total_cost'
                         else
@@ -139,15 +145,16 @@ module Analytics
 
     def daily_stats
       # Получаем дневную статистику
-      cost_expression = if @has_detailed_costs
-                          "cost + COALESCE(input_cost, 0) + COALESCE(output_cost, 0)"
-                        else
-                          "cost"
-                        end
-
-      costs_by_day = ai_usage_logs
-        .group("DATE(created_at)")
-        .sum(cost_expression)
+      costs_by_day = if @has_cost_column
+                       cost_expression = if @has_detailed_costs
+                                           "cost + COALESCE(input_cost, 0) + COALESCE(output_cost, 0)"
+                                         else
+                                           "cost"
+                                         end
+                       ai_usage_logs.group("DATE(created_at)").sum(cost_expression)
+                     else
+                       {}
+                     end
 
       revenue_by_day = completed_payments
         .group("DATE(created_at)")
@@ -198,6 +205,13 @@ module Analytics
     # Курс USD к RUB (можно сделать настраиваемым)
     def usd_to_rub_rate
       @usd_to_rub_rate ||= ENV.fetch('USD_TO_RUB_RATE', 90).to_f
+    end
+
+    # Проверяем, есть ли базовая колонка cost
+    def check_cost_column
+      AiUsageLog.table_exists? && AiUsageLog.column_names.include?('cost')
+    rescue StandardError
+      false
     end
 
     # Проверяем, есть ли колонки для детальных расходов

@@ -55,10 +55,10 @@
         </div>
       <% end %>
 
-      <% if @user.telegram_user_id.present? %>
+      <% if @user.telegram_id.present? %>
         <div>
           <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Telegram User ID</dt>
-          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50 font-mono"><%= @user.telegram_user_id %></dd>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50 font-mono"><%= @user.telegram_id %></dd>
         </div>
       <% end %>
     </dl>
