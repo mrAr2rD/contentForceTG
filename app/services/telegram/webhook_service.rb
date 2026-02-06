@@ -12,10 +12,18 @@ module Telegram
 
     def setup!
       webhook_url = "#{ENV.fetch('TELEGRAM_WEBHOOK_URL', 'http://localhost:3000')}/webhooks/telegram/#{@bot.bot_token}"
-      
+
       params = {
         url: webhook_url,
-        allowed_updates: ['message', 'channel_post', 'callback_query', 'my_chat_member']
+        allowed_updates: [
+          'message',
+          'channel_post',
+          'edited_channel_post',
+          'callback_query',
+          'my_chat_member',
+          'message_reaction',
+          'message_reaction_count'
+        ]
       }
 
       result = make_request('setWebhook', params)
@@ -25,6 +33,8 @@ module Telegram
       end
 
       @bot.update!(last_sync_at: Time.current)
+
+      Rails.logger.info("Webhook configured for bot #{@bot.id} at #{webhook_url}")
       result
     end
 

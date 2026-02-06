@@ -1,6 +1,9 @@
 <div data-controller="post-editor chat"
      data-chat-project-id-value="<%= @project&.id %>"
      data-chat-ai-model-value="<%= @project&.ai_model || 'anthropic/claude-3.5-sonnet' %>"
+     data-post-editor-bots-value="<%= @telegram_bots.map { |bot| { id: bot.id, channel_name: bot.channel_name || bot.bot_username } }.to_json %>"
+     data-post-editor-post-id-value="<%= @post.id %>"
+     data-post-editor-remove-image-url-value="<%= @post.persisted? ? remove_image_post_path(@post) : '' %>"
      class="h-screen flex flex-col bg-white dark:bg-zinc-950">
   <!-- Header - Notion style -->
   <header class="h-14 border-b border-zinc-200 dark:border-zinc-800 px-6 flex items-center justify-between bg-white dark:bg-zinc-950">
@@ -17,8 +20,24 @@
         <h1 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">AI Редактор</h1>
       </div>
     </div>
-    
+
     <div class="flex items-center gap-2">
+      <!-- Theme Toggle -->
+      <button
+        data-action="click->theme#toggle"
+        class="p-2 rounded-md text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800 transition-colors"
+        title="Переключить тему"
+      >
+        <!-- Sun icon (visible in dark mode) -->
+        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+        </svg>
+        <!-- Moon icon (visible in light mode) -->
+        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        </svg>
+      </button>
+
       <% if @post.persisted? %>
         <%= link_to @post, class: "inline-flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors" do %>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -28,8 +47,8 @@
           Просмотр
         <% end %>
       <% end %>
-      <button 
-        data-action="click->post-editor#save" 
+      <button
+        data-action="click->post-editor#save"
         class="inline-flex items-center gap-2 px-4 py-1.5 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -40,10 +59,10 @@
     </div>
   </header>
 
-  <!-- Three Panel Layout - Notion style -->
-  <div class="flex-1 flex overflow-hidden">
-    <!-- Left Panel: AI Chat (30%) -->
-    <aside class="w-[30%] bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+  <!-- Three Panel Layout - Notion style (responsive) -->
+  <div class="flex-1 flex flex-col lg:flex-row overflow-hidden">
+    <!-- Left Panel: AI Chat (hidden on mobile, 30% on desktop) -->
+    <aside class="hidden lg:flex lg:w-[30%] bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex-col">
       <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
         <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
           <div class="w-6 h-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-md flex items-center justify-center">
@@ -58,9 +77,9 @@
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Chat Messages -->
         <div data-chat-target="messages" class="flex-1 overflow-y-auto notion-scrollbar px-6 py-4 space-y-4">
-          <div class="bg-primary-50 dark:bg-primary-950/20 border border-primary-200 dark:border-primary-900 rounded-lg p-4">
-            <p class="text-sm text-primary-900 dark:text-primary-100 font-medium mb-2">👋 Привет! Я помогу создать пост.</p>
-            <p class="text-sm text-primary-800 dark:text-primary-200">Напиши тему или идею, и я сгенерирую текст для Telegram.</p>
+          <div class="bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg p-4">
+            <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">👋 Привет! Я помогу создать пост.</p>
+            <p class="text-sm text-primary-800 dark:text-primary-100">Напиши тему или идею, и я сгенерирую текст для Telegram.</p>
           </div>
         </div>
         
@@ -73,13 +92,13 @@
               placeholder="Напиши тему поста..."
               class="flex-1 h-10 px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-md text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 focus:ring-offset-2 dark:ring-offset-zinc-950 transition-shadow"
             >
-            <button 
+            <button
               type="submit"
               data-chat-target="submitButton"
               class="inline-flex items-center justify-center h-10 px-4 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
               </svg>
             </button>
           </form>
@@ -87,13 +106,13 @@
       </div>
     </aside>
 
-    <!-- Center Panel: Settings (20%) -->
-    <aside class="w-[20%] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto notion-scrollbar">
+    <!-- Center Panel: Settings (full width on mobile, 25% on desktop) -->
+    <aside class="w-full md:w-1/3 lg:w-1/4 bg-white dark:bg-zinc-950 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto notion-scrollbar">
       <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
         <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Настройки</h2>
       </div>
       
-      <%= form_with model: @post, url: @post.persisted? ? post_path(@post) : posts_path, method: @post.persisted? ? :patch : :post, local: true, data: { post_editor_target: "form" }, class: "px-6 py-4 space-y-6" do |f| %>
+      <%= form_with model: @post, url: @post.persisted? ? post_path(@post) : posts_path, method: @post.persisted? ? :patch : :post, local: true, multipart: true, data: { post_editor_target: "form" }, class: "px-6 py-4 space-y-6" do |f| %>
         <!-- Project -->
         <div>
           <%= f.label :project_id, "Проект", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
@@ -105,9 +124,15 @@
         <!-- Telegram Bot -->
         <div>
           <%= f.label :telegram_bot_id, "Telegram Бот", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name, 
-              { prompt: "Выберите бота", include_blank: true }, 
-              { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
+          <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name,
+              { include_blank: "Выберите бота" },
+              {
+                data: {
+                  post_editor_target: "botSelect",
+                  action: "change->post-editor#updateChannelName"
+                },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
+              } %>
         </div>
 
         <!-- Title -->
@@ -116,6 +141,68 @@
           <%= f.text_field :title,
               placeholder: "Название поста",
               class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
+        </div>
+
+        <!-- Post Type -->
+        <div>
+          <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+          <%= f.select :post_type,
+              [
+                ['Текстовый', 'text'],
+                ['С изображением', 'image'],
+                ['С изображением и кнопкой', 'image_button']
+              ],
+              {},
+              {
+                data: {
+                  post_editor_target: "postType",
+                  action: "change->post-editor#toggleButtonFields"
+                },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
+              } %>
+        </div>
+
+        <!-- Image Upload (show for image and image_button types) -->
+        <div data-post-editor-target="imageField" class="<%= @post.post_type == 'text' ? 'hidden' : '' %>">
+          <%= f.label :image, "Изображение", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+          <div class="flex items-center gap-2">
+            <%= f.file_field :image,
+                accept: "image/*",
+                data: {
+                  action: "change->post-editor#previewImage"
+                },
+                class: "block w-full text-sm text-zinc-900 dark:text-zinc-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-zinc-50 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 transition-colors cursor-pointer" %>
+          </div>
+          <% if @post.image.attached? %>
+            <div class="mt-2 relative">
+              <%= image_tag @post.image, class: "w-full rounded-md max-h-48 object-cover" %>
+              <%= link_to "Удалить", "#",
+                  data: { action: "click->post-editor#removeImage" },
+                  class: "absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors" %>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Button Fields (show only for image_button type) -->
+        <div data-post-editor-target="buttonFields" class="space-y-4 <%= @post.post_type == 'image_button' ? '' : 'hidden' %>">
+          <div>
+            <%= f.label :button_text, "Текст кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+            <%= f.text_field :button_text,
+                placeholder: "Например: Перейти на сайт",
+                maxlength: 64,
+                data: { action: "input->post-editor#updateButtonText" },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Максимум 64 символа</p>
+          </div>
+
+          <div>
+            <%= f.label :button_url, "Ссылка кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+            <%= f.url_field :button_url,
+                placeholder: "https://example.com",
+                data: { action: "input->post-editor#updateButtonUrl" },
+                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow font-mono" %>
+            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Полный URL с https://</p>
+          </div>
         </div>
 
         <!-- AI Settings Section -->
@@ -155,32 +242,13 @@
           </div>
         <% end %>
 
-        <%# TODO: Add tone_of_voice and post_type columns to posts table %>
-        <%# Tone of Voice %>
-        <%# <div> %>
-        <%#   <%= f.label :tone_of_voice, "Тон голоса", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-        <%#   <%= f.select :tone_of_voice,  %>
-        <%#       Post.tone_of_voices.keys.map { |k| [k.humanize, k] }, %>
-        <%#       { include_blank: "По умолчанию" }, %>
-        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        <%# </div> %>
-
-        <%# Post Type %>
-        <%# <div> %>
-        <%#   <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-        <%#   <%= f.select :post_type,  %>
-        <%#       Post.post_types.keys.map { |k| [k.humanize, k] }, %>
-        <%#       {}, %>
-        <%#       { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
-        <%# </div> %>
-
         <!-- Hidden fields -->
         <%= f.hidden_field :content, data: { post_editor_target: "content" } %>
       <% end %>
     </aside>
 
-    <!-- Right Panel: Preview & Editor (50%) -->
-    <main class="flex-1 bg-white dark:bg-zinc-950 overflow-y-auto notion-scrollbar">
+    <!-- Right Panel: Preview & Editor (flex-1 for remaining space) -->
+    <main class="flex-1 min-h-0 bg-white dark:bg-zinc-950 overflow-y-auto notion-scrollbar">
       <div class="max-w-3xl mx-auto px-12 py-8">
         <!-- Preview Header -->
         <div class="mb-6 flex items-center justify-between">
@@ -202,8 +270,8 @@
                 </svg>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-zinc-900 dark:text-zinc-50 font-semibold text-sm truncate">
-                  <%= @post.telegram_bot&.channel_name || "Ваш Канал" %>
+                <p data-post-editor-target="channelName" class="text-zinc-900 dark:text-zinc-50 font-semibold text-sm truncate">
+                  <%= @post.telegram_bot&.channel_name || @telegram_bots.first&.channel_name || "Выберите бота" %>
                 </p>
                 <p class="text-zinc-500 dark:text-zinc-400 text-xs"><%= Time.current.strftime("%H:%M") %></p>
               </div>
@@ -211,20 +279,36 @@
           </div>
 
           <!-- Post Image (если есть) -->
-          <div data-post-editor-target="imagePreview" class="hidden">
-            <img src="" alt="Post image" class="w-full object-cover max-h-96" />
+          <div data-post-editor-target="imagePreview" class="<%= @post.image.attached? ? '' : 'hidden' %>">
+            <% if @post.image.attached? %>
+              <%= image_tag @post.image, alt: "Post image", class: "w-full object-cover max-h-96" %>
+            <% else %>
+              <img src="" alt="Post image" class="w-full object-cover max-h-96" data-post-editor-target="imagePreviewImg" />
+            <% end %>
           </div>
 
           <!-- Post Content: Title + Text (как в Telegram) -->
           <div class="bg-white dark:bg-zinc-900 px-4 py-4">
             <!-- Title (жирный, как в Telegram) -->
-            <h3 data-post-editor-target="titlePreview" class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3 hidden"></h3>
+            <h3 data-post-editor-target="titlePreview" class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3 <%= @post.title.present? ? '' : 'hidden' %>"><%= @post.title %></h3>
 
             <!-- Content with Rich Telegram Formatting -->
             <div data-post-editor-target="preview" class="telegram-content text-[15px] text-zinc-900 dark:text-zinc-50 leading-relaxed space-y-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-              <p class="text-zinc-400 dark:text-zinc-500 italic">
-                Начните писать или используйте AI для генерации...
-              </p>
+              <% if @post.content.present? %>
+                <%= simple_format(@post.content, class: '') %>
+              <% else %>
+                <p class="text-zinc-400 dark:text-zinc-500 italic">
+                  Начните писать или используйте AI для генерации...
+                </p>
+              <% end %>
+            </div>
+
+            <!-- Button (для типа image_button) -->
+            <div data-post-editor-target="buttonPreview" class="mt-4 <%= @post.post_type == 'image_button' && @post.button_text.present? ? '' : 'hidden' %>">
+              <a href="<%= @post.button_url %>" target="_blank"
+                 class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-colors text-sm">
+                <span data-post-editor-target="buttonTextPreview"><%= @post.button_text || 'Кнопка' %></span>
+              </a>
             </div>
           </div>
 
@@ -246,7 +330,7 @@
                   72
                 </span>
               </div>
-              <span data-post-editor-target="charCount" class="font-medium text-zinc-500 dark:text-zinc-400">0 / 4096</span>
+              <span data-post-editor-target="charCount" class="font-medium tabular-nums text-zinc-500 dark:text-zinc-400">0 / 4096 символов</span>
             </div>
           </div>
         </div>
@@ -278,8 +362,9 @@
 
         <!-- Quick Actions - Notion style -->
         <div class="flex flex-wrap gap-2">
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#addEmoji"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -287,8 +372,9 @@
             </svg>
             Добавить эмодзи
           </button>
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#addHashtags"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -296,8 +382,9 @@
             </svg>
             Добавить хештеги
           </button>
-          <button 
+          <button
             type="button"
+            data-action="click->post-editor#triggerImageUpload"
             class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
           >
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">

@@ -1,0 +1,68 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Посты</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Управление постами в системе</p>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="flex gap-4">
+    <%= link_to "Все", admin_posts_path, class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:status].blank? ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <% Post.statuses.keys.each do |status| %>
+      <%= link_to status.titleize, admin_posts_path(status: status), class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:status] == status ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <% end %>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Заголовок</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Автор</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Создан</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @posts.each do |post| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate max-w-xs">
+                <%= post.title.presence || post.content.truncate(50) %>
+              </div>
+              <div class="text-xs text-zinc-500 dark:text-zinc-400">
+                <%= post.project&.name || 'Без проекта' %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-zinc-900 dark:text-zinc-50"><%= post.user.email %></div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% status_colors = { 'draft' => 'bg-zinc-100 text-zinc-700', 'scheduled' => 'bg-blue-100 text-blue-700', 'published' => 'bg-green-100 text-green-700', 'failed' => 'bg-red-100 text-red-700' } %>
+              <span class="px-2 py-1 text-xs font-medium rounded <%= status_colors[post.status] %>">
+                <%= post.status.titleize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= time_ago_in_words(post.created_at) %> назад
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <%= link_to "Просмотр", admin_post_path(post), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              <%= button_to "Удалить", admin_post_path(post), method: :delete, data: { turbo_confirm: "Удалить пост?" }, class: "text-red-600 dark:text-red-400 hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @posts.empty? %>
+      <div class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
+        Посты не найдены
+      </div>
+    <% end %>
+  </div>
+
+  <%= paginate @posts if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+</div>

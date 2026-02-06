@@ -1,6 +1,16 @@
 <!DOCTYPE html>
-<html data-controller="theme">
+<html lang="ru" data-controller="theme">
   <head>
+    <!-- Prevent FOUC - Load theme before rendering -->
+    <script>
+      (function() {
+        const theme = localStorage.getItem('theme') || 'light';
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
     <title><%= content_for(:title) || "Contentforce" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,17 +31,19 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
 
-    <script>
-      // Load theme before page renders to avoid flash
-      (function() {
-        const theme = localStorage.getItem('theme');
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document,'script','https://mc.yandex.ru/metrika/tag.js?id=106310106', 'ym');
 
-        if (theme === 'dark' || (!theme && systemPrefersDark)) {
-          document.documentElement.classList.add('dark');
-        }
-      })();
+        ym(106310106, 'init', {ssr:true, webvisor:true, clickmap:true, ecommerce:"dataLayer", accurateTrackBounce:true, trackLinks:true});
     </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/106310106" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
   </head>
 
   <body class="bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50">

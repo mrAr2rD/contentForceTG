@@ -8,13 +8,21 @@ class Post < ApplicationRecord
 
   # Enums
   enum :status, { draft: 0, scheduled: 1, published: 2, failed: 3 }, default: :draft
+  enum :post_type, { text: 0, image: 1, image_button: 2 }, default: :text
 
   # Validations
   validates :title, length: { minimum: 2, maximum: 200 }, allow_blank: true
   validates :content, presence: true, length: { minimum: 10, maximum: 4096 }, unless: :draft?
   validates :content, length: { maximum: 4096 }, if: :draft?, allow_blank: true
+  validates :button_text, presence: true, length: { maximum: 64 }, if: :image_button?
+  validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
+  validate :telegram_caption_length, unless: :draft?
+  validate :image_required_for_image_posts, unless: :draft?
+  validate :validate_image_size, if: -> { image.attached? }
+  validate :validate_image_format, if: -> { image.attached? }
 
   # Callbacks
+  before_destroy :purge_image_attachment
   after_create :schedule_publication, if: -> { scheduled? && published_at.present? }
 
   # Scopes
@@ -33,6 +41,10 @@ class Post < ApplicationRecord
       published_at: Time.current,
       telegram_message_id: result.message_id
     )
+
+    # Schedule periodic analytics updates for this post
+    schedule_analytics_updates
+
     result
   rescue StandardError => e
     mark_as_failed!(e.message)
@@ -54,7 +66,11 @@ class Post < ApplicationRecord
   end
 
   def mark_as_failed!(error_message = nil)
-    update!(status: :failed)
+    update!(status: :failed, error_details: error_message)
+  end
+
+  def reset_to_draft!
+    update!(status: :draft, published_at: nil, telegram_message_id: nil)
   end
 
   def published?
@@ -71,5 +87,60 @@ class Post < ApplicationRecord
 
   def failed?
     status == "failed"
+  end
+
+  private
+
+  def purge_image_attachment
+    image.purge if image.attached?
+  end
+
+  def telegram_caption_length
+    return unless content.present?
+    return if text? # Text posts can be up to 4096 characters
+
+    # Image and image_button posts have a 1024 character limit for captions
+    if (image? || image_button?) && content.length > 1024
+      errors.add(:content, "слишком длинный для Telegram (максимум 1024 символа для постов с картинкой, сейчас #{content.length})")
+    end
+  end
+
+  def image_required_for_image_posts
+    return if text?
+    return if image.attached?
+
+    errors.add(:image, "обязательно для постов с изображением")
+  end
+
+  def validate_image_size
+    return unless image.blob.byte_size > 10.megabytes
+
+    errors.add(:image, "должно быть не больше 10MB (текущий размер: #{(image.blob.byte_size / 1024.0 / 1024).round(2)}MB)")
+  end
+
+  def validate_image_format
+    allowed_types = %w[image/jpeg image/png image/webp image/gif]
+    return if allowed_types.include?(image.content_type)
+
+    errors.add(:image, "должно быть JPEG, PNG, WebP или GIF (получено: #{image.content_type})")
+  end
+
+  def schedule_analytics_updates
+    return unless published? && telegram_message_id.present? && telegram_bot.present?
+
+    # First update: 1 hour after publication
+    Analytics::UpdatePostViewsJob.set(wait: 1.hour).perform_later(id)
+
+    # Second update: 6 hours after publication
+    Analytics::UpdatePostViewsJob.set(wait: 6.hours).perform_later(id)
+
+    # Third update: 24 hours after publication
+    Analytics::UpdatePostViewsJob.set(wait: 24.hours).perform_later(id)
+
+    # Fourth update: 7 days after publication (for long-term stats)
+    Analytics::UpdatePostViewsJob.set(wait: 7.days).perform_later(id)
+  rescue StandardError => e
+    Rails.logger.error("Failed to schedule analytics updates for post #{id}: #{e.message}")
+    # Don't fail publish if scheduling fails
   end
 end

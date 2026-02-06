@@ -3,11 +3,11 @@
 
 **Версия:** 2.1 (Монолитная архитектура + Notion-style UI)
 **Дата создания:** 10 января 2026
-**Последнее обновление:** 15 января 2026 (00:17 MSK)
+**Последнее обновление:** 16 января 2026 (20:45 MSK)
 **Статус проекта:** В разработке - Этап 1 ✅ 100%, Этап 2 ✅ 100%, Этап 3 ✅ 100%, Этап 4 ✅ 100%, UI Редизайн ✅ 100%
 **Целевая дата MVP:** Март 2026 (12 недель)
 
-**Последняя проверка:** 15 января 2026 (00:17 MSK)
+**Последняя проверка:** 16 января 2026 (20:45 MSK)
 **Реализовано:**
 - ✅ Базовая инфраструктура (Rails 8, PostgreSQL, Redis, Docker)
 - ✅ Аутентификация (Devise + Telegram OAuth)
@@ -30,11 +30,14 @@
 - ✅ Dashboard и базовые views - **ПЕРЕРАБОТАНЫ В NOTION-STYLE**
 - ✅ Landing page
 - ✅ **ViewComponent дизайн-система (Button, Card, Input, Sidebar)**
-- ✅ **Темная тема (Dark Mode) с автоопределением**
+- ✅ **Темная тема (Dark Mode) с ручным управлением** ✨ ОБНОВЛЕНО 16.01.2026
 - ✅ **Notion-style типографика и spacing**
 - ✅ **Календарь публикаций (Stage 4.1)** ✨ НОВОЕ
 - ✅ **Аналитика с графиками (Stage 4.2)** ✨ НОВОЕ
 - ✅ **Мульти-канальная архитектура** ✨ НОВОЕ
+- ✅ **19 AI моделей с тарифными планами** ✨ НОВОЕ 16.01.2026
+- ✅ **DeepSeek Chat как бесплатная модель по умолчанию** ✨ НОВОЕ 16.01.2026
+- ✅ **Группировка моделей по тарифам в админке** ✨ НОВОЕ 16.01.2026
 
 **Требует внимания:**
 - ⚠️ GitHub Actions CI/CD не настроен
@@ -122,11 +125,13 @@
 
 ✅ **Дополнительно выполнено:**
 - **ViewComponent дизайн-система** (Button, Card, Input, Sidebar) ✨
-- **Темная тема (Dark Mode)** с автоопределением системной темы ✨
+- **Темная тема (Dark Mode)** с ручным переключением пользователем ✨ ОБНОВЛЕНО 16.01.2026
 - **Notion-style типографика и spacing** ✨
 - **Dashboard переработан в Notion-style** ✨
 - **Projects view переработан в Notion-style** ✨
 - **Tailwind CSS 4.1 конфигурация** обновлена ✨
+- **19 AI моделей вместо 6** (Free, Starter, Pro, Business) ✨ НОВОЕ 16.01.2026
+- **Миграция scheduled_at для постов** ✨ НОВОЕ 16.01.2026
 
 ---
 
@@ -1290,19 +1295,30 @@
   end
   ```
 
-### 3.2 OpenRouter AI интеграция
+### 3.2 OpenRouter AI интеграция - **✅ 100% ЗАВЕРШЕНО**
 
 #### 3.2.1 OpenRouter Client (в lib/)
-- ( ) Создать `lib/openrouter/client.rb` (см. детали в Этапе 3.2.1)
+- (X) Создать `lib/openrouter/client.rb` ✅
+- (X) Поддержка 19 AI моделей ✅ ОБНОВЛЕНО 16.01.2026
+- (X) Группировка по тарифам (Free, Starter, Pro, Business) ✅
 
 #### 3.2.2 Модели для AI
-- ( ) Создать `AiConfiguration` модель
-- ( ) Создать `AiUsageLog` модель
+- (X) Создать `AiConfiguration` модель ✅
+- (X) Создать `AiUsageLog` модель ✅
+- (X) Расширен список моделей с 6 до 19 ✅ НОВОЕ 16.01.2026
+- (X) DeepSeek Chat как модель по умолчанию ✅ НОВОЕ 16.01.2026
+- (X) Миграция для обновления дефолтной модели ✅ НОВОЕ 16.01.2026
+
+**Доступные модели:**
+- **Free tier (3):** DeepSeek Chat, Gemini 2.0 Flash, Llama 3.2 3B
+- **Starter tier (4):** GPT-3.5 Turbo, Claude 3 Haiku, Gemini Pro, Llama 3 8B
+- **Pro tier (6):** Claude 3.5 Sonnet, GPT-4 Turbo, GPT-4o, Gemini Pro 1.5, Llama 3 70B, Claude 3 Sonnet
+- **Business tier (5):** Claude 3 Opus, GPT-4 Turbo Preview, OpenAI o1 Preview, Gemini Ultra, DeepSeek Coder
 
 #### 3.2.3 AI сервисы
-- (X) Создать `app/services/ai/content_generator.rb` (содержит generate, improve, generate_hashtags)
-- ( ) Создать `app/services/ai/post_improver.rb` (встроено в ContentGenerator)
-- ( ) Создать `app/services/ai/hashtag_generator.rb` (встроено в ContentGenerator)
+- (X) Создать `app/services/ai/content_generator.rb` ✅
+- (X) Поддержка всех 19 моделей ✅
+- (X) Проверка доступности модели по тарифу пользователя ✅
 
 #### 3.2.4 API контроллер для AI
 - (X) Создать `app/controllers/api/v1/ai_controller.rb`
@@ -1321,19 +1337,27 @@
   end
   ```
 
-### 3.3 Post Editor (трехпанельный интерфейс)
+### 3.3 Post Editor (трехпанельный интерфейс) - **✅ 100% ЗАВЕРШЕНО**
 
 #### 3.3.1 Контроллеры
-- (X) Создать `PostsController` с action `editor`
-- (X) Создать `ProjectsController`
+- (X) Создать `PostsController` с action `editor` ✅
+- (X) Создать `ProjectsController` ✅
 
 #### 3.3.2 Views
-- (X) Создать `app/views/posts/editor.html.erb` (трехпанельный интерфейс: AI чат, настройки, preview)
-- (X) Создать `app/views/layouts/editor.html.erb`
+- (X) Создать `app/views/posts/editor.html.erb` ✅
+- (X) Трехпанельный интерфейс (AI чат, настройки, preview) ✅
+- (X) Создать `app/views/layouts/editor.html.erb` ✅
+- (X) Темная тема для редактора ✅ ОБНОВЛЕНО 16.01.2026
+- (X) Улучшена контрастность текста в темной теме ✅ НОВОЕ 16.01.2026
+- (X) Кнопка отправки с иконкой самолетика ✅ НОВОЕ 16.01.2026
 
 #### 3.3.3 Stimulus контроллеры
-- (X) Создать `app/javascript/controllers/post_editor_controller.js` (управление редактором и preview)
-- (X) Создать `app/javascript/controllers/chat_controller.js` (AI чат интерфейс)
+- (X) Создать `app/javascript/controllers/post_editor_controller.js` ✅
+- (X) Создать `app/javascript/controllers/chat_controller.js` ✅
+- (X) Создать `app/javascript/controllers/theme_controller.js` ✅ НОВОЕ 16.01.2026
+- (X) Ручное переключение темы (светлая/темная) ✅ ОБНОВЛЕНО 16.01.2026
+- (X) Удалено автоопределение системной темы ✅ НОВОЕ 16.01.2026
+- (X) Визуальный селектор темы в настройках ✅ НОВОЕ 16.01.2026
 
 #### 3.3.4 Active Storage для изображений
 - (X) Установить: `rails active_storage:install` (миграция создана)
@@ -1359,6 +1383,10 @@
 - (X) Sidebar с upcoming posts и статистикой ✅
 - (X) Навигация по месяцам ✅
 - (X) Роут и ссылка в navigation ✅
+
+#### 4.1.3 Database Schema
+- (X) Миграция `add_scheduled_at_to_posts` ✅ НОВОЕ 16.01.2026
+- (X) Исправлена ошибка 500 с отсутствующей колонкой ✅ НОВОЕ 16.01.2026
 
 ### 4.2 Аналитика - **✅ 100% ЗАВЕРШЕНО**
 

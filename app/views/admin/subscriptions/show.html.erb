@@ -1,0 +1,112 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Подписка</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Пользователь: <%= @subscription.user.email %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Назад", admin_subscriptions_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" %>
+      <%= link_to "Изменить", edit_admin_subscription_path(@subscription), class: "px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Информация о подписке -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Информация</h3>
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Пользователь</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <%= link_to @subscription.user.email, admin_user_path(@subscription.user), class: "text-primary-600 hover:underline" %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">План</dt>
+          <dd class="mt-1">
+            <% plan_colors = { 'free' => 'bg-zinc-100 text-zinc-700', 'starter' => 'bg-blue-100 text-blue-700', 'pro' => 'bg-purple-100 text-purple-700', 'business' => 'bg-amber-100 text-amber-700' } %>
+            <span class="px-2 py-1 text-xs font-medium rounded <%= plan_colors[@subscription.plan] %>">
+              <%= @subscription.plan.titleize %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Статус</dt>
+          <dd class="mt-1">
+            <% status_colors = { 'active' => 'bg-green-100 text-green-700', 'canceled' => 'bg-red-100 text-red-700', 'past_due' => 'bg-orange-100 text-orange-700', 'trialing' => 'bg-blue-100 text-blue-700' } %>
+            <span class="px-2 py-1 text-xs font-medium rounded <%= status_colors[@subscription.status] %>">
+              <%= @subscription.status.titleize %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Период</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <% if @subscription.current_period_start && @subscription.current_period_end %>
+              <%= @subscription.current_period_start.strftime('%d.%m.%Y') %> — <%= @subscription.current_period_end.strftime('%d.%m.%Y') %>
+            <% else %>
+              —
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Создана</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @subscription.created_at.strftime('%d.%m.%Y %H:%M') %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Использование -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Использование</h3>
+      <dl class="space-y-3">
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">AI генерации</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <%= @subscription.usage_for(:ai_generations_per_month) %> / <%= @subscription.limit_for(:ai_generations_per_month) == Float::INFINITY ? '∞' : @subscription.limit_for(:ai_generations_per_month) %>
+          </dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Проекты</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <%= @subscription.user.projects.count %> / <%= @subscription.limit_for(:projects) == Float::INFINITY ? '∞' : @subscription.limit_for(:projects) %>
+          </dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Посты за месяц</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <%= @subscription.user.posts.where('created_at > ?', Time.current.beginning_of_month).count %> / <%= @subscription.limit_for(:posts_per_month) == Float::INFINITY ? '∞' : @subscription.limit_for(:posts_per_month) %>
+          </dd>
+        </div>
+      </dl>
+
+      <div class="mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <%= button_to "Сбросить использование", admin_subscription_path(@subscription), method: :patch, params: { subscription: { usage: {} } }, class: "text-sm text-primary-600 hover:underline" %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Платежи -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">История платежей</h3>
+    <% payments = @subscription.payments.order(created_at: :desc).limit(10) %>
+    <% if payments.any? %>
+      <div class="space-y-2">
+        <% payments.each do |payment| %>
+          <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded">
+            <div>
+              <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_to_currency(payment.amount, unit: '₽', format: '%n %u') %></p>
+              <p class="text-xs text-zinc-500"><%= payment.created_at.strftime('%d.%m.%Y %H:%M') %></p>
+            </div>
+            <% payment_status_colors = { 'pending' => 'bg-yellow-100 text-yellow-700', 'completed' => 'bg-green-100 text-green-700', 'failed' => 'bg-red-100 text-red-700' } %>
+            <span class="px-2 py-1 text-xs font-medium rounded <%= payment_status_colors[payment.status] || 'bg-zinc-100 text-zinc-700' %>">
+              <%= payment.status.titleize %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет платежей</p>
+    <% end %>
+  </div>
+</div>

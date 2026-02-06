@@ -1,0 +1,228 @@
+<div class="p-6 lg:p-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">Тарифные планы</h1>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Выберите подходящий тариф для вашего бизнеса</p>
+  </div>
+
+  <!-- Current Subscription Status -->
+  <% if @current_subscription %>
+    <div class="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Текущая подписка</h3>
+          <div class="flex items-center gap-4">
+            <span class="inline-flex items-center rounded-md bg-primary-100 dark:bg-primary-900/30 px-3 py-1 text-sm font-medium text-primary-700 dark:text-primary-300">
+              <%= @current_subscription.plan.titleize %>
+            </span>
+            <% if @current_subscription.active? %>
+              <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
+                Активна
+              </span>
+            <% else %>
+              <span class="inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
+                <%= @current_subscription.status.titleize %>
+              </span>
+            <% end %>
+          </div>
+        </div>
+        <% if @current_subscription.current_period_end %>
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">
+            Продлится до: <%= @current_subscription.current_period_end.strftime("%d.%m.%Y") %>
+          </div>
+        <% end %>
+      </div>
+
+      <!-- Usage Stats -->
+      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">AI генерации</div>
+          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <%= @current_subscription.usage_for(:ai_generations_per_month) %> /
+            <span class="text-lg text-zinc-500 dark:text-zinc-400">
+              <%= @current_subscription.limit_for(:ai_generations_per_month) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:ai_generations_per_month) %>
+            </span>
+          </div>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Проекты</div>
+          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <%= current_user.projects.count %> /
+            <span class="text-lg text-zinc-500 dark:text-zinc-400">
+              <%= @current_subscription.limit_for(:projects) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:projects) %>
+            </span>
+          </div>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Боты</div>
+          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+            <%= current_user.projects.joins(:telegram_bots).count %> /
+            <span class="text-lg text-zinc-500 dark:text-zinc-400">
+              <%= @current_subscription.limit_for(:bots) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:bots) %>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Pricing Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <% [:free, :starter, :pro, :business].each do |plan| %>
+      <% plan_limits = @plans[plan] %>
+      <% price = @prices[plan] %>
+      <% is_current = @current_subscription&.plan == plan.to_s %>
+
+      <div class="relative bg-white dark:bg-zinc-900 border <%= is_current ? 'border-primary-500 ring-2 ring-primary-500' : 'border-zinc-200 dark:border-zinc-800' %> rounded-lg p-6 flex flex-col h-full">
+        <% if is_current %>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="inline-flex items-center rounded-full bg-primary-600 px-3 py-1 text-xs font-medium text-white">
+              Текущий план
+            </span>
+          </div>
+        <% end %>
+
+        <!-- Plan Header -->
+        <div class="mb-6">
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-2"><%= plan.to_s.titleize %></h3>
+          <div class="flex items-baseline">
+            <span class="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50"><%= price %></span>
+            <span class="ml-2 text-zinc-500 dark:text-zinc-400">₽/мес</span>
+          </div>
+        </div>
+
+        <!-- Features List -->
+        <ul class="space-y-3 mb-8 flex-grow">
+          <li class="flex items-start gap-2">
+            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+              <%= plan_limits[:projects] == Float::INFINITY ? 'Безлимитные' : plan_limits[:projects] %>
+              <%= plan_limits[:projects] == 1 ? 'проект' : 'проектов' %>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+              <%= plan_limits[:bots] == Float::INFINITY ? 'Безлимитные' : plan_limits[:bots] %>
+              <%= plan_limits[:bots] == 1 ? 'бот' : 'ботов' %>
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+              <%= plan_limits[:posts_per_month] == Float::INFINITY ? 'Безлимитные' : plan_limits[:posts_per_month] %>
+              постов в месяц
+            </span>
+          </li>
+          <li class="flex items-start gap-2">
+            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+              <%= plan_limits[:ai_generations_per_month] == Float::INFINITY ? 'Безлимитные' : plan_limits[:ai_generations_per_month] %>
+              AI генераций в месяц
+            </span>
+          </li>
+          <% if plan_limits[:ai_image_generations_per_month] %>
+            <li class="flex items-start gap-2">
+              <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <span class="text-sm text-zinc-700 dark:text-zinc-300">
+                <%= plan_limits[:ai_image_generations_per_month] %> изображений AI в месяц
+              </span>
+            </li>
+          <% end %>
+          <li class="flex items-start gap-2">
+            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            </svg>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+              Аналитика: <%= plan_limits[:analytics].to_s.titleize %>
+            </span>
+          </li>
+        </ul>
+
+        <!-- Action Button -->
+        <% if is_current %>
+          <% if plan != :free %>
+            <%= button_to 'Отменить подписку', cancel_subscriptions_path, method: :post,
+                class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors",
+                data: { turbo_confirm: 'Вы уверены? Подписка будет отменена.' } %>
+          <% else %>
+            <button disabled class="w-full inline-flex justify-center items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-400 dark:text-zinc-500 cursor-not-allowed">
+              Текущий план
+            </button>
+          <% end %>
+        <% elsif plan == :free %>
+          <%= button_to 'Перейти на Free', downgrade_subscriptions_path, method: :post,
+              class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors" %>
+        <% else %>
+          <%= button_to 'Перейти на этот план', upgrade_subscriptions_path(plan: plan), method: :post,
+              class: "w-full inline-flex justify-center items-center rounded-md bg-primary-600 hover:bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-colors",
+              data: { turbo: false } %>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Payment History -->
+  <% if current_user.payments.any? %>
+    <div class="mt-12">
+      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-6">История платежей</h2>
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+          <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Дата</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">План</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Сумма</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+            <% current_user.payments.recent.limit(10).each do |payment| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+                  <%= payment.created_at.strftime("%d.%m.%Y %H:%M") %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+                  <%= payment.metadata['plan']&.titleize || 'N/A' %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+                  <%= number_to_currency(payment.amount, unit: '₽', separator: ',', delimiter: ' ', format: '%n %u') %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <% case payment.status %>
+                  <% when 'completed' %>
+                    <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
+                      Завершен
+                    </span>
+                  <% when 'pending', 'processing' %>
+                    <span class="inline-flex items-center rounded-md bg-yellow-100 dark:bg-yellow-900/30 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-300">
+                      В обработке
+                    </span>
+                  <% when 'failed' %>
+                    <span class="inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
+                      Ошибка
+                    </span>
+                  <% else %>
+                    <span class="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                      <%= payment.status.titleize %>
+                    </span>
+                  <% end %>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+</div>

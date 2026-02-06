@@ -8,6 +8,24 @@ fi
 
 # If running the rails server then create or migrate existing database
 if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  # Load Solid Queue/Cache/Cable schemas BEFORE db:prepare to avoid migration issues
+  # These tables need to exist before Rails tries to migrate
+  if ! ./bin/rails runner "ActiveRecord::Base.connection.table_exists?('solid_queue_jobs')" 2>/dev/null; then
+    echo "Loading Solid Queue schema..."
+    DISABLE_DATABASE_ENVIRONMENT_CHECK=1 ./bin/rails db:schema:load:queue 2>/dev/null || true
+  fi
+
+  if ! ./bin/rails runner "ActiveRecord::Base.connection.table_exists?('solid_cache_entries')" 2>/dev/null; then
+    echo "Loading Solid Cache schema..."
+    DISABLE_DATABASE_ENVIRONMENT_CHECK=1 ./bin/rails db:schema:load:cache 2>/dev/null || true
+  fi
+
+  if ! ./bin/rails runner "ActiveRecord::Base.connection.table_exists?('solid_cable_messages')" 2>/dev/null; then
+    echo "Loading Solid Cable schema..."
+    DISABLE_DATABASE_ENVIRONMENT_CHECK=1 ./bin/rails db:schema:load:cable 2>/dev/null || true
+  fi
+
+  # Now run migrations - Solid tables already exist, so no schema load will be triggered
   ./bin/rails db:prepare
 fi
 

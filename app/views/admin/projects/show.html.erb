@@ -1,0 +1,107 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50"><%= @project.name %></h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Проект пользователя <%= @project.user.email %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Назад", admin_projects_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" %>
+      <%= button_to "Удалить", admin_project_path(@project), method: :delete, data: { turbo_confirm: "Удалить проект?" }, class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Статистика -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Статистика</h3>
+      <dl class="space-y-3">
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Telegram боты</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @project.telegram_bots.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Всего постов</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @project.posts.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Опубликовано</dt>
+          <dd class="text-sm font-medium text-green-600"><%= @project.posts.published.count %></dd>
+        </div>
+        <div class="flex justify-between">
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Запланировано</dt>
+          <dd class="text-sm font-medium text-blue-600"><%= @project.posts.scheduled.count %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- Информация -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Информация</h3>
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Владелец</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50">
+            <%= link_to @project.user.email, admin_user_path(@project.user), class: "text-primary-600 hover:underline" %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">AI модель</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @project.ai_model || 'По умолчанию' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Создан</dt>
+          <dd class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @project.created_at.strftime('%d.%m.%Y %H:%M') %></dd>
+        </div>
+        <% if @project.archived_at %>
+          <div>
+            <dt class="text-sm text-orange-500">Архивирован</dt>
+            <dd class="text-sm font-medium text-orange-600"><%= @project.archived_at.strftime('%d.%m.%Y') %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Telegram боты -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Telegram боты</h3>
+      <% if @project.telegram_bots.any? %>
+        <ul class="space-y-2">
+          <% @project.telegram_bots.each do |bot| %>
+            <li class="flex items-center justify-between p-2 bg-zinc-50 dark:bg-zinc-900 rounded">
+              <span class="text-sm text-zinc-900 dark:text-zinc-50">@<%= bot.bot_username %></span>
+              <%= link_to "→", admin_telegram_bot_path(bot), class: "text-primary-600 hover:underline text-sm" %>
+            </li>
+          <% end %>
+        </ul>
+      <% else %>
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет подключенных ботов</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Последние посты -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Последние посты</h3>
+    <% recent_posts = @project.posts.order(created_at: :desc).limit(10) %>
+    <% if recent_posts.any? %>
+      <div class="space-y-2">
+        <% recent_posts.each do |post| %>
+          <div class="flex items-center justify-between p-3 bg-zinc-50 dark:bg-zinc-900 rounded">
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate">
+                <%= post.title.presence || post.content.truncate(50) %>
+              </p>
+              <p class="text-xs text-zinc-500"><%= time_ago_in_words(post.created_at) %> назад</p>
+            </div>
+            <% status_colors = { 'draft' => 'bg-zinc-100 text-zinc-700', 'scheduled' => 'bg-blue-100 text-blue-700', 'published' => 'bg-green-100 text-green-700', 'failed' => 'bg-red-100 text-red-700' } %>
+            <span class="px-2 py-1 text-xs font-medium rounded <%= status_colors[post.status] %>">
+              <%= post.status.titleize %>
+            </span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400">Нет постов</p>
+    <% end %>
+  </div>
+</div>

@@ -10,17 +10,17 @@ module Ai
     end
 
     def generate(prompt:, context: {})
-      # Проверка лимитов тарифа
-      unless can_generate?
+      # Получаем модель из настроек проекта или глобальных настроек
+      model = context[:model] || @project&.ai_model || @config.default_model
+
+      # Проверка лимитов тарифа (только для платных моделей)
+      unless AiConfiguration.free_model?(model) || can_generate?
         return {
           content: nil,
           error: 'Превышен лимит AI генераций для вашего тарифа',
           success: false
         }
       end
-
-      # Получаем модель из настроек проекта или глобальных настроек
-      model = context[:model] || @project&.ai_model || @config.default_model
 
       # Получаем температуру из настроек проекта или глобальных
       temperature = @project&.ai_temperature || @config.temperature
@@ -141,7 +141,7 @@ module Ai
 
         # Добавляем стиль написания из настроек проекта
         if @project.writing_style.present?
-          base_prompt += "\nСтиль написания: #{@project.ai_system_prompt}"
+          base_prompt += "\nСтиль написания: #{@project.writing_style}"
         end
 
         base_prompt += "\nОписание: #{@project.description}" if @project.description.present?
@@ -216,6 +216,9 @@ module Ai
         purpose: :content_generation
       )
 
+      # Не списываем квоту для бесплатных моделей
+      return if AiConfiguration.free_model?(response[:model])
+
       if @user.subscription
         @user.subscription.increment_usage!(:ai_generations_per_month)
       end
@@ -230,12 +233,17 @@ module Ai
     def calculate_cost(response)
       model_info = AiConfiguration::AVAILABLE_MODELS[response[:model]]
       return 0 unless model_info
+      return 0 unless model_info[:cost_per_1k_tokens] # Return 0 if no cost info available
 
-      input_tokens = response[:usage][:prompt_tokens]
-      output_tokens = response[:usage][:completion_tokens]
+      usage = response[:usage]
+      return 0 unless usage # Return 0 if no usage data
 
-      input_cost = (input_tokens / 1000.0) * model_info[:cost_per_1k_tokens][:input]
-      output_cost = (output_tokens / 1000.0) * model_info[:cost_per_1k_tokens][:output]
+      input_tokens = usage[:prompt_tokens] || 0
+      output_tokens = usage[:completion_tokens] || 0
+
+      cost_info = model_info[:cost_per_1k_tokens]
+      input_cost = (input_tokens / 1000.0) * (cost_info[:input] || 0)
+      output_cost = (output_tokens / 1000.0) * (cost_info[:output] || 0)
 
       input_cost + output_cost
     end

@@ -5,6 +5,7 @@ module Api
     class AiController < ApplicationController
       skip_before_action :verify_authenticity_token
       before_action :authenticate_user!
+      before_action :check_ai_limits
 
       def generate
         project = current_user.projects.find_by(id: params[:project_id])
@@ -13,7 +14,7 @@ module Api
         unless AiConfiguration.current.api_key_configured?
           return render json: {
             success: false,
-            error: 'OpenRouter API ключ не настроен. Обратитесь к администратору.'
+            error: "OpenRouter API ключ не настроен. Обратитесь к администратору."
           }, status: :unprocessable_entity
         end
 
@@ -35,10 +36,12 @@ module Api
           }
         else
           Rails.logger.error "AI Generation failed: #{result[:error]}"
+          status = result[:error]&.include?("лимит") ? :forbidden : :unprocessable_entity
           render json: {
             success: false,
-            error: result[:error]
-          }, status: :unprocessable_entity
+            error: result[:error],
+            limit_reached: result[:error]&.include?("лимит")
+          }, status: status
         end
       rescue StandardError => e
         Rails.logger.error "AI Controller error: #{e.message}\n#{e.backtrace.join("\n")}"
@@ -85,6 +88,26 @@ module Api
             success: false,
             error: result[:error]
           }, status: :unprocessable_entity
+        end
+      end
+
+      private
+
+      def check_ai_limits
+        # Пропускаем проверку лимитов для бесплатных моделей
+        return if AiConfiguration.free_model?(params[:model])
+
+        subscription = current_user.subscription
+
+        unless subscription&.can_use?(:ai_generations_per_month)
+          remaining = subscription&.ai_generations_remaining || 0
+
+          render json: {
+            success: false,
+            error: "Достигнут лимит AI генераций для вашего тарифа. Осталось: #{remaining}. Обновите тариф для продолжения работы.",
+            limit_reached: true,
+            upgrade_url: subscriptions_path
+          }, status: :forbidden
         end
       end
     end

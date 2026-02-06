@@ -1,0 +1,64 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Telegram Боты</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Управление Telegram ботами в системе</p>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Бот</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Проект</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Канал</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Создан</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @telegram_bots.each do |bot| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-zinc-900 dark:text-zinc-50">@<%= bot.bot_username %></div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% if bot.project %>
+                <%= link_to bot.project.name, admin_project_path(bot.project), class: "text-sm text-primary-600 hover:underline" %>
+              <% else %>
+                <span class="text-sm text-zinc-400">Без проекта</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-zinc-900 dark:text-zinc-50"><%= bot.channel_name.presence || bot.channel_id.presence || '—' %></div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% if bot.verified? %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">Верифицирован</span>
+              <% else %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">Не верифицирован</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= time_ago_in_words(bot.created_at) %> назад
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <%= link_to "Просмотр", admin_telegram_bot_path(bot), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              <%= button_to "Удалить", admin_telegram_bot_path(bot), method: :delete, data: { turbo_confirm: "Удалить бота?" }, class: "text-red-600 dark:text-red-400 hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @telegram_bots.empty? %>
+      <div class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
+        Telegram боты не найдены
+      </div>
+    <% end %>
+  </div>
+
+  <%= paginate @telegram_bots if @telegram_bots.respond_to?(:total_pages) && @telegram_bots.total_pages > 1 %>
+</div>

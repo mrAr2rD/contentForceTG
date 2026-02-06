@@ -2,7 +2,7 @@
 
 class PostsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule]
+  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule, :remove_image]
   before_action :set_project, only: [:new, :create]
   layout "dashboard", except: [:editor]
 
@@ -88,6 +88,21 @@ class PostsController < ApplicationController
     redirect_to @post, alert: "Ошибка планирования: #{e.message}"
   end
 
+  def remove_image
+    authorize @post, :update?
+
+    if @post.image.attached?
+      @post.image.purge
+      # Если тип поста требует картинку, меняем на текстовый
+      @post.update!(post_type: :text) if @post.image? || @post.image_button?
+    end
+
+    respond_to do |format|
+      format.html { redirect_back fallback_location: @post, notice: 'Изображение удалено' }
+      format.json { render json: { success: true } }
+    end
+  end
+
   # Editor view - трехпанельный интерфейс
   def editor
     # Check for post_id parameter (when redirected from create)
@@ -116,9 +131,16 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(
+    permitted = params.require(:post).permit(
       :title, :content, :status, :project_id, :telegram_bot_id,
-      :published_at, :telegram_message_id, :image
+      :published_at, :telegram_message_id, :image,
+      :post_type, :button_text, :button_url
     )
+
+    # Convert empty strings to nil for optional foreign keys
+    permitted[:project_id] = nil if permitted[:project_id].blank?
+    permitted[:telegram_bot_id] = nil if permitted[:telegram_bot_id].blank?
+
+    permitted
   end
 end

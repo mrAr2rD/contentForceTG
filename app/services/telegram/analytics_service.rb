@@ -10,17 +10,31 @@ module Telegram
 
     # Get channel statistics
     def fetch_channel_statistics
-      return mock_channel_statistics unless Rails.env.production?
-
       begin
         client = Telegram::Bot::Client.new(telegram_bot.bot_token)
         chat = client.api.get_chat(chat_id: telegram_bot.channel_id)
 
+        result = chat['result'] || {}
+
         {
-          subscriber_count: chat.dig('result', 'member_count') || 0,
-          title: chat.dig('result', 'title'),
-          description: chat.dig('result', 'description')
+          subscriber_count: result['member_count'] || 0,
+          title: result['title'] || telegram_bot.channel_name,
+          description: result['description'],
+          username: result['username']
         }
+      rescue Telegram::Bot::Exceptions::ResponseError => e
+        Rails.logger.error("Telegram API error for bot #{telegram_bot.id}: #{e.message}")
+        # Return last known data or mock
+        last_metric = telegram_bot.channel_subscriber_metrics.recent.first
+        if last_metric
+          {
+            subscriber_count: last_metric.subscriber_count,
+            title: telegram_bot.channel_name,
+            description: nil
+          }
+        else
+          mock_channel_statistics
+        end
       rescue StandardError => e
         Rails.logger.error("Telegram Analytics API error: #{e.message}")
         mock_channel_statistics
@@ -28,20 +42,60 @@ module Telegram
     end
 
     # Get post statistics
+    # NOTE: Telegram Bot API has limitations for getting message statistics:
+    # - For channels: requires bot to be admin with "can_post_messages" permission
+    # - View counts are NOT available through regular Bot API
+    # - We rely on webhooks and periodic polling for analytics
     def fetch_post_statistics(post)
-      return mock_post_statistics unless Rails.env.production?
-
       return {} unless post.telegram_message_id.present?
 
       begin
-        # Note: Telegram Bot API doesn't provide direct message view statistics
-        # This would require Telegram Analytics API or channel admin privileges
-        # For MVP, we'll use mock data
+        client = Telegram::Bot::Client.new(telegram_bot.bot_token)
 
-        mock_post_statistics
+        # Try to get message info (this only works if bot is channel admin)
+        message = client.api.get_message(
+          chat_id: telegram_bot.channel_id,
+          message_id: post.telegram_message_id
+        )
+
+        # Parse available data from message
+        result = {}
+
+        # Telegram doesn't provide view counts through regular API
+        # We'll get this data through webhooks or Telegram Analytics API
+        result[:views] = post.post_analytics.recent.first&.views || 0
+
+        # Forwards count (if available in message object)
+        result[:forwards] = message.dig('result', 'forward_count') || 0
+
+        # Reactions (if available - requires Message Reaction API)
+        if message.dig('result', 'reactions').present?
+          reactions_data = message.dig('result', 'reactions')
+          result[:reactions] = parse_reactions(reactions_data)
+        else
+          result[:reactions] = {}
+        end
+
+        result[:button_clicks] = {}
+
+        result
+      rescue Telegram::Bot::Exceptions::ResponseError => e
+        Rails.logger.error("Telegram API error for post #{post.id}: #{e.message}")
+        # Fall back to last known data
+        last_analytics = post.post_analytics.recent.first
+        if last_analytics
+          {
+            views: last_analytics.views,
+            forwards: last_analytics.forwards,
+            reactions: last_analytics.reactions || {},
+            button_clicks: last_analytics.button_clicks || {}
+          }
+        else
+          mock_post_statistics
+        end
       rescue StandardError => e
         Rails.logger.error("Telegram Post Analytics error: #{e.message}")
-        {}
+        mock_post_statistics
       end
     end
 
@@ -79,6 +133,19 @@ module Telegram
         },
         button_clicks: {}
       }
+    end
+
+    # Parse Telegram reactions format to our format
+    def parse_reactions(reactions_data)
+      return {} unless reactions_data.is_a?(Array)
+
+      result = {}
+      reactions_data.each do |reaction|
+        emoji = reaction.dig('type', 'emoji')
+        count = reaction['total_count'] || 0
+        result[emoji] = count if emoji.present?
+      end
+      result
     end
   end
 end

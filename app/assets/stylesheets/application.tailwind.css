@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable class-based dark mode (instead of prefers-color-scheme) */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   /* Notion-inspired color palette */
   --color-zinc-50: #fafafa;
@@ -225,5 +228,114 @@
   /* Custom utilities */
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* shadcn/ui compatible semantic color utilities */
+  /* These map to the Notion-style zinc palette */
+
+  /* Background colors */
+  .bg-background {
+    @apply bg-white dark:bg-zinc-950;
+  }
+
+  .bg-card {
+    @apply bg-white dark:bg-zinc-900;
+  }
+
+  .bg-muted {
+    @apply bg-zinc-100 dark:bg-zinc-800;
+  }
+
+  /* Text colors */
+  .text-foreground {
+    @apply text-zinc-950 dark:text-zinc-50;
+  }
+
+  .text-muted-foreground {
+    @apply text-zinc-500 dark:text-zinc-400;
+  }
+
+  .text-card-foreground {
+    @apply text-zinc-950 dark:text-zinc-50;
+  }
+
+  /* Border colors */
+  .border-border {
+    @apply border-zinc-200 dark:border-zinc-800;
+  }
+
+  .divide-border > :not([hidden]) ~ :not([hidden]) {
+    @apply border-zinc-200 dark:border-zinc-800;
+  }
+
+  /* Input styling */
+  .text-input {
+    @apply text-zinc-950 dark:text-zinc-50;
+  }
+
+  .bg-input {
+    @apply bg-white dark:bg-zinc-900;
+  }
+
+  .border-input {
+    @apply border-zinc-300 dark:border-zinc-700;
+  }
+
+  /* Accent/Primary colors */
+  .text-primary {
+    @apply text-primary-600 dark:text-primary-400;
+  }
+
+  .bg-primary {
+    @apply bg-primary-600 dark:bg-primary-500;
+  }
+
+  .text-primary-foreground {
+    @apply text-white;
+  }
+
+  /* Destructive/Error colors */
+  .bg-destructive {
+    @apply bg-red-600 dark:bg-red-700;
+  }
+
+  .text-destructive {
+    @apply text-red-600 dark:text-red-400;
+  }
+
+  .text-destructive-foreground {
+    @apply text-white;
+  }
+
+  /* Ring colors for focus states */
+  .ring-ring {
+    @apply ring-zinc-950 dark:ring-zinc-300;
+  }
+
+  /* Popover/Dropdown colors */
+  .bg-popover {
+    @apply bg-white dark:bg-zinc-900;
+  }
+
+  .text-popover-foreground {
+    @apply text-zinc-950 dark:text-zinc-50;
+  }
+
+  /* Secondary colors */
+  .bg-secondary {
+    @apply bg-zinc-100 dark:bg-zinc-800;
+  }
+
+  .text-secondary-foreground {
+    @apply text-zinc-900 dark:text-zinc-50;
+  }
+
+  /* Accent colors (hover states) */
+  .bg-accent {
+    @apply bg-zinc-100 dark:bg-zinc-800;
+  }
+
+  .text-accent-foreground {
+    @apply text-zinc-900 dark:text-zinc-50;
   }
 }

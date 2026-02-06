@@ -4,7 +4,8 @@ Rails.application.routes.draw do
 
   # Devise routes with custom controllers
   devise_for :users, controllers: {
-    omniauth_callbacks: 'users/omniauth_callbacks'
+    omniauth_callbacks: 'users/omniauth_callbacks',
+    registrations: 'users/registrations'
   }
 
   # Authenticated root - Dashboard
@@ -31,6 +32,7 @@ Rails.application.routes.draw do
     member do
       post :publish
       post :schedule
+      delete :remove_image
     end
   end
 
@@ -71,14 +73,28 @@ Rails.application.routes.draw do
     end
   end
 
+  # Subscriptions
+  resources :subscriptions, only: [:index] do
+    collection do
+      post :upgrade
+      post :downgrade
+      post :cancel
+    end
+  end
+
   # Webhooks
   namespace :webhooks do
     post 'telegram/:bot_token', to: 'telegram#receive', as: :telegram
+    post 'robokassa/result', to: 'robokassa#result', as: :robokassa_result
+    get 'robokassa/success', to: 'robokassa#success', as: :robokassa_success
+    get 'robokassa/fail', to: 'robokassa#fail', as: :robokassa_fail
   end
 
   # Static pages
   get 'pages/home'
-  
+  get 'terms', to: 'pages#terms', as: :terms
+  get 'privacy', to: 'pages#privacy', as: :privacy
+
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
     root to: "dashboard#index"
@@ -88,9 +104,13 @@ Rails.application.routes.draw do
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
+    resources :payments, only: [:index, :show]
 
     # AI Settings (singleton resource)
     resource :ai_settings, only: [:edit, :update]
+
+    # Payment Settings (Robokassa)
+    resource :payment_settings, only: [:edit, :update]
   end
   
   # Rails health check

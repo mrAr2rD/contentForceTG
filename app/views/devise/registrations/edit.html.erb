@@ -1,60 +1,92 @@
-<div class="max-w-2xl mx-auto px-8 py-8">
-  <div class="mb-6">
-    <h1 class="text-2xl font-semibold text-foreground">Настройки аккаунта</h1>
-    <p class="text-sm text-muted-foreground mt-1">Управляйте вашим аккаунтом и настройками</p>
+<div class="p-6 lg:p-8 max-w-3xl">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">Настройки аккаунта</h1>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400">Управляйте вашим аккаунтом и настройками</p>
   </div>
 
   <div class="space-y-6">
+    <!-- Appearance Settings -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6" data-controller="theme">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Внешний вид</h2>
+
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="text-sm font-medium text-zinc-900 dark:text-zinc-50 block">Тема оформления</label>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+              Переключение между светлой и темной темой
+            </p>
+          </div>
+          <button
+            type="button"
+            data-action="click->theme#toggle"
+            class="p-2 rounded-lg border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Переключить тему"
+          >
+            <!-- Sun icon (visible in dark mode) -->
+            <svg class="w-5 h-5 text-zinc-700 dark:text-zinc-300 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
+            </svg>
+            <!-- Moon icon (visible in light mode) -->
+            <svg class="w-5 h-5 text-zinc-700 dark:text-zinc-300 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Profile Settings -->
-    <div class="bg-card border border-border rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-foreground mb-4">Профиль</h2>
-      
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Профиль</h2>
+
       <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put, class: "space-y-4" }) do |f| %>
         <%= render "devise/shared/error_messages", resource: resource %>
 
         <div class="space-y-2">
-          <%= f.label :email, "Email", class: "text-sm font-medium text-foreground" %>
-          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+          <%= f.label :email, "Email", class: "text-sm font-medium text-zinc-900 dark:text-zinc-50" %>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "flex h-10 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50" %>
         </div>
 
         <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
-          <div class="rounded-md bg-blue-50 border border-blue-200 p-3 text-sm text-blue-800">
+          <div class="rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-3 text-sm text-blue-800 dark:text-blue-200">
             Ожидается подтверждение для: <%= resource.unconfirmed_email %>
           </div>
         <% end %>
 
         <div class="space-y-2">
-          <%= f.label :password, "Новый пароль", class: "text-sm font-medium text-foreground" %>
-          <p class="text-xs text-muted-foreground">Оставьте пустым, если не хотите менять пароль</p>
-          <%= f.password_field :password, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+          <%= f.label :password, "Новый пароль", class: "text-sm font-medium text-zinc-900 dark:text-zinc-50" %>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Оставьте пустым, если не хотите менять пароль</p>
+          <%= f.password_field :password, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50" %>
           <% if @minimum_password_length %>
-            <p class="text-xs text-muted-foreground">Минимум <%= @minimum_password_length %> символов</p>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Минимум <%= @minimum_password_length %> символов</p>
           <% end %>
         </div>
 
         <div class="space-y-2">
-          <%= f.label :password_confirmation, "Подтверждение пароля", class: "text-sm font-medium text-foreground" %>
-          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+          <%= f.label :password_confirmation, "Подтверждение пароля", class: "text-sm font-medium text-zinc-900 dark:text-zinc-50" %>
+          <%= f.password_field :password_confirmation, autocomplete: "new-password", class: "flex h-10 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50" %>
         </div>
 
         <div class="space-y-2">
-          <%= f.label :current_password, "Текущий пароль", class: "text-sm font-medium text-foreground" %>
-          <p class="text-xs text-muted-foreground">Нужен для подтверждения изменений</p>
-          <%= f.password_field :current_password, autocomplete: "current-password", class: "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
+          <%= f.label :current_password, "Текущий пароль", class: "text-sm font-medium text-zinc-900 dark:text-zinc-50" %>
+          <p class="text-xs text-zinc-500 dark:text-zinc-400">Нужен для подтверждения изменений</p>
+          <%= f.password_field :current_password, autocomplete: "current-password", class: "flex h-10 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:cursor-not-allowed disabled:opacity-50" %>
         </div>
 
         <div class="flex items-center gap-3 pt-4">
-          <%= f.submit "Сохранить изменения", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
-          <%= link_to "Отмена", dashboard_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+          <%= f.submit "Сохранить изменения", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary-600 hover:bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+          <%= link_to "Отмена", dashboard_path, class: "inline-flex h-10 items-center justify-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
         </div>
       <% end %>
     </div>
 
     <!-- Danger Zone -->
-    <div class="bg-card border border-red-200 rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-red-600 mb-4">Опасная зона</h2>
-      <p class="text-sm text-muted-foreground mb-4">Удаление аккаунта необратимо. Все ваши данные будут удалены.</p>
-      <%= button_to "Удалить аккаунт", registration_path(resource_name), data: { confirm: "Вы уверены? Это действие нельзя отменить.", turbo_confirm: "Вы уверены? Это действие нельзя отменить." }, method: :delete, class: "inline-flex h-10 items-center justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white ring-offset-background transition-colors hover:bg-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+    <div class="bg-white dark:bg-zinc-900 border border-red-200 dark:border-red-800 rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-red-600 dark:text-red-400 mb-4">Опасная зона</h2>
+      <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Удаление аккаунта необратимо. Все ваши данные будут удалены.</p>
+      <%= button_to "Удалить аккаунт", registration_path(resource_name), data: { turbo_confirm: "Вы уверены? Это действие нельзя отменить." }, method: :delete, class: "inline-flex h-10 items-center justify-center rounded-md bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
     </div>
   </div>
 </div>

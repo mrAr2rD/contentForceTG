@@ -1,0 +1,107 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Пост #<%= @post.id.to_s[0..7] %></h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400"><%= @post.title.presence || 'Без заголовка' %></p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to "Назад", admin_posts_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 rounded-md hover:bg-zinc-200 dark:hover:bg-zinc-700" %>
+      <%= button_to "Удалить", admin_post_path(@post), method: :delete, data: { turbo_confirm: "Удалить пост?" }, class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Основная информация -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 space-y-4">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Информация</h3>
+
+      <dl class="space-y-3">
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Статус</dt>
+          <dd class="mt-1">
+            <% status_colors = { 'draft' => 'bg-zinc-100 text-zinc-700', 'scheduled' => 'bg-blue-100 text-blue-700', 'published' => 'bg-green-100 text-green-700', 'failed' => 'bg-red-100 text-red-700' } %>
+            <span class="px-2 py-1 text-xs font-medium rounded <%= status_colors[@post.status] %>">
+              <%= @post.status.titleize %>
+            </span>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Тип поста</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @post.post_type.titleize %></dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Автор</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <%= link_to @post.user.email, admin_user_path(@post.user), class: "text-primary-600 hover:underline" %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Проект</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <% if @post.project %>
+              <%= link_to @post.project.name, admin_project_path(@post.project), class: "text-primary-600 hover:underline" %>
+            <% else %>
+              <span class="text-zinc-400">Без проекта</span>
+            <% end %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Telegram Bot</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <% if @post.telegram_bot %>
+              <%= link_to @post.telegram_bot.bot_username, admin_telegram_bot_path(@post.telegram_bot), class: "text-primary-600 hover:underline" %>
+            <% else %>
+              <span class="text-zinc-400">Не выбран</span>
+            <% end %>
+          </dd>
+        </div>
+
+        <div>
+          <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Создан</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @post.created_at.strftime('%d.%m.%Y %H:%M') %></dd>
+        </div>
+
+        <% if @post.published_at %>
+          <div>
+            <dt class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Опубликован</dt>
+            <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @post.published_at.strftime('%d.%m.%Y %H:%M') %></dd>
+          </div>
+        <% end %>
+
+        <% if @post.error_details.present? %>
+          <div>
+            <dt class="text-sm font-medium text-red-500">Ошибка</dt>
+            <dd class="mt-1 text-sm text-red-600"><%= @post.error_details %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Контент -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6 space-y-4">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Контент</h3>
+
+      <% if @post.image.attached? %>
+        <div class="mb-4">
+          <%= image_tag @post.image, class: "w-full rounded-lg max-h-64 object-cover" %>
+        </div>
+      <% end %>
+
+      <div class="prose dark:prose-invert max-w-none">
+        <%= simple_format(@post.content) %>
+      </div>
+
+      <% if @post.button_text.present? %>
+        <div class="mt-4 p-3 bg-zinc-50 dark:bg-zinc-900 rounded-lg">
+          <p class="text-sm text-zinc-500 dark:text-zinc-400">Кнопка:</p>
+          <p class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @post.button_text %></p>
+          <p class="text-xs text-zinc-400 truncate"><%= @post.button_url %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

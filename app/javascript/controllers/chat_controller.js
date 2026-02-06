@@ -95,21 +95,34 @@ export default class extends Controller {
     const messageDiv = document.createElement('div')
     messageDiv.className = `rounded-lg p-3 text-sm leading-relaxed ${
       type === "user"
-        ? "bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 text-primary-900 dark:text-primary-100 ml-auto max-w-[80%]"
+        ? "bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 text-primary-900 dark:text-primary-50 ml-auto max-w-[80%]"
         : type === "error"
-        ? "bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-900 dark:text-red-100"
+        ? "bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 text-red-900 dark:text-red-50"
         : "bg-zinc-100 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-900 dark:text-zinc-50"
     }`
 
-    const formattedText = text
+    // Safe HTML rendering with sanitization
+    messageDiv.innerHTML = this.sanitizeAndFormatMarkdown(text)
+    this.messagesTarget.appendChild(messageDiv)
+    this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight
+  }
+
+  // Sanitize user input and format basic markdown safely
+  sanitizeAndFormatMarkdown(text) {
+    // First, escape all HTML to prevent XSS
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+
+    // Then apply safe markdown formatting (only on escaped text)
+    return escaped
       .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-zinc-900 dark:text-zinc-50">$1</strong>')
       .replace(/\*(.+?)\*/g, '<em class="italic">$1</em>')
       .replace(/`(.+?)`/g, '<code class="bg-white dark:bg-zinc-900 px-1.5 py-0.5 rounded text-xs font-mono text-zinc-900 dark:text-zinc-100">$1</code>')
       .replace(/\n/g, '<br>')
-
-    messageDiv.innerHTML = formattedText
-    this.messagesTarget.appendChild(messageDiv)
-    this.messagesTarget.scrollTop = this.messagesTarget.scrollHeight
   }
 
   getProjectId() {

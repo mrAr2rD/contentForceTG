@@ -4,12 +4,11 @@ import { Controller } from "@hotwired/stimulus"
 export default class extends Controller {
   connect() {
     this.loadTheme()
-    this.watchSystemTheme()
   }
 
   toggle() {
     const isDark = document.documentElement.classList.contains('dark')
-    
+
     if (isDark) {
       document.documentElement.classList.remove('dark')
       localStorage.setItem('theme', 'light')
@@ -20,26 +19,19 @@ export default class extends Controller {
   }
 
   loadTheme() {
-    const theme = localStorage.getItem('theme')
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-    
-    if (theme === 'dark' || (!theme && systemPrefersDark)) {
+    // Only use manually set theme from localStorage
+    // Default to light theme if nothing is set (no auto-detection)
+    const theme = localStorage.getItem('theme') || 'light'
+
+    if (theme === 'dark') {
       document.documentElement.classList.add('dark')
     } else {
       document.documentElement.classList.remove('dark')
     }
-  }
 
-  // Listen to system theme changes
-  watchSystemTheme() {
-    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-      if (!localStorage.getItem('theme')) {
-        if (e.matches) {
-          document.documentElement.classList.add('dark')
-        } else {
-          document.documentElement.classList.remove('dark')
-        }
-      }
-    })
+    // Set initial theme in localStorage if not already set
+    if (!localStorage.getItem('theme')) {
+      localStorage.setItem('theme', 'light')
+    }
   }
 }
