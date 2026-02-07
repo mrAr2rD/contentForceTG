@@ -176,19 +176,53 @@
         </div>
       </div>
 
-      <!-- Schedule -->
-      <% if @post.draft? %>
+      <!-- Error Details (for failed posts) -->
+      <% if @post.failed? && @post.error_details.present? %>
+        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+          <div class="p-4 border-b border-red-200 dark:border-red-800">
+            <h3 class="text-xs font-semibold text-red-700 dark:text-red-300">Ошибка публикации</h3>
+          </div>
+          <div class="p-4">
+            <p class="text-xs text-red-600 dark:text-red-400"><%= @post.error_details %></p>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Quick Publish (for draft and failed posts) -->
+      <% if (@post.draft? || @post.failed?) && @post.telegram_bot %>
+        <div class="bg-card border border-border rounded-lg">
+          <div class="p-4 border-b border-border">
+            <h3 class="text-xs font-semibold text-foreground">Быстрая публикация</h3>
+          </div>
+          <div class="p-4">
+            <%= button_to publish_post_path(@post), method: :post, class: "inline-flex h-10 w-full items-center justify-center rounded-md bg-green-600 px-4 py-2 text-xs font-semibold text-white ring-offset-background transition-colors hover:bg-green-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2" do %>
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+              </svg>
+              <%= @post.failed? ? 'Повторить публикацию' : 'Опубликовать сейчас' %>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
+      <!-- Schedule (for draft and failed posts) -->
+      <% if @post.draft? || @post.failed? %>
         <div class="bg-card border border-border rounded-lg">
           <div class="p-4 border-b border-border">
             <h3 class="text-xs font-semibold text-foreground">Запланировать</h3>
           </div>
           <div class="p-4">
-            <%= form_with url: schedule_post_path(@post), method: :post, local: true, class: "space-y-3" do %>
-              <input type="datetime-local" name="scheduled_at" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" min="<%= Time.current.strftime('%Y-%m-%dT%H:%M') %>">
-              <p class="text-xs text-muted-foreground">Часовой пояс: <%= current_user.time_zone %></p>
-              <button type="submit" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-xs font-semibold text-white ring-offset-background transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
-                Запланировать
-              </button>
+            <% if @post.telegram_bot %>
+              <%= form_with url: schedule_post_path(@post), method: :post, local: true, class: "space-y-3" do %>
+                <input type="datetime-local" name="scheduled_at" class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-xs ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" min="<%= Time.current.strftime('%Y-%m-%dT%H:%M') %>">
+                <p class="text-xs text-muted-foreground">Часовой пояс: <%= current_user.time_zone %></p>
+                <button type="submit" class="inline-flex h-10 w-full items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-xs font-semibold text-white ring-offset-background transition-colors hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+                  Запланировать
+                </button>
+              <% end %>
+            <% else %>
+              <p class="text-xs text-muted-foreground mb-2">Для публикации необходимо выбрать бота</p>
+              <%= link_to "Редактировать пост", editor_posts_path(post_id: @post.id), class: "inline-flex h-9 w-full items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-xs font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground" %>
             <% end %>
           </div>
         </div>
