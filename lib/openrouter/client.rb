@@ -107,9 +107,13 @@ module Openrouter
     end
 
     # Парсинг ответа с изображением
-    # OpenRouter возвращает изображение в формате base64 в content части
+    # OpenRouter возвращает изображение в поле images внутри message
+    # Формат: { choices: [{ message: { content: "...", images: [{ type: "image_url", image_url: { url: "data:..." } }] } }] }
     def parse_image_response(response)
       body = JSON.parse(response.body)
+
+      # Логируем ответ для отладки
+      Rails.logger.info "OpenRouter image response: #{body.to_json[0..500]}..."
 
       unless response.is_a?(Net::HTTPSuccess)
         error_message = body.dig('error', 'message') || 'Unknown error'
@@ -117,38 +121,42 @@ module Openrouter
       end
 
       message = body.dig('choices', 0, 'message')
-      content = message&.dig('content')
+      raise APIError, 'No message in response' unless message
 
-      # Проверяем наличие изображения в ответе
-      # OpenRouter может возвращать изображение как:
-      # 1. В виде массива content с type: "image_url"
-      # 2. В виде base64 строки напрямую
       image_data = nil
       content_type = 'image/png'
 
-      if content.is_a?(Array)
-        # Ищем элемент с типом image_url
+      # Способ 1: Изображения в отдельном поле images (основной формат OpenRouter)
+      images = message['images']
+      if images.is_a?(Array) && images.any?
+        image_item = images.first
+        url = image_item.dig('image_url', 'url') || image_item['url']
+        if url&.start_with?('data:')
+          image_data, content_type = extract_base64_from_data_uri(url)
+        elsif url&.match?(/^[A-Za-z0-9+\/=]+$/)
+          image_data = url
+        end
+      end
+
+      # Способ 2: Изображение в content как массив (альтернативный формат)
+      content = message['content']
+      if image_data.nil? && content.is_a?(Array)
         image_item = content.find { |item| item['type'] == 'image_url' }
         if image_item
           url = image_item.dig('image_url', 'url')
           if url&.start_with?('data:')
-            # Парсим data URI
-            match = url.match(/^data:([^;]+);base64,(.+)$/)
-            if match
-              content_type = match[1]
-              image_data = match[2]
-            end
+            image_data, content_type = extract_base64_from_data_uri(url)
           end
         end
-      elsif content.is_a?(String) && content.start_with?('data:')
-        # Прямой data URI
-        match = content.match(/^data:([^;]+);base64,(.+)$/)
-        if match
-          content_type = match[1]
-          image_data = match[2]
-        end
-      elsif content.is_a?(String) && content.match?(/^[A-Za-z0-9+\/=]+$/)
-        # Чистый base64
+      end
+
+      # Способ 3: Content напрямую содержит data URI
+      if image_data.nil? && content.is_a?(String) && content.start_with?('data:')
+        image_data, content_type = extract_base64_from_data_uri(content)
+      end
+
+      # Способ 4: Content содержит чистый base64
+      if image_data.nil? && content.is_a?(String) && content.match?(/^[A-Za-z0-9+\/=]{100,}$/)
         image_data = content
       end
 
@@ -164,6 +172,14 @@ module Openrouter
           total_tokens: body.dig('usage', 'total_tokens') || 0
         }
       }
+    end
+
+    # Извлечение base64 данных из data URI
+    def extract_base64_from_data_uri(uri)
+      match = uri.match(/^data:([^;]+);base64,(.+)$/m)
+      return nil, 'image/png' unless match
+
+      [ match[2], match[1] ]
     end
 
     def handle_error(error)
