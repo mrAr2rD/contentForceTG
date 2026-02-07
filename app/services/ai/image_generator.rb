@@ -5,8 +5,9 @@ module Ai
   # Поддерживает модели: Gemini Flash Image, Flux 1.1 Pro
   class ImageGenerator
     # Доступные модели для генерации изображений
+    # Актуальные ID моделей: https://openrouter.ai/collections/image-models
     AVAILABLE_MODELS = {
-      'google/gemini-2.5-flash-preview-image-generation' => {
+      'google/gemini-2.5-flash-image-preview' => {
         name: 'Gemini Flash Image',
         description: 'Быстрая генерация, хорошее качество',
         cost_per_image: 0.04
@@ -19,7 +20,7 @@ module Ai
     }.freeze
 
     # Модель по умолчанию
-    DEFAULT_MODEL = 'google/gemini-2.5-flash-preview-image-generation'
+    DEFAULT_MODEL = 'google/gemini-2.5-flash-image-preview'
 
     # Доступные соотношения сторон
     ASPECT_RATIOS = {
