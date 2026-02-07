@@ -61,7 +61,11 @@ module Telegram
     end
 
     def send_photo_message
-      raise 'No image attached' unless @post.image.attached?
+      # Если картинка не прикреплена или файл недоступен - публикуем как текст
+      unless @post.image.attached? && image_file_exists?
+        Rails.logger.warn "Post #{@post.id}: Image not available, falling back to text message"
+        return send_text_message
+      end
 
       params = {
         chat_id: @bot.channel_id,
@@ -79,6 +83,16 @@ module Telegram
       end
 
       make_multipart_request('sendPhoto', params, @post.image)
+    end
+
+    # Проверяем физическое наличие файла
+    def image_file_exists?
+      return false unless @post.image.attached?
+
+      @post.image.blob.open { |f| true }
+      true
+    rescue ActiveStorage::FileNotFoundError
+      false
     end
 
     def format_content(content)
