@@ -37,6 +37,27 @@
       </div>
     </div>
 
+    <!-- Regional Settings -->
+    <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
+      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Региональные настройки</h2>
+
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <%= f.label :time_zone, "Часовой пояс", class: "text-sm font-medium text-zinc-900 dark:text-zinc-50" %>
+            <p class="text-xs text-zinc-500 dark:text-zinc-400">Используется для отложенной публикации постов</p>
+            <%= f.time_zone_select :time_zone, ActiveSupport::TimeZone.all,
+                { default: "Moscow" },
+                { class: "flex h-10 w-full rounded-md border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent" } %>
+          </div>
+
+          <div class="pt-2">
+            <%= f.submit "Сохранить", class: "inline-flex h-10 items-center justify-center rounded-md bg-primary-600 hover:bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
     <!-- Profile Settings -->
     <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
       <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Профиль</h2>

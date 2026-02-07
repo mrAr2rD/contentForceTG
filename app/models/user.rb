@@ -5,7 +5,7 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
          :trackable,
-         :omniauthable, omniauth_providers: [:telegram]
+         :omniauthable, omniauth_providers: [ :telegram ]
 
   # Enums
   enum :role, { user: 0, admin: 1 }, default: :user
@@ -20,24 +20,29 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true, allow_blank: true
   validates :telegram_id, uniqueness: true, allow_nil: true
   validates :role, presence: true
+  validates :time_zone, presence: true, inclusion: {
+    in: ActiveSupport::TimeZone.all.map(&:name),
+    message: "некорректная временная зона"
+  }
 
   # Callbacks
   after_create :create_default_subscription, if: -> { subscription.nil? }
 
   # Helper method for admin check
   def admin?
-    role == 'admin'
+    role == "admin"
   end
 
   # Class methods
   def self.from_telegram_auth(auth_data)
-    user = find_or_initialize_by(telegram_id: auth_data['id'])
+    user = find_or_initialize_by(telegram_id: auth_data["id"])
     user.assign_attributes(
-      telegram_username: auth_data['username'],
-      first_name: auth_data['first_name'],
-      last_name: auth_data['last_name'],
-      avatar_url: auth_data['photo_url'],
-      email: auth_data['email'] || "telegram_#{auth_data['id']}@contentforce.local"
+      telegram_username: auth_data["username"],
+      first_name: auth_data["first_name"],
+      last_name: auth_data["last_name"],
+      avatar_url: auth_data["photo_url"],
+      email: auth_data["email"] || "telegram_#{auth_data['id']}@contentforce.local",
+      time_zone: user.time_zone.presence || "Moscow"
     )
 
     # Skip password validation for Telegram users
