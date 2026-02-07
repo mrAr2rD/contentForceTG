@@ -4,7 +4,7 @@ module Analytics
   class UpdatePostViewsJob < ApplicationJob
     queue_as :default
 
-    retry_on StandardError, wait: :exponentially_longer, attempts: 3
+    retry_on StandardError, wait: 5.seconds, attempts: 3
 
     def perform(post_id)
       post = Post.find(post_id)

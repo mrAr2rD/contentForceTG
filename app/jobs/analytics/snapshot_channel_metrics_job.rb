@@ -4,7 +4,7 @@ module Analytics
   class SnapshotChannelMetricsJob < ApplicationJob
     queue_as :default
 
-    retry_on StandardError, wait: :exponentially_longer, attempts: 3
+    retry_on StandardError, wait: 5.seconds, attempts: 3
 
     def perform(telegram_bot_id)
       bot = TelegramBot.find(telegram_bot_id)
