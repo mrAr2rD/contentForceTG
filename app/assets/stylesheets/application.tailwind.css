@@ -339,3 +339,23 @@
     @apply text-zinc-900 dark:text-zinc-50;
   }
 }
+
+/* Mobile editor panels - переключение панелей на мобилях */
+@media (max-width: 1023px) {
+  /* Панели на мобилях занимают весь экран */
+  [data-editor-panels-target="chatPanel"].mobile-panel-active,
+  [data-editor-panels-target="settingsPanel"].mobile-panel-active,
+  [data-editor-panels-target="previewPanel"].mobile-panel-active {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    overflow-y: auto;
+  }
+
+  /* Анимация появления панелей */
+  [data-editor-panels-target="chatPanel"],
+  [data-editor-panels-target="settingsPanel"],
+  [data-editor-panels-target="previewPanel"] {
+    transition: opacity 0.15s ease-in-out;
+  }
+}

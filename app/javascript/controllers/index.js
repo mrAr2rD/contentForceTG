@@ -24,3 +24,6 @@ application.register("calendar", CalendarController)
 
 import AnalyticsController from "./analytics_controller"
 application.register("analytics", AnalyticsController)
+
+import EditorPanelsController from "./editor_panels_controller"
+application.register("editor-panels", EditorPanelsController)
