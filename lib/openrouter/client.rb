@@ -123,6 +123,14 @@ module Openrouter
       message = body.dig('choices', 0, 'message')
       raise APIError, 'No message in response' unless message
 
+      # Проверяем причину завершения — модель могла отказать в генерации
+      finish_reason = body.dig('choices', 0, 'native_finish_reason') || body.dig('choices', 0, 'finish_reason')
+      if finish_reason == 'IMAGE_PROHIBITED_CONTENT'
+        raise APIError, 'Запрос отклонён: изображение содержит защищённый контент (персонажи, бренды). Попробуйте переформулировать без упоминания известных персонажей.'
+      elsif finish_reason == 'SAFETY' || finish_reason == 'RECITATION'
+        raise APIError, 'Запрос отклонён из-за ограничений безопасности. Попробуйте переформулировать запрос.'
+      end
+
       image_data = nil
       content_type = 'image/png'
 
