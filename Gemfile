@@ -47,6 +47,9 @@ gem "lookbook", group: :development
 # Image Processing for Active Storage
 gem "image_processing", "~> 1.2"
 
+# S3 Storage
+gem "aws-sdk-s3", require: false
+
 # Monitoring
 gem "sentry-ruby"
 gem "sentry-rails"

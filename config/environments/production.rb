@@ -21,8 +21,8 @@ Rails.application.configure do
   # Enable serving of images, stylesheets, and JavaScripts from an asset server.
   # config.asset_host = "http://assets.example.com"
 
-  # Store uploaded files on the local file system (see config/storage.yml for options).
-  config.active_storage.service = :local
+  # Store uploaded files on S3 (or local if S3 not configured)
+  config.active_storage.service = ENV['S3_BUCKET'].present? ? :amazon : :local
 
   # Skip automatic image analysis until Solid Queue tables are created
   # TODO: Remove this after running db:schema:load:queue on production
