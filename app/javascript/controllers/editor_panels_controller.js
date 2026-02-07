@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Контроллер для управления переключением панелей редактора на мобильных устройствах
 // На мобилях (<1024px) показывается только одна панель за раз
-// На desktop все панели видны одновременно
+// На desktop контроллер не вмешивается - используются CSS классы из HTML
 export default class extends Controller {
   static targets = ["chatPanel", "settingsPanel", "previewPanel", "chatTab", "settingsTab", "previewTab"]
 
@@ -10,9 +10,17 @@ export default class extends Controller {
     activePanel: { type: String, default: "preview" }
   }
 
+  // Сохраняем исходные классы панелей для восстановления
+  originalClasses = new Map()
+
   connect() {
-    // На мобилях по умолчанию показываем редактор (preview)
-    this.updatePanelVisibility()
+    // Сохраняем исходные классы панелей
+    this.saveOriginalClasses()
+
+    // Применяем мобильный layout только если мобильное устройство
+    if (this.isMobile()) {
+      this.applyMobileLayout()
+    }
 
     // Отслеживаем изменение размера окна
     this.handleResize = this.handleResize.bind(this)
@@ -23,82 +31,88 @@ export default class extends Controller {
     window.removeEventListener("resize", this.handleResize)
   }
 
+  saveOriginalClasses() {
+    if (this.hasChatPanelTarget) {
+      this.originalClasses.set("chat", this.chatPanelTarget.className)
+    }
+    if (this.hasSettingsPanelTarget) {
+      this.originalClasses.set("settings", this.settingsPanelTarget.className)
+    }
+    if (this.hasPreviewPanelTarget) {
+      this.originalClasses.set("preview", this.previewPanelTarget.className)
+    }
+  }
+
+  isMobile() {
+    return window.innerWidth < 1024
+  }
+
   handleResize() {
-    // При изменении размера окна обновляем видимость панелей
-    this.updatePanelVisibility()
+    if (this.isMobile()) {
+      this.applyMobileLayout()
+    } else {
+      this.restoreDesktopLayout()
+    }
   }
 
   showChat(event) {
     event?.preventDefault()
     this.activePanelValue = "chat"
-    this.updatePanelVisibility()
+    this.applyMobileLayout()
   }
 
   showSettings(event) {
     event?.preventDefault()
     this.activePanelValue = "settings"
-    this.updatePanelVisibility()
+    this.applyMobileLayout()
   }
 
   showPreview(event) {
     event?.preventDefault()
     this.activePanelValue = "preview"
-    this.updatePanelVisibility()
+    this.applyMobileLayout()
   }
 
-  updatePanelVisibility() {
-    const isMobile = window.innerWidth < 1024
-
-    if (isMobile) {
-      // Мобильный режим: показываем только активную панель
-      if (this.hasChatPanelTarget) {
-        this.togglePanel(this.chatPanelTarget, this.activePanelValue === "chat")
-      }
-      if (this.hasSettingsPanelTarget) {
-        this.togglePanel(this.settingsPanelTarget, this.activePanelValue === "settings")
-      }
-      if (this.hasPreviewPanelTarget) {
-        this.togglePanel(this.previewPanelTarget, this.activePanelValue === "preview")
-      }
-
-      // Обновляем активные табы
-      this.updateTabs()
-    } else {
-      // Desktop режим: показываем все панели согласно их исходным классам
-      this.resetDesktopLayout()
+  applyMobileLayout() {
+    // Показываем только активную панель на мобилях
+    if (this.hasChatPanelTarget) {
+      this.toggleMobilePanel(this.chatPanelTarget, this.activePanelValue === "chat")
     }
+    if (this.hasSettingsPanelTarget) {
+      this.toggleMobilePanel(this.settingsPanelTarget, this.activePanelValue === "settings")
+    }
+    if (this.hasPreviewPanelTarget) {
+      this.toggleMobilePanel(this.previewPanelTarget, this.activePanelValue === "preview")
+    }
+
+    this.updateTabs()
   }
 
-  togglePanel(panel, isActive) {
+  toggleMobilePanel(panel, isActive) {
     if (!panel) return
 
+    // Убираем все lg: классы и desktop-специфичные классы
+    panel.classList.remove("lg:flex", "lg:block", "lg:w-[30%]", "lg:w-1/4")
+
     if (isActive) {
-      // Показываем панель на мобилях
-      panel.classList.remove("hidden", "lg:hidden", "lg:flex", "lg:block")
-      panel.classList.add("flex", "flex-col", "mobile-panel-active")
+      panel.classList.remove("hidden")
+      panel.classList.add("flex", "flex-col", "w-full", "h-full")
     } else {
-      // Скрываем панель на мобилях
       panel.classList.add("hidden")
-      panel.classList.remove("flex", "flex-col", "mobile-panel-active")
+      panel.classList.remove("flex", "flex-col", "w-full", "h-full")
     }
   }
 
-  resetDesktopLayout() {
-    // AI Chat: hidden на мобилях, flex на desktop
-    if (this.hasChatPanelTarget) {
-      this.chatPanelTarget.classList.remove("mobile-panel-active", "flex-col")
-      this.chatPanelTarget.classList.add("hidden", "lg:flex")
+  restoreDesktopLayout() {
+    // Восстанавливаем исходные классы из HTML
+    if (this.hasChatPanelTarget && this.originalClasses.has("chat")) {
+      this.chatPanelTarget.className = this.originalClasses.get("chat")
     }
-
-    // Settings: hidden на мобилях, block на desktop
-    if (this.hasSettingsPanelTarget) {
-      this.settingsPanelTarget.classList.remove("mobile-panel-active", "flex", "flex-col")
-      this.settingsPanelTarget.classList.add("hidden", "lg:block")
+    if (this.hasSettingsPanelTarget && this.originalClasses.has("settings")) {
+      this.settingsPanelTarget.className = this.originalClasses.get("settings")
     }
-
-    // Preview: всегда показан, flex-1
-    if (this.hasPreviewPanelTarget) {
-      this.previewPanelTarget.classList.remove("mobile-panel-active", "hidden", "flex-col")
+    if (this.hasPreviewPanelTarget && this.originalClasses.has("preview")) {
+      this.previewPanelTarget.className = this.originalClasses.get("preview")
     }
   }
 
@@ -113,11 +127,9 @@ export default class extends Controller {
       if (!target) return
 
       if (this.activePanelValue === panel) {
-        // Активный таб
         target.classList.add("border-primary-500", "text-primary-600", "dark:text-primary-400")
         target.classList.remove("border-transparent", "text-zinc-500", "dark:text-zinc-400")
       } else {
-        // Неактивный таб
         target.classList.remove("border-primary-500", "text-primary-600", "dark:text-primary-400")
         target.classList.add("border-transparent", "text-zinc-500", "dark:text-zinc-400")
       }
