@@ -65,6 +65,7 @@ Rails.application.routes.draw do
           post :generate
           post :improve
           post :generate_hashtags
+          post :generate_image
         end
       end
 

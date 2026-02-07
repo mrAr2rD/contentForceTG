@@ -91,6 +91,57 @@ module Api
         end
       end
 
+      # Генерация изображения с помощью AI
+      def generate_image
+        project = current_user.projects.find_by(id: params[:project_id])
+
+        # Проверка наличия API ключа
+        unless AiConfiguration.current.api_key_configured?
+          return render json: {
+            success: false,
+            error: "OpenRouter API ключ не настроен. Обратитесь к администратору."
+          }, status: :unprocessable_entity
+        end
+
+        # Валидация промпта
+        if params[:prompt].blank?
+          return render json: {
+            success: false,
+            error: "Промпт не может быть пустым"
+          }, status: :unprocessable_entity
+        end
+
+        generator = Ai::ImageGenerator.new(project: project, user: current_user)
+        result = generator.generate(
+          prompt: params[:prompt],
+          aspect_ratio: params[:aspect_ratio] || '1:1',
+          model: params[:model]
+        )
+
+        if result[:success]
+          render json: {
+            success: true,
+            image_data: result[:image_data],
+            content_type: result[:content_type],
+            model_used: result[:model_used]
+          }
+        else
+          Rails.logger.error "AI Image Generation failed: #{result[:error]}"
+          status = result[:error]&.include?("лимит") ? :forbidden : :unprocessable_entity
+          render json: {
+            success: false,
+            error: result[:error],
+            limit_reached: result[:error]&.include?("лимит")
+          }, status: status
+        end
+      rescue StandardError => e
+        Rails.logger.error "AI Image Controller error: #{e.message}\n#{e.backtrace.join("\n")}"
+        render json: {
+          success: false,
+          error: "Произошла ошибка при генерации изображения: #{e.message}"
+        }, status: :internal_server_error
+      end
+
       private
 
       def check_ai_limits

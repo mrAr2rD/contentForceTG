@@ -27,3 +27,6 @@ application.register("analytics", AnalyticsController)
 
 import EditorPanelsController from "./editor_panels_controller"
 application.register("editor-panels", EditorPanelsController)
+
+import ImageGeneratorController from "./image_generator_controller"
+application.register("image-generator", ImageGeneratorController)

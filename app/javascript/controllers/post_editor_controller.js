@@ -357,4 +357,60 @@ export default class extends Controller {
       this.formTarget.requestSubmit()
     }
   }
+
+  // Применение сгенерированного AI изображения
+  // Принимает base64 данные и конвертирует в File для загрузки
+  applyGeneratedImage(base64Data, contentType) {
+    // Конвертируем base64 в Blob
+    const byteCharacters = atob(base64Data)
+    const byteNumbers = new Array(byteCharacters.length)
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i)
+    }
+    const byteArray = new Uint8Array(byteNumbers)
+    const blob = new Blob([byteArray], { type: contentType || 'image/png' })
+
+    // Определяем расширение файла
+    const extension = contentType?.split('/')[1] || 'png'
+    const fileName = `ai_generated_${Date.now()}.${extension}`
+
+    // Создаём File из Blob
+    const file = new File([blob], fileName, { type: contentType || 'image/png' })
+
+    // Находим file input
+    const fileInput = this.element.querySelector('input[type="file"][accept="image/*"]')
+    if (!fileInput) {
+      console.error('File input not found')
+      return
+    }
+
+    // Создаём DataTransfer для установки файла
+    const dataTransfer = new DataTransfer()
+    dataTransfer.items.add(file)
+    fileInput.files = dataTransfer.files
+
+    // Показываем превью изображения
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      if (this.hasImagePreviewTarget) {
+        let img = this.imagePreviewTarget.querySelector('img')
+        if (!img && this.hasImagePreviewImgTarget) {
+          img = this.imagePreviewImgTarget
+        }
+
+        if (img) {
+          img.src = e.target.result
+          this.imagePreviewTarget.classList.remove('hidden')
+          this.updateCharCount(this.contentEditorTarget.value.length)
+        }
+      }
+    }
+    reader.readAsDataURL(file)
+
+    // Переключаем тип поста на 'image' если сейчас 'text'
+    if (this.hasPostTypeTarget && this.postTypeTarget.value === 'text') {
+      this.postTypeTarget.value = 'image'
+      this.toggleButtonFields()
+    }
+  }
 }
