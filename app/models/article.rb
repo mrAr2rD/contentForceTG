@@ -1,6 +1,15 @@
 # frozen_string_literal: true
 
 class Article < ApplicationRecord
+  # Таблица транслитерации кириллицы
+  TRANSLIT_MAP = {
+    'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
+    'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm',
+    'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
+    'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ъ' => '',
+    'ы' => 'y', 'ь' => '', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
+  }.freeze
+
   # Категории статей
   CATEGORIES = %w[product tutorials updates tips case-studies].freeze
 
@@ -14,7 +23,7 @@ class Article < ApplicationRecord
   # Validations
   validates :title, presence: true, length: { minimum: 5, maximum: 200 }
   validates :slug, presence: true, uniqueness: true, format: { with: /\A[a-z0-9\-]+\z/, message: 'допускает только строчные буквы, цифры и дефисы' }
-  validates :content, presence: true, length: { minimum: 100 }
+  validates :content, presence: true, length: { minimum: 50 }
   validates :category, inclusion: { in: CATEGORIES }, allow_blank: true
   validates :excerpt, length: { maximum: 500 }, allow_blank: true
   validates :meta_title, length: { maximum: 70 }, allow_blank: true
@@ -23,10 +32,11 @@ class Article < ApplicationRecord
   # Callbacks
   before_validation :generate_slug, if: -> { slug.blank? && title.present? }
   before_save :calculate_reading_time, if: -> { content_changed? }
+  before_save :set_published_at, if: -> { published? && published_at.blank? }
 
   # Scopes
-  scope :published, -> { where(status: :published).where('published_at <= ?', Time.current) }
-  scope :recent, -> { order(published_at: :desc) }
+  scope :published, -> { where(status: :published).where('published_at IS NOT NULL AND published_at <= ?', Time.current) }
+  scope :recent, -> { order(Arel.sql('COALESCE(published_at, created_at) DESC')) }
   scope :by_category, ->(category) { where(category: category) }
   scope :featured, -> { published.recent.limit(3) }
 
@@ -70,20 +80,20 @@ class Article < ApplicationRecord
 
   private
 
+  def set_published_at
+    self.published_at = Time.current
+  end
+
   def generate_slug
-    self.slug = Russian.translit(title)
-                       .downcase
-                       .gsub(/[^a-z0-9\s-]/, '')
-                       .gsub(/[\s_]+/, '-')
-                       .gsub(/-+/, '-')
-                       .gsub(/^-|-$/, '')
-  rescue StandardError
-    # Если gem russian не установлен, используем простую транслитерацию
-    self.slug = title
-                .downcase
+    # Транслитерация кириллицы
+    transliterated = title.downcase.chars.map { |char| TRANSLIT_MAP[char] || char }.join
+    # Очистка и форматирование
+    self.slug = transliterated
                 .gsub(/[^a-z0-9\s-]/, '')
                 .gsub(/[\s_]+/, '-')
                 .gsub(/-+/, '-')
                 .gsub(/^-|-$/, '')
+    # Если slug пустой, генерируем из timestamp
+    self.slug = "article-#{Time.current.to_i}" if slug.blank?
   end
 end
