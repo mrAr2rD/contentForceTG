@@ -11,16 +11,14 @@ module Telegram
     # Get channel statistics
     def fetch_channel_statistics
       begin
-        client = Telegram::Bot::Client.new(telegram_bot.bot_token)
-        chat = client.api.get_chat(chat_id: telegram_bot.channel_id)
-
-        result = chat['result'] || {}
+        api = Telegram::Bot::Api.new(telegram_bot.bot_token)
+        chat = api.get_chat(chat_id: telegram_bot.channel_id)
 
         {
-          subscriber_count: result['member_count'] || 0,
-          title: result['title'] || telegram_bot.channel_name,
-          description: result['description'],
-          username: result['username']
+          subscriber_count: chat.member_count || 0,
+          title: chat.title || telegram_bot.channel_name,
+          description: chat.description,
+          username: chat.username
         }
       rescue Telegram::Bot::Exceptions::ResponseError => e
         Rails.logger.error("Telegram API error for bot #{telegram_bot.id}: #{e.message}")
@@ -50,35 +48,26 @@ module Telegram
       return {} unless post.telegram_message_id.present?
 
       begin
-        client = Telegram::Bot::Client.new(telegram_bot.bot_token)
+        # Telegram Bot API не предоставляет метод get_message для каналов
+        # Получаем данные из последней записи аналитики или возвращаем mock
+        last_analytics = post.post_analytics.recent.first
 
-        # Try to get message info (this only works if bot is channel admin)
-        message = client.api.get_message(
-          chat_id: telegram_bot.channel_id,
-          message_id: post.telegram_message_id
-        )
-
-        # Parse available data from message
-        result = {}
-
-        # Telegram doesn't provide view counts through regular API
-        # We'll get this data through webhooks or Telegram Analytics API
-        result[:views] = post.post_analytics.recent.first&.views || 0
-
-        # Forwards count (if available in message object)
-        result[:forwards] = message.dig('result', 'forward_count') || 0
-
-        # Reactions (if available - requires Message Reaction API)
-        if message.dig('result', 'reactions').present?
-          reactions_data = message.dig('result', 'reactions')
-          result[:reactions] = parse_reactions(reactions_data)
+        if last_analytics
+          {
+            views: last_analytics.views,
+            forwards: last_analytics.forwards,
+            reactions: last_analytics.reactions || {},
+            button_clicks: last_analytics.button_clicks || {}
+          }
         else
-          result[:reactions] = {}
+          # Для новых постов возвращаем нулевые значения
+          {
+            views: 0,
+            forwards: 0,
+            reactions: {},
+            button_clicks: {}
+          }
         end
-
-        result[:button_clicks] = {}
-
-        result
       rescue Telegram::Bot::Exceptions::ResponseError => e
         Rails.logger.error("Telegram API error for post #{post.id}: #{e.message}")
         # Fall back to last known data
