@@ -188,8 +188,10 @@ class Plan < ApplicationRecord
   # Возвращает лимит для конкретной фичи
   def limit_for(feature)
     value = limits&.dig(feature.to_s) || limits&.dig(feature.to_sym)
+    return 0 if value.nil?
+    value = value.to_i
     return Float::INFINITY if value == -1
-    value || 0
+    value
   end
 
   # Проверяет, есть ли фича
