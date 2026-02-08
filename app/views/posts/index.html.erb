@@ -392,12 +392,12 @@
             <div class="post-header">
               <%= link_to post.title.presence || post.content.truncate(50), post_path(post), class: "post-title" %>
               <span class="status-badge <%= post.status %>">
-                <% case post.status %>
-                <% when "published" %>Опубликован
-                <% when "scheduled" %>Запланирован
-                <% when "draft" %>Черновик
-                <% when "failed" %>Ошибка
-                <% end %>
+                <%= case post.status
+                    when "published" then "Опубликован"
+                    when "scheduled" then "Запланирован"
+                    when "draft" then "Черновик"
+                    when "failed" then "Ошибка"
+                    end %>
               </span>
             </div>
 

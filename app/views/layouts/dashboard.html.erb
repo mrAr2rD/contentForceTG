@@ -308,13 +308,6 @@
             <span>Telegram</span>
           <% end %>
 
-          <%= link_to subscriptions_path, class: "nav-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium #{controller_name == 'subscriptions' ? 'active' : 'text-[#A1A1AA]'}" do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
-            </svg>
-            <span>Тарифы</span>
-          <% end %>
-
           <!-- Coming Soon Section -->
           <div class="px-3 py-2 mt-4 text-[10px] font-semibold text-[#71717A] mono uppercase tracking-widest">
             Скоро
@@ -368,8 +361,15 @@
 
           <!-- Settings -->
           <div class="px-3 py-2 mt-4 text-[10px] font-semibold text-[#71717A] mono uppercase tracking-widest">
-            Настройки
+            Аккаунт
           </div>
+
+          <%= link_to subscriptions_path, class: "nav-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium #{controller_name == 'subscriptions' ? 'active' : 'text-[#A1A1AA]'}" do %>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+            </svg>
+            <span>Тарифы</span>
+          <% end %>
 
           <%= link_to edit_user_registration_path, class: "nav-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-[#A1A1AA]" do %>
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -455,7 +455,7 @@
         <% end %>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto tech-scrollbar bg-[#0A0A0B]" data-sidebar-target="content">
+        <main class="flex-1 overflow-y-auto tech-scrollbar bg-[#0A0A0B] p-4 lg:p-6" data-sidebar-target="content">
           <%= yield %>
         </main>
       </div>
