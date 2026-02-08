@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_08_112707) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -92,6 +92,29 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_112707) do
     t.index ["purpose"], name: "index_ai_usage_logs_on_purpose"
     t.index ["user_id", "created_at"], name: "index_ai_usage_logs_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_ai_usage_logs_on_user_id"
+  end
+
+  create_table "articles", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "author_id", null: false
+    t.string "category"
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.text "excerpt"
+    t.text "meta_description"
+    t.string "meta_title"
+    t.datetime "published_at"
+    t.integer "reading_time"
+    t.string "slug", null: false
+    t.integer "status", default: 0, null: false
+    t.jsonb "tags", default: []
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.integer "views_count", default: 0
+    t.index ["author_id"], name: "index_articles_on_author_id"
+    t.index ["category"], name: "index_articles_on_category"
+    t.index ["published_at"], name: "index_articles_on_published_at"
+    t.index ["slug"], name: "index_articles_on_slug", unique: true
+    t.index ["status"], name: "index_articles_on_status"
   end
 
   create_table "channel_subscriber_metrics", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -342,6 +365,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_112707) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "ai_usage_logs", "projects"
   add_foreign_key "ai_usage_logs", "users"
+  add_foreign_key "articles", "users", column: "author_id"
   add_foreign_key "channel_subscriber_metrics", "telegram_bots"
   add_foreign_key "invite_links", "telegram_bots"
   add_foreign_key "notifications", "users"

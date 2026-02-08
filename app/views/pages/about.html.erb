@@ -1,0 +1,240 @@
+<%= content_for :head do %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>О нас — ContentForce</title>
+  <meta name="description" content="ContentForce — платформа для автоматизации создания и публикации контента в Telegram с использованием AI. Узнайте о нашей миссии и технологиях.">
+<% end %>
+
+<style>
+  .about-page {
+    --accent: #00D4AA;
+    --bg-dark: #0A0A0B;
+    --bg-card: #111113;
+    --bg-elevated: #1A1A1D;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --border: #27272A;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .about-page code, .about-page .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grain-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .section-card {
+    transition: all 0.3s ease;
+  }
+
+  .section-card:hover {
+    border-color: var(--accent);
+  }
+
+  .tech-icon {
+    transition: transform 0.3s ease;
+  }
+
+  .tech-icon:hover {
+    transform: scale(1.1);
+  }
+</style>
+
+<div class="about-page min-h-screen bg-[#0A0A0B] text-[#FAFAFA]">
+  <div class="grain-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
+    <div class="max-w-5xl mx-auto px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <%= link_to root_path, class: "flex items-center gap-3 group" do %>
+          <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
+            CF
+          </div>
+          <span class="text-lg font-semibold tracking-tight">ContentForce</span>
+        <% end %>
+
+        <div class="flex items-center gap-4 text-sm">
+          <%= link_to "Главная", root_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Блог", blog_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Документация", docs_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="relative border-b border-[#27272A]">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#00D4AA]/5 to-transparent"></div>
+    <div class="relative max-w-5xl mx-auto px-6 lg:px-8 py-20">
+      <div class="mono text-xs text-[#00D4AA] tracking-widest uppercase mb-4">О компании</div>
+      <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        Мы создаём будущее<br>контент-маркетинга
+      </h1>
+      <p class="text-xl text-[#A1A1AA] max-w-2xl">
+        ContentForce — платформа, которая объединяет искусственный интеллект и автоматизацию для создания качественного контента в Telegram.
+      </p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-5xl mx-auto px-6 lg:px-8 py-16">
+
+    <!-- Mission -->
+    <section class="mb-16">
+      <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold">Наша миссия</h2>
+        </div>
+        <div class="space-y-4 text-[#A1A1AA] leading-relaxed text-lg">
+          <p>
+            Мы верим, что качественный контент должен быть доступен каждому. Наша миссия — дать владельцам Telegram-каналов инструменты, которые помогут им создавать, планировать и публиковать контент эффективно и без лишних затрат времени.
+          </p>
+          <p>
+            С помощью искусственного интеллекта мы автоматизируем рутинные задачи, оставляя вам возможность сосредоточиться на стратегии и росте аудитории.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Values -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">Наши ценности</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Инновации</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Мы постоянно исследуем новые технологии AI и внедряем лучшие решения в наш продукт.
+          </p>
+        </div>
+
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Ориентация на клиента</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Каждая функция создаётся на основе реальных потребностей наших пользователей.
+          </p>
+        </div>
+
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center mb-4">
+            <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Надёжность</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Стабильность и безопасность данных — наш приоритет. Ваш контент всегда в безопасности.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Technologies -->
+    <section class="mb-16">
+      <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+        <div class="flex items-center gap-4 mb-6">
+          <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold">Технологии</h2>
+        </div>
+
+        <p class="text-[#A1A1AA] mb-8 leading-relaxed">
+          ContentForce построен на современном технологическом стеке, который обеспечивает высокую производительность, безопасность и масштабируемость.
+        </p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
+            <div class="text-2xl mb-2">💎</div>
+            <div class="font-medium text-sm">Ruby on Rails</div>
+            <div class="text-xs text-[#71717A]">Backend</div>
+          </div>
+          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
+            <div class="text-2xl mb-2">🤖</div>
+            <div class="font-medium text-sm">OpenRouter AI</div>
+            <div class="text-xs text-[#71717A]">AI Models</div>
+          </div>
+          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
+            <div class="text-2xl mb-2">📱</div>
+            <div class="font-medium text-sm">Telegram API</div>
+            <div class="text-xs text-[#71717A]">Publishing</div>
+          </div>
+          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
+            <div class="text-2xl mb-2">🐘</div>
+            <div class="font-medium text-sm">PostgreSQL</div>
+            <div class="text-xs text-[#71717A]">Database</div>
+          </div>
+        </div>
+
+        <div class="mt-6 p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A]">
+          <h3 class="font-medium mb-3">AI-модели для генерации контента:</h3>
+          <div class="flex flex-wrap gap-2">
+            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">Claude</span>
+            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">GPT-4</span>
+            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">Gemini</span>
+            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">DeepSeek</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="mb-16">
+      <div class="bg-gradient-to-r from-[#00D4AA]/10 to-[#00D4AA]/5 border border-[#00D4AA]/20 rounded-2xl p-8 text-center">
+        <h2 class="text-2xl font-bold mb-4">Готовы начать?</h2>
+        <p class="text-[#A1A1AA] mb-6 max-w-xl mx-auto">
+          Присоединяйтесь к тысячам владельцев Telegram-каналов, которые уже используют ContentForce для создания контента.
+        </p>
+        <div class="flex justify-center gap-4">
+          <%= link_to "Начать бесплатно", new_user_registration_path, class: "px-6 py-3 bg-[#00D4AA] text-[#0A0A0B] font-semibold rounded-lg hover:bg-[#00D4AA]/90 transition-colors" %>
+          <%= link_to "Связаться с нами", contacts_path, class: "px-6 py-3 bg-[#1A1A1D] border border-[#27272A] text-[#FAFAFA] font-semibold rounded-lg hover:border-[#00D4AA] transition-colors" %>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="border-t border-[#27272A] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "Документация", docs_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Блог", blog_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Партнёрам", careers_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Контакты", contacts_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "Политика", privacy_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Оферта", terms_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+    </div>
+  </div>
+</div>

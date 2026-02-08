@@ -1,0 +1,196 @@
+<%= content_for :head do %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Блог — ContentForce</title>
+  <meta name="description" content="Статьи о контент-маркетинге, AI, Telegram и автоматизации. Полезные советы и руководства от команды ContentForce.">
+<% end %>
+
+<style>
+  .blog-page {
+    --accent: #00D4AA;
+    --bg-dark: #0A0A0B;
+    --bg-card: #111113;
+    --bg-elevated: #1A1A1D;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --border: #27272A;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .blog-page code, .blog-page .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grain-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .article-card {
+    transition: all 0.3s ease;
+  }
+
+  .article-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+
+  .article-card:hover .article-image {
+    transform: scale(1.05);
+  }
+
+  .category-badge {
+    transition: all 0.2s ease;
+  }
+
+  .category-badge:hover {
+    background: var(--accent);
+    color: var(--bg-dark);
+  }
+
+  .category-badge.active {
+    background: var(--accent);
+    color: var(--bg-dark);
+  }
+</style>
+
+<div class="blog-page min-h-screen bg-[#0A0A0B] text-[#FAFAFA]">
+  <div class="grain-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <%= link_to root_path, class: "flex items-center gap-3 group" do %>
+          <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
+            CF
+          </div>
+          <span class="text-lg font-semibold tracking-tight">ContentForce</span>
+        <% end %>
+
+        <div class="flex items-center gap-4 text-sm">
+          <%= link_to "Главная", root_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Документация", docs_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "О нас", about_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="relative border-b border-[#27272A]">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#00D4AA]/5 to-transparent"></div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-16">
+      <div class="mono text-xs text-[#00D4AA] tracking-widest uppercase mb-4">Блог</div>
+      <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        Статьи и руководства
+      </h1>
+      <p class="text-xl text-[#A1A1AA] max-w-2xl">
+        Полезные материалы о контент-маркетинге, AI, Telegram и автоматизации от команды ContentForce.
+      </p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+
+    <!-- Categories -->
+    <div class="flex flex-wrap gap-2 mb-10">
+      <%= link_to "Все", blog_path, class: "category-badge px-4 py-2 rounded-full text-sm border border-[#27272A] #{params[:category].blank? ? 'active' : 'bg-[#111113] text-[#A1A1AA]'}" %>
+      <% @categories.each do |category| %>
+        <%= link_to category.titleize, blog_path(category: category), class: "category-badge px-4 py-2 rounded-full text-sm border border-[#27272A] #{params[:category] == category ? 'active' : 'bg-[#111113] text-[#A1A1AA]'}" %>
+      <% end %>
+    </div>
+
+    <% if @articles.any? %>
+      <!-- Featured Articles (only on first page without category filter) -->
+      <% if @featured_articles.any? && params[:page].blank? && params[:category].blank? %>
+        <section class="mb-16">
+          <h2 class="text-lg font-semibold text-[#A1A1AA] mb-6">Популярное</h2>
+          <div class="grid md:grid-cols-3 gap-6">
+            <% @featured_articles.each do |article| %>
+              <%= render 'article_card', article: article, featured: true %>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
+      <!-- All Articles -->
+      <section>
+        <h2 class="text-lg font-semibold text-[#A1A1AA] mb-6">
+          <%= params[:category].present? ? params[:category].titleize : 'Все статьи' %>
+        </h2>
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <% @articles.each do |article| %>
+            <%= render 'article_card', article: article %>
+          <% end %>
+        </div>
+      </section>
+
+      <!-- Pagination -->
+      <% if @articles.total_pages > 1 %>
+        <div class="mt-12 flex justify-center">
+          <nav class="flex items-center gap-2">
+            <% if @articles.prev_page %>
+              <%= link_to blog_path(page: @articles.prev_page, category: params[:category]), class: "px-4 py-2 bg-[#111113] border border-[#27272A] rounded-lg text-sm hover:border-[#00D4AA] transition-colors" do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+              <% end %>
+            <% end %>
+
+            <span class="px-4 py-2 text-sm text-[#A1A1AA]">
+              Страница <%= @articles.current_page %> из <%= @articles.total_pages %>
+            </span>
+
+            <% if @articles.next_page %>
+              <%= link_to blog_path(page: @articles.next_page, category: params[:category]), class: "px-4 py-2 bg-[#111113] border border-[#27272A] rounded-lg text-sm hover:border-[#00D4AA] transition-colors" do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              <% end %>
+            <% end %>
+          </nav>
+        </div>
+      <% end %>
+
+    <% else %>
+      <!-- Empty State -->
+      <div class="text-center py-20">
+        <div class="w-16 h-16 bg-[#111113] border border-[#27272A] rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <svg class="w-8 h-8 text-[#71717A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+          </svg>
+        </div>
+        <h2 class="text-xl font-semibold mb-2">Статьи скоро появятся</h2>
+        <p class="text-[#A1A1AA] mb-6">Мы работаем над полезными материалами для вас.</p>
+        <%= link_to "Вернуться на главную", root_path, class: "inline-flex items-center gap-2 text-[#00D4AA] hover:underline" %>
+      </div>
+    <% end %>
+
+    <!-- Footer -->
+    <div class="border-t border-[#27272A] pt-8 mt-16 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "О нас", about_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Документация", docs_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Партнёрам", careers_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Контакты", contacts_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "Политика", privacy_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Оферта", terms_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+    </div>
+  </div>
+</div>

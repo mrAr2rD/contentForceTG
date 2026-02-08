@@ -1,0 +1,112 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Статьи блога</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Управление статьями блога с AI-генерацией</p>
+    </div>
+    <%= link_to new_admin_article_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors" do %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Новая статья
+    <% end %>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="flex gap-4">
+    <%= link_to "Все", admin_articles_path, class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:status].blank? && params[:category].blank? ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <%= link_to "Черновики", admin_articles_path(status: 'draft'), class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:status] == 'draft' ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+    <%= link_to "Опубликованные", admin_articles_path(status: 'published'), class: "px-3 py-1.5 text-sm font-medium rounded-md #{params[:status] == 'published' ? 'bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900' : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'}" %>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статья</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Категория</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Просмотры</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Дата</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @articles.each do |article| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <% if article.cover_image.attached? %>
+                  <%= image_tag article.cover_image.variant(resize_to_fill: [64, 64]), class: "w-12 h-12 rounded-lg object-cover" %>
+                <% else %>
+                  <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                    </svg>
+                  </div>
+                <% end %>
+                <div>
+                  <div class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate max-w-xs">
+                    <%= article.title %>
+                  </div>
+                  <div class="text-xs text-zinc-500 dark:text-zinc-400">
+                    /<%= article.slug %>
+                  </div>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% if article.category.present? %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  <%= article.category.titleize %>
+                </span>
+              <% else %>
+                <span class="text-zinc-400">—</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% if article.published? %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                  Опубликовано
+                </span>
+              <% else %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
+                  Черновик
+                </span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= number_with_delimiter(article.views_count) %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <% if article.published? && article.published_at %>
+                <%= article.published_at.strftime("%d.%m.%Y") %>
+              <% else %>
+                <%= article.created_at.strftime("%d.%m.%Y") %>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+              <%= link_to "Просмотр", admin_article_path(article), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              <%= link_to "Редактировать", edit_admin_article_path(article), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              <% if article.published? %>
+                <%= link_to "На сайте", article_path(article), target: "_blank", class: "text-zinc-600 dark:text-zinc-400 hover:underline" %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if @articles.empty? %>
+      <div class="px-6 py-12 text-center text-zinc-500 dark:text-zinc-400">
+        <svg class="w-12 h-12 mx-auto mb-4 text-zinc-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+        </svg>
+        <p class="mb-4">Статьи не найдены</p>
+        <%= link_to "Создать первую статью", new_admin_article_path, class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= paginate @articles if @articles.respond_to?(:total_pages) && @articles.total_pages > 1 %>
+</div>

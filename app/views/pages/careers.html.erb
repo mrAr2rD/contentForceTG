@@ -1,0 +1,309 @@
+<%= content_for :head do %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Партнёрская программа — ContentForce</title>
+  <meta name="description" content="Станьте партнёром ContentForce и зарабатывайте 20% с каждого привлечённого клиента. Пожизненные выплаты, маркетинговые материалы.">
+<% end %>
+
+<style>
+  .careers-page {
+    --accent: #00D4AA;
+    --bg-dark: #0A0A0B;
+    --bg-card: #111113;
+    --bg-elevated: #1A1A1D;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --border: #27272A;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .careers-page code, .careers-page .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grain-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .section-card {
+    transition: all 0.3s ease;
+  }
+
+  .section-card:hover {
+    border-color: var(--accent);
+  }
+
+  .benefit-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .benefit-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 40px -20px rgba(0, 212, 170, 0.2);
+  }
+</style>
+
+<div class="careers-page min-h-screen bg-[#0A0A0B] text-[#FAFAFA]">
+  <div class="grain-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
+    <div class="max-w-5xl mx-auto px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <%= link_to root_path, class: "flex items-center gap-3 group" do %>
+          <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
+            CF
+          </div>
+          <span class="text-lg font-semibold tracking-tight">ContentForce</span>
+        <% end %>
+
+        <div class="flex items-center gap-4 text-sm">
+          <%= link_to "Главная", root_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "О нас", about_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Контакты", contacts_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="relative border-b border-[#27272A]">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#00D4AA]/5 to-transparent"></div>
+    <div class="relative max-w-5xl mx-auto px-6 lg:px-8 py-20">
+      <div class="mono text-xs text-[#00D4AA] tracking-widest uppercase mb-4">Партнёрская программа</div>
+      <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        Зарабатывайте вместе<br>с ContentForce
+      </h1>
+      <p class="text-xl text-[#A1A1AA] max-w-2xl">
+        Рекомендуйте наш сервис и получайте <span class="text-[#00D4AA] font-semibold">20% комиссии</span> с каждого платежа привлечённых клиентов. Пожизненно.
+      </p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-5xl mx-auto px-6 lg:px-8 py-16">
+
+    <!-- Benefits -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">Преимущества партнёрства</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <div class="benefit-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-14 h-14 bg-gradient-to-br from-[#00D4AA]/20 to-[#00D4AA]/5 rounded-xl flex items-center justify-center mb-4">
+            <span class="text-3xl font-bold text-[#00D4AA]">20%</span>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Высокая комиссия</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Получайте 20% от каждого платежа привлечённого клиента. Это одна из самых высоких ставок на рынке SaaS.
+          </p>
+        </div>
+
+        <div class="benefit-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-14 h-14 bg-gradient-to-br from-[#00D4AA]/20 to-[#00D4AA]/5 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Пожизненные выплаты</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Вы получаете комиссию всё время, пока клиент пользуется сервисом. Никаких ограничений по времени.
+          </p>
+        </div>
+
+        <div class="benefit-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="w-14 h-14 bg-gradient-to-br from-[#00D4AA]/20 to-[#00D4AA]/5 rounded-xl flex items-center justify-center mb-4">
+            <svg class="w-7 h-7 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">Маркетинговые материалы</h3>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Предоставляем баннеры, тексты и готовые креативы для продвижения. Вам остаётся только делиться.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="mb-16">
+      <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+        <div class="flex items-center gap-4 mb-8">
+          <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold">Как это работает</h2>
+        </div>
+
+        <div class="space-y-6">
+          <div class="flex gap-4">
+            <div class="w-10 h-10 bg-[#00D4AA] rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="font-bold text-[#0A0A0B]">1</span>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-1">Заполните заявку</h3>
+              <p class="text-[#A1A1AA] text-sm">Расскажите о себе и своей аудитории. Мы рассмотрим заявку в течение 24 часов.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-10 h-10 bg-[#00D4AA] rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="font-bold text-[#0A0A0B]">2</span>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-1">Получите персональную ссылку</h3>
+              <p class="text-[#A1A1AA] text-sm">После одобрения вы получите уникальную реферальную ссылку для отслеживания.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-10 h-10 bg-[#00D4AA] rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="font-bold text-[#0A0A0B]">3</span>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-1">Делитесь с аудиторией</h3>
+              <p class="text-[#A1A1AA] text-sm">Используйте ссылку в постах, stories, на сайте или в любых других каналах.</p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-10 h-10 bg-[#00D4AA] rounded-full flex items-center justify-center flex-shrink-0">
+              <span class="font-bold text-[#0A0A0B]">4</span>
+            </div>
+            <div>
+              <h3 class="font-semibold mb-1">Получайте выплаты</h3>
+              <p class="text-[#A1A1AA] text-sm">Выплаты производятся ежемесячно на карту или электронный кошелёк. Минимум — 3000₽.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Who is it for -->
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">Кому подойдёт партнёрство</h2>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#00D4AA]" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.717-.962 3.767-1.362 5.001-.168.52-.504.694-.826.71-.702.033-1.235-.464-1.913-.908-1.061-.695-1.662-1.127-2.693-1.805-.119-.078-.238-.158-.356-.239a.734.734 0 01.05-1.171c.294-.24 2.661-2.426 2.661-2.426s.172-.177.161-.284a.316.316 0 00-.189-.238 1.02 1.02 0 00-.373-.05c-.177.011-2.986 1.897-8.428 5.571-.797.548-1.52.815-2.165.801-.713-.016-2.082-.403-3.104-.736-.125-.041-.247-.081-.364-.121a.722.722 0 01-.437-.873c.056-.148.146-.258.256-.354.851-.748 8.666-3.758 10.818-4.677 5.112-2.186 6.184-2.568 6.876-2.58.153-.002.495.035.716.214.186.149.238.351.263.494.024.143.056.466.032.72z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold">Владельцы Telegram-каналов</h3>
+          </div>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Если у вас есть канал о маркетинге, SMM, бизнесе или технологиях — ваша аудитория заинтересована в автоматизации контента.
+          </p>
+        </div>
+
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold">Блогеры и инфлюенсеры</h3>
+          </div>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Рекомендуйте полезный инструмент своей аудитории и получайте пассивный доход от каждого привлечённого клиента.
+          </p>
+        </div>
+
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold">Агентства и фрилансеры</h3>
+          </div>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Предлагайте ContentForce своим клиентам как часть услуг по SMM и зарабатывайте дополнительно.
+          </p>
+        </div>
+
+        <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-[#00D4AA]/10 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+              </svg>
+            </div>
+            <h3 class="font-semibold">Образовательные проекты</h3>
+          </div>
+          <p class="text-[#A1A1AA] text-sm leading-relaxed">
+            Включите ContentForce в свои курсы по SMM или контент-маркетингу и зарабатывайте на рекомендациях.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Application Form -->
+    <section class="mb-16">
+      <div class="bg-gradient-to-r from-[#00D4AA]/10 to-[#00D4AA]/5 border border-[#00D4AA]/20 rounded-2xl p-8">
+        <h2 class="text-2xl font-bold mb-2">Стать партнёром</h2>
+        <p class="text-[#A1A1AA] mb-6">
+          Заполните форму, и мы свяжемся с вами в течение 24 часов.
+        </p>
+
+        <%= form_with url: submit_contact_path, method: :post, local: true, class: "space-y-4" do |f| %>
+          <input type="hidden" name="subject" value="Заявка на партнёрство">
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Ваше имя</label>
+              <input type="text" name="name" required class="w-full px-4 py-3 bg-[#0A0A0B] border border-[#27272A] rounded-lg focus:border-[#00D4AA] focus:outline-none transition-colors">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Email</label>
+              <input type="email" name="email" required class="w-full px-4 py-3 bg-[#0A0A0B] border border-[#27272A] rounded-lg focus:border-[#00D4AA] focus:outline-none transition-colors">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Telegram</label>
+            <input type="text" name="telegram" placeholder="@username" class="w-full px-4 py-3 bg-[#0A0A0B] border border-[#27272A] rounded-lg focus:border-[#00D4AA] focus:outline-none transition-colors">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium mb-2">Расскажите о себе и своей аудитории</label>
+            <textarea name="message" rows="4" required class="w-full px-4 py-3 bg-[#0A0A0B] border border-[#27272A] rounded-lg focus:border-[#00D4AA] focus:outline-none transition-colors resize-none" placeholder="Какой у вас канал/блог? Сколько подписчиков? Какая тематика?"></textarea>
+          </div>
+
+          <button type="submit" class="w-full md:w-auto px-8 py-3 bg-[#00D4AA] text-[#0A0A0B] font-semibold rounded-lg hover:bg-[#00D4AA]/90 transition-colors">
+            Отправить заявку
+          </button>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <div class="border-t border-[#27272A] pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "О нас", about_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Документация", docs_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Блог", blog_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Контакты", contacts_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "Политика", privacy_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Оферта", terms_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+    </div>
+  </div>
+</div>

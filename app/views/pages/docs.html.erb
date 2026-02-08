@@ -1,0 +1,550 @@
+<%= content_for :head do %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <title>Документация — ContentForce</title>
+  <meta name="description" content="Руководство пользователя ContentForce. Узнайте как создавать проекты, подключать Telegram-ботов, генерировать контент с AI.">
+<% end %>
+
+<style>
+  .docs-page {
+    --accent: #00D4AA;
+    --bg-dark: #0A0A0B;
+    --bg-card: #111113;
+    --bg-elevated: #1A1A1D;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    --border: #27272A;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+  }
+
+  .docs-page code, .docs-page .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .grain-overlay {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    right: -50%;
+    bottom: -50%;
+    width: 200%;
+    height: 200vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  .section-card {
+    transition: all 0.3s ease;
+  }
+
+  .section-card:hover {
+    border-color: var(--accent);
+  }
+
+  .toc-link {
+    transition: all 0.2s ease;
+  }
+
+  .toc-link:hover {
+    color: var(--accent);
+    padding-left: 4px;
+  }
+
+  .step-number {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, var(--accent), #00A88A);
+    color: var(--bg-dark);
+    font-weight: bold;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+</style>
+
+<div class="docs-page min-h-screen bg-[#0A0A0B] text-[#FAFAFA]">
+  <div class="grain-overlay"></div>
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
+    <div class="max-w-6xl mx-auto px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <%= link_to root_path, class: "flex items-center gap-3 group" do %>
+          <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
+            CF
+          </div>
+          <span class="text-lg font-semibold tracking-tight">ContentForce</span>
+        <% end %>
+
+        <div class="flex items-center gap-4 text-sm">
+          <%= link_to "Главная", root_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Блог", blog_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+          <%= link_to "Контакты", contacts_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <div class="relative border-b border-[#27272A]">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#00D4AA]/5 to-transparent"></div>
+    <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-16">
+      <div class="mono text-xs text-[#00D4AA] tracking-widest uppercase mb-4">Документация</div>
+      <h1 class="text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        Руководство пользователя
+      </h1>
+      <p class="text-xl text-[#A1A1AA] max-w-2xl">
+        Всё, что нужно знать для эффективной работы с ContentForce: от создания проекта до аналитики публикаций.
+      </p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="max-w-6xl mx-auto px-6 lg:px-8 py-12">
+    <div class="grid lg:grid-cols-4 gap-8">
+
+      <!-- Sidebar / Table of Contents -->
+      <aside class="lg:col-span-1">
+        <div class="sticky top-24 bg-[#111113] border border-[#27272A] rounded-xl p-5">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-[#A1A1AA] mb-4">Содержание</h2>
+          <nav class="space-y-2 text-sm">
+            <a href="#getting-started" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Начало работы</a>
+            <a href="#projects" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Создание проекта</a>
+            <a href="#telegram-bot" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Подключение Telegram-бота</a>
+            <a href="#posts" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Создание постов</a>
+            <a href="#ai-generation" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">AI-генерация</a>
+            <a href="#calendar" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Календарь публикаций</a>
+            <a href="#analytics" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Аналитика</a>
+            <a href="#pricing" class="toc-link block text-[#71717A] hover:text-[#00D4AA]">Тарифы и оплата</a>
+          </nav>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="lg:col-span-3 space-y-12">
+
+        <!-- Getting Started -->
+        <section id="getting-started">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Начало работы</h2>
+            </div>
+
+            <div class="space-y-4 text-[#A1A1AA] leading-relaxed">
+              <p>
+                ContentForce — это платформа для автоматизации создания и публикации контента в Telegram с использованием искусственного интеллекта. Вот что вы можете делать:
+              </p>
+
+              <div class="grid md:grid-cols-2 gap-3 my-6">
+                <div class="flex items-center gap-3 p-3 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="text-sm text-[#FAFAFA]">Генерировать посты с помощью AI</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="text-sm text-[#FAFAFA]">Планировать публикации</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="text-sm text-[#FAFAFA]">Публиковать в Telegram автоматически</span>
+                </div>
+                <div class="flex items-center gap-3 p-3 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span class="text-sm text-[#FAFAFA]">Отслеживать аналитику</span>
+                </div>
+              </div>
+
+              <div class="p-4 bg-[#00D4AA]/10 border border-[#00D4AA]/20 rounded-lg">
+                <p class="text-[#00D4AA] text-sm">
+                  <strong>Совет:</strong> Начните с бесплатного тарифа, чтобы познакомиться с возможностями платформы.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Projects -->
+        <section id="projects">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Создание проекта</h2>
+            </div>
+
+            <div class="space-y-6 text-[#A1A1AA] leading-relaxed">
+              <p>
+                Проект — это контейнер для вашего Telegram-канала. В рамках проекта вы создаёте посты, подключаете бота и настраиваете параметры AI-генерации.
+              </p>
+
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div class="step-number">1</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Перейдите в раздел "Проекты"</h3>
+                    <p class="text-sm">В левом меню нажмите на "Проекты" или используйте кнопку "Новый проект" на дашборде.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="step-number">2</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Заполните информацию</h3>
+                    <p class="text-sm">Укажите название проекта, описание и тематику. Это поможет AI генерировать релевантный контент.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="step-number">3</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Настройте AI (опционально)</h3>
+                    <p class="text-sm">Выберите модель AI, задайте стиль написания и системный промпт для персонализации генерации.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Telegram Bot -->
+        <section id="telegram-bot">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.717-.962 3.767-1.362 5.001-.168.52-.504.694-.826.71-.702.033-1.235-.464-1.913-.908-1.061-.695-1.662-1.127-2.693-1.805-.119-.078-.238-.158-.356-.239a.734.734 0 01.05-1.171c.294-.24 2.661-2.426 2.661-2.426s.172-.177.161-.284a.316.316 0 00-.189-.238 1.02 1.02 0 00-.373-.05c-.177.011-2.986 1.897-8.428 5.571-.797.548-1.52.815-2.165.801-.713-.016-2.082-.403-3.104-.736-.125-.041-.247-.081-.364-.121a.722.722 0 01-.437-.873c.056-.148.146-.258.256-.354.851-.748 8.666-3.758 10.818-4.677 5.112-2.186 6.184-2.568 6.876-2.58.153-.002.495.035.716.214.186.149.238.351.263.494.024.143.056.466.032.72z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Подключение Telegram-бота</h2>
+            </div>
+
+            <div class="space-y-6 text-[#A1A1AA] leading-relaxed">
+              <p>
+                Для публикации постов вам нужен Telegram-бот с правами администратора в вашем канале.
+              </p>
+
+              <div class="space-y-4">
+                <div class="flex gap-4">
+                  <div class="step-number">1</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Создайте бота через @BotFather</h3>
+                    <p class="text-sm">Откройте Telegram, найдите @BotFather и создайте нового бота командой <code class="px-2 py-0.5 bg-[#1A1A1D] rounded">/newbot</code>.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="step-number">2</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Скопируйте токен бота</h3>
+                    <p class="text-sm">BotFather выдаст вам токен вида <code class="px-2 py-0.5 bg-[#1A1A1D] rounded">123456789:ABCdef...</code>. Сохраните его.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="step-number">3</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Добавьте бота в канал как администратора</h3>
+                    <p class="text-sm">Перейдите в настройки канала → Администраторы → Добавить администратора. Дайте боту права на публикацию сообщений.</p>
+                  </div>
+                </div>
+
+                <div class="flex gap-4">
+                  <div class="step-number">4</div>
+                  <div>
+                    <h3 class="font-semibold text-[#FAFAFA] mb-1">Подключите бота в ContentForce</h3>
+                    <p class="text-sm">В проекте нажмите "Добавить бота", вставьте токен и нажмите "Проверить". Система автоматически найдёт ваш канал.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+                <p class="text-amber-200 text-sm">
+                  <strong>Важно:</strong> Храните токен бота в секрете. Не передавайте его третьим лицам.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Posts -->
+        <section id="posts">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Создание постов</h2>
+            </div>
+
+            <div class="space-y-6 text-[#A1A1AA] leading-relaxed">
+              <p>
+                ContentForce поддерживает три типа постов:
+              </p>
+
+              <div class="grid md:grid-cols-3 gap-4">
+                <div class="p-4 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <h3 class="font-semibold text-[#FAFAFA] mb-2">Текстовый</h3>
+                  <p class="text-sm">Только текст до 4096 символов. Поддерживает Markdown-форматирование.</p>
+                </div>
+                <div class="p-4 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <h3 class="font-semibold text-[#FAFAFA] mb-2">С изображением</h3>
+                  <p class="text-sm">Картинка + подпись до 1024 символов. Поддерживаются JPEG, PNG, WebP, GIF.</p>
+                </div>
+                <div class="p-4 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <h3 class="font-semibold text-[#FAFAFA] mb-2">С кнопкой</h3>
+                  <p class="text-sm">Изображение + подпись + inline-кнопка со ссылкой.</p>
+                </div>
+              </div>
+
+              <p>
+                Вы можете сохранить пост как черновик, опубликовать сразу или запланировать на определённое время.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- AI Generation -->
+        <section id="ai-generation">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">AI-генерация</h2>
+            </div>
+
+            <div class="space-y-6 text-[#A1A1AA] leading-relaxed">
+              <p>
+                ContentForce использует передовые AI-модели для генерации контента. Доступны:
+              </p>
+
+              <div class="flex flex-wrap gap-2 my-4">
+                <span class="px-3 py-1 bg-[#1A1A1D] rounded-full text-sm border border-[#27272A]">Claude 3.5</span>
+                <span class="px-3 py-1 bg-[#1A1A1D] rounded-full text-sm border border-[#27272A]">GPT-4</span>
+                <span class="px-3 py-1 bg-[#1A1A1D] rounded-full text-sm border border-[#27272A]">Gemini Pro</span>
+                <span class="px-3 py-1 bg-[#1A1A1D] rounded-full text-sm border border-[#27272A]">DeepSeek</span>
+                <span class="px-3 py-1 bg-[#00D4AA]/20 text-[#00D4AA] rounded-full text-sm border border-[#00D4AA]/30">Gemini Flash (бесплатно)</span>
+              </div>
+
+              <h3 class="font-semibold text-[#FAFAFA]">Возможности AI:</h3>
+              <ul class="space-y-2 ml-4">
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span><strong class="text-[#FAFAFA]">Генерация контента</strong> — создание постов по теме или промпту</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span><strong class="text-[#FAFAFA]">Улучшение текста</strong> — переработка и улучшение существующего контента</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span><strong class="text-[#FAFAFA]">Генерация хештегов</strong> — автоматический подбор релевантных хештегов</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <svg class="w-5 h-5 text-[#00D4AA] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                  </svg>
+                  <span><strong class="text-[#FAFAFA]">Генерация изображений</strong> — создание картинок для постов (Gemini Flash)</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Calendar -->
+        <section id="calendar">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Календарь публикаций</h2>
+            </div>
+
+            <div class="space-y-4 text-[#A1A1AA] leading-relaxed">
+              <p>
+                Календарь позволяет визуально планировать контент на неделю или месяц вперёд. Вы видите все запланированные посты и можете:
+              </p>
+
+              <ul class="space-y-2 ml-4">
+                <li>• Перетаскивать посты на другие даты</li>
+                <li>• Быстро создавать новые посты на конкретную дату</li>
+                <li>• Видеть статус каждого поста (черновик, запланирован, опубликован)</li>
+                <li>• Фильтровать по проектам</li>
+              </ul>
+
+              <p>
+                Время публикации учитывает вашу временную зону, которую можно настроить в профиле.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Analytics -->
+        <section id="analytics">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Аналитика</h2>
+            </div>
+
+            <div class="space-y-4 text-[#A1A1AA] leading-relaxed">
+              <p>
+                ContentForce собирает статистику по вашим публикациям и каналам:
+              </p>
+
+              <div class="grid md:grid-cols-2 gap-4">
+                <div class="p-4 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <h3 class="font-semibold text-[#FAFAFA] mb-2">Метрики постов</h3>
+                  <ul class="text-sm space-y-1">
+                    <li>• Количество просмотров</li>
+                    <li>• Динамика просмотров по времени</li>
+                    <li>• Лучшее время для публикации</li>
+                  </ul>
+                </div>
+                <div class="p-4 bg-[#1A1A1D] rounded-lg border border-[#27272A]">
+                  <h3 class="font-semibold text-[#FAFAFA] mb-2">Метрики канала</h3>
+                  <ul class="text-sm space-y-1">
+                    <li>• Рост подписчиков</li>
+                    <li>• Статистика по пригласительным ссылкам</li>
+                    <li>• Активность аудитории</li>
+                  </ul>
+                </div>
+              </div>
+
+              <p class="text-sm">
+                Данные обновляются автоматически через 1 час, 6 часов, 24 часа и 7 дней после публикации.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Pricing -->
+        <section id="pricing">
+          <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-6">
+              <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
+                <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+              </div>
+              <h2 class="text-2xl font-bold">Тарифы и оплата</h2>
+            </div>
+
+            <div class="space-y-4 text-[#A1A1AA] leading-relaxed">
+              <p>
+                ContentForce предлагает несколько тарифов для разных потребностей:
+              </p>
+
+              <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-[#27272A]">
+                      <th class="text-left py-3 text-[#FAFAFA]">Тариф</th>
+                      <th class="text-left py-3 text-[#FAFAFA]">AI-генерации</th>
+                      <th class="text-left py-3 text-[#FAFAFA]">Проекты</th>
+                      <th class="text-right py-3 text-[#FAFAFA]">Цена</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="border-b border-[#27272A]/50">
+                      <td class="py-3">Free</td>
+                      <td class="py-3">10/мес</td>
+                      <td class="py-3">1</td>
+                      <td class="py-3 text-right text-[#00D4AA]">Бесплатно</td>
+                    </tr>
+                    <tr class="border-b border-[#27272A]/50">
+                      <td class="py-3">Starter</td>
+                      <td class="py-3">100/мес</td>
+                      <td class="py-3">3</td>
+                      <td class="py-3 text-right">590 ₽/мес</td>
+                    </tr>
+                    <tr class="border-b border-[#27272A]/50">
+                      <td class="py-3">Pro</td>
+                      <td class="py-3">500/мес</td>
+                      <td class="py-3">10</td>
+                      <td class="py-3 text-right">1 490 ₽/мес</td>
+                    </tr>
+                    <tr>
+                      <td class="py-3">Business</td>
+                      <td class="py-3">Безлимит</td>
+                      <td class="py-3">Безлимит</td>
+                      <td class="py-3 text-right">2 990 ₽/мес</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <p>
+                Оплата производится через Robokassa. Принимаются карты, СБП и электронные кошельки.
+              </p>
+
+              <div class="mt-4">
+                <%= link_to subscriptions_path, class: "inline-flex items-center gap-2 text-[#00D4AA] hover:underline" do %>
+                  Посмотреть все тарифы
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+                  </svg>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-t border-[#27272A] pt-8 mt-16 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "О нас", about_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Блог", blog_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Партнёрам", careers_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Контакты", contacts_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+      <div class="flex items-center gap-6 text-sm">
+        <%= link_to "Политика", privacy_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+        <%= link_to "Оферта", terms_path, class: "text-[#71717A] hover:text-[#00D4AA] transition-colors" %>
+      </div>
+    </div>
+  </div>
+</div>

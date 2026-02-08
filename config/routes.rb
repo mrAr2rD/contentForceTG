@@ -98,6 +98,15 @@ Rails.application.routes.draw do
   get 'pages/home'
   get 'terms', to: 'pages#terms', as: :terms
   get 'privacy', to: 'pages#privacy', as: :privacy
+  get 'about', to: 'pages#about', as: :about
+  get 'careers', to: 'pages#careers', as: :careers
+  get 'contacts', to: 'pages#contacts', as: :contacts
+  post 'contacts', to: 'pages#submit_contact', as: :submit_contact
+  get 'docs', to: 'pages#docs', as: :docs
+
+  # Blog
+  get 'blog', to: 'articles#index', as: :blog
+  resources :articles, only: [:index, :show], param: :slug
 
   # Admin namespace - Simple admin without Administrate
   namespace :admin do
@@ -150,6 +159,17 @@ Rails.application.routes.draw do
     resources :notification_templates do
       collection do
         post :load_defaults
+      end
+    end
+
+    # Статьи блога
+    resources :articles do
+      member do
+        get :preview
+        post :generate_content
+      end
+      collection do
+        post :generate_content
       end
     end
   end

@@ -30,3 +30,6 @@ application.register("editor-panels", EditorPanelsController)
 
 import ImageGeneratorController from "./image_generator_controller"
 application.register("image-generator", ImageGeneratorController)
+
+import ArticleGeneratorController from "./article_generator_controller"
+application.register("article-generator", ArticleGeneratorController)
