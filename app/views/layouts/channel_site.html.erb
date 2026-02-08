@@ -48,65 +48,146 @@
         border-radius: 12px;
       }
       .text-muted { color: var(--text-secondary); }
+      .channel-site-scrollbar::-webkit-scrollbar {
+        width: 6px;
+      }
+      .channel-site-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .channel-site-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--border-color);
+        border-radius: 3px;
+      }
+      .channel-site-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--text-muted);
+      }
     </style>
   </head>
 
-  <body class="min-h-screen flex flex-col">
-    <!-- Header -->
-    <header class="border-b border-zinc-800 sticky top-0 z-50" style="background-color: var(--bg-primary);">
-      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-        <a href="/" class="text-xl font-bold hover:text-emerald-400 transition-colors">
-          <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
-        </a>
+  <body class="min-h-screen" data-controller="sidebar">
+    <div class="flex h-screen overflow-hidden">
+      <!-- Mobile overlay -->
+      <div data-sidebar-target="overlay" data-action="click->sidebar#closeMobile" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
-        <nav class="flex items-center gap-6">
-          <a href="/posts" class="text-zinc-400 hover:text-white transition-colors">Все посты</a>
+      <!-- Left Sidebar -->
+      <aside data-sidebar-target="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 border-r border-zinc-800 flex flex-col shrink-0 transition-all duration-300 -translate-x-full lg:translate-x-0" style="background-color: var(--bg-secondary);">
+        <!-- Channel Header -->
+        <div class="p-4 border-b border-zinc-800">
+          <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-full accent-bg flex items-center justify-center text-black font-bold text-lg">
+              <%= (@channel_site.site_title || @channel_site.telegram_bot.channel_name).to_s[0]&.upcase %>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h1 class="font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
+                <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
+              </h1>
+              <p class="text-xs text-zinc-500">Telegram канал</p>
+            </div>
+          </a>
+
+          <!-- Close button (mobile only) -->
+          <button
+            data-action="click->sidebar#closeMobile"
+            class="lg:hidden absolute top-4 right-4 p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto channel-site-scrollbar p-3 space-y-1">
+          <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white' %>">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+            </svg>
+            <span>Главная</span>
+          </a>
+
+          <a href="/posts" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/posts' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white' %>">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+            </svg>
+            <span>Все посты</span>
+          </a>
+
+          <!-- Channel Stats -->
+          <div class="mt-6 pt-4 border-t border-zinc-800">
+            <div class="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+              Статистика
+            </div>
+            <div class="space-y-2 px-3 py-2">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-zinc-500">Публикаций</span>
+                <span class="text-white font-medium"><%= @channel_site.posts_count %></span>
+              </div>
+              <% if @channel_site.last_synced_at.present? %>
+                <div class="flex items-center justify-between text-sm">
+                  <span class="text-zinc-500">Обновлено</span>
+                  <span class="text-zinc-400 text-xs"><%= time_ago_in_words(@channel_site.last_synced_at) %> назад</span>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </nav>
+
+        <!-- Subscribe CTA -->
+        <div class="p-4 border-t border-zinc-800">
           <% if @channel_site.telegram_url.present? %>
             <a href="<%= @channel_site.telegram_url %>"
                target="_blank"
                rel="noopener noreferrer"
-               class="inline-flex items-center gap-2 px-4 py-2 rounded-lg accent-bg text-black font-semibold hover:opacity-90 transition-opacity">
+               class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-lg accent-bg text-black font-semibold hover:opacity-90 transition-opacity">
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.308-.346-.11l-6.4 4.02-2.76-.918c-.6-.187-.612-.6.125-.89l10.782-4.156c.5-.18.94.12.78.89z"/>
               </svg>
               Подписаться
             </a>
           <% end %>
-        </nav>
-      </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="flex-1">
-      <%= yield %>
-    </main>
+          <!-- Powered by -->
+          <a href="https://contentforce.app"
+             target="_blank"
+             rel="noopener noreferrer"
+             class="flex items-center justify-center gap-1.5 mt-3 text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+            <span>Создано на</span>
+            <span class="font-medium">ContentForce</span>
+          </a>
+        </div>
+      </aside>
 
-    <!-- Footer -->
-    <footer class="border-t border-zinc-800 mt-16">
-      <div class="max-w-5xl mx-auto px-4 py-8">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div class="text-zinc-500 text-sm">
-            Контент канала <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
-          </div>
-
-          <div class="flex items-center gap-6">
-            <% if @channel_site.telegram_url.present? %>
-              <a href="<%= @channel_site.telegram_url %>"
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 class="text-zinc-400 hover:text-emerald-400 transition-colors">
-                Telegram канал
-              </a>
-            <% end %>
-            <a href="https://contentforce.app"
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Mobile header -->
+        <header class="lg:hidden h-14 px-4 border-b border-zinc-800 flex items-center justify-between" style="background-color: var(--bg-primary);">
+          <button data-action="click->sidebar#openMobile" class="p-2 text-zinc-400 hover:text-white transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+            </svg>
+          </button>
+          <a href="/" class="font-semibold text-white">
+            <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
+          </a>
+          <% if @channel_site.telegram_url.present? %>
+            <a href="<%= @channel_site.telegram_url %>"
                target="_blank"
                rel="noopener noreferrer"
-               class="text-zinc-500 hover:text-zinc-400 transition-colors text-sm">
-              Создано на ContentForce
+               class="p-2 accent hover:opacity-80 transition-opacity">
+              <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.308-.346-.11l-6.4 4.02-2.76-.918c-.6-.187-.612-.6.125-.89l10.782-4.156c.5-.18.94.12.78.89z"/>
+              </svg>
             </a>
-          </div>
-        </div>
+          <% else %>
+            <div class="w-10"></div>
+          <% end %>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto channel-site-scrollbar" style="background-color: var(--bg-primary);">
+          <%= yield %>
+        </main>
       </div>
-    </footer>
+    </div>
   </body>
 </html>

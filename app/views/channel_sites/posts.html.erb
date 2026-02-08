@@ -1,8 +1,11 @@
-<div class="max-w-5xl mx-auto px-4 py-12">
-  <h1 class="text-3xl font-bold mb-8">Все публикации</h1>
+<div class="max-w-4xl mx-auto px-6 py-8">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Все публикации</h1>
+    <span class="text-sm text-zinc-500"><%= @posts.respond_to?(:total_count) ? @posts.total_count : @posts.size %> постов</span>
+  </div>
 
   <% if @posts.any? %>
-    <div class="space-y-6 mb-12">
+    <div class="space-y-4 mb-8">
       <% @posts.each do |post| %>
         <%= render 'channel_sites/post_card', post: post %>
       <% end %>
@@ -12,23 +15,38 @@
     <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
       <nav class="flex items-center justify-center gap-2">
         <% if @posts.prev_page %>
-          <%= link_to '← Назад', channel_site_posts_path(page: @posts.prev_page),
-                      class: 'px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors' %>
+          <%= link_to channel_site_posts_path(page: @posts.prev_page),
+                      class: 'flex items-center gap-1 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors text-sm' do %>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+            Назад
+          <% end %>
         <% end %>
 
-        <span class="px-4 py-2 text-zinc-500">
-          Страница <%= @posts.current_page %> из <%= @posts.total_pages %>
+        <span class="px-4 py-2 text-zinc-500 text-sm">
+          <%= @posts.current_page %> / <%= @posts.total_pages %>
         </span>
 
         <% if @posts.next_page %>
-          <%= link_to 'Вперёд →', channel_site_posts_path(page: @posts.next_page),
-                      class: 'px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors' %>
+          <%= link_to channel_site_posts_path(page: @posts.next_page),
+                      class: 'flex items-center gap-1 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors text-sm' do %>
+            Вперёд
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+          <% end %>
         <% end %>
       </nav>
     <% end %>
   <% else %>
     <div class="card p-12 text-center">
-      <p class="text-zinc-400 text-lg">Публикации пока отсутствуют</p>
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-zinc-800 flex items-center justify-center">
+        <svg class="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+        </svg>
+      </div>
+      <p class="text-zinc-400">Публикации пока отсутствуют</p>
     </div>
   <% end %>
 </div>
