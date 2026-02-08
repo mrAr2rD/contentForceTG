@@ -101,9 +101,9 @@ module Analytics
       return [] unless @has_cost_column
 
       cost_expression = if @has_detailed_costs
-                          'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as total_cost'
+                          'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as cost_total'
                         else
-                          'SUM(cost) as total_cost'
+                          'SUM(cost) as cost_total'
                         end
 
       ai_usage_logs
@@ -119,7 +119,7 @@ module Analytics
             model: record.model_used,
             requests_count: record.requests_count,
             total_tokens: record.total_tokens,
-            total_cost: record.total_cost.to_f.round(6)
+            total_cost: record.cost_total.to_f.round(6)
           }
         end
         .sort_by { |r| -r[:total_cost] }
