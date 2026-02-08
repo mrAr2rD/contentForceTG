@@ -47,6 +47,9 @@ gem "lookbook", group: :development
 # Image Processing for Active Storage
 gem "image_processing", "~> 1.2"
 
+# Markdown rendering
+gem "redcarpet"
+
 # S3 Storage
 gem "aws-sdk-s3", require: false
 

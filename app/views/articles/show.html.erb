@@ -233,7 +233,7 @@
 
     <!-- Content -->
     <div class="article-content">
-      <%= simple_format(@article.content) %>
+      <%= render_markdown(@article.content) %>
     </div>
 
     <!-- Tags -->

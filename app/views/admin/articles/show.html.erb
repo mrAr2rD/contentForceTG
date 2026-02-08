@@ -39,7 +39,7 @@
       <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
         <h3 class="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-4">Контент</h3>
         <div class="prose dark:prose-invert max-w-none">
-          <%= simple_format(@article.content) %>
+          <%= render_markdown(@article.content) %>
         </div>
       </div>
 
