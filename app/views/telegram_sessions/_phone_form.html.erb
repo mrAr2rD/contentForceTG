@@ -1,33 +1,48 @@
 <% error ||= nil %>
 
 <%= form_with url: send_code_telegram_sessions_path, method: :post, data: { controller: "telegram-auth", turbo_frame: "_top" } do |f| %>
-  <div class="space-y-4">
+  <div class="space-y-5">
     <% if error %>
-      <div class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
-        <p class="text-sm text-red-600 dark:text-red-400"><%= error %></p>
+      <div class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl">
+        <div class="flex gap-3">
+          <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <p class="text-sm text-red-600 dark:text-red-400"><%= error %></p>
+        </div>
       </div>
     <% end %>
 
     <div>
-      <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label for="phone_number" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
         Номер телефона
       </label>
-      <input type="tel"
-             name="phone_number"
-             id="phone_number"
-             placeholder="+7 999 123 45 67"
-             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-             data-telegram-auth-target="phone"
-             autofocus>
-      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
-        Введите номер с кодом страны
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <svg class="w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+          </svg>
+        </div>
+        <input type="tel"
+               name="phone_number"
+               id="phone_number"
+               placeholder="+7 999 123 45 67"
+               class="w-full pl-12 pr-4 py-3.5 border border-zinc-300 dark:border-zinc-700 rounded-xl focus:ring-2 focus:ring-sky-500 focus:border-transparent dark:bg-zinc-800 dark:text-white text-lg font-mono transition-all"
+               data-telegram-auth-target="phone"
+               autofocus>
+      </div>
+      <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
+        Введите номер с кодом страны, например +7 для России
       </p>
     </div>
 
     <button type="submit"
-            class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            class="w-full py-3.5 px-4 bg-gradient-to-r from-sky-500 to-sky-600 text-white rounded-xl hover:from-sky-600 hover:to-sky-700 transition-all font-medium shadow-lg shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
             data-telegram-auth-target="submit">
-      Получить код
+      <span>Получить код</span>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+      </svg>
     </button>
   </div>
 <% end %>

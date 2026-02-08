@@ -1,18 +1,60 @@
-<div class="max-w-md mx-auto px-4 py-8">
-  <div class="text-center mb-8">
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Авторизация Telegram</h1>
-    <p class="mt-2 text-gray-600 dark:text-gray-400">
-      Авторизуйтесь для доступа к истории ваших каналов
-    </p>
-  </div>
-
-  <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-    <div id="auth_form">
-      <%= render "telegram_sessions/phone_form" %>
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
+  <div class="w-full max-w-md">
+    <!-- Декоративный фон -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-violet-500/10 rounded-full blur-3xl"></div>
     </div>
-  </div>
 
-  <div class="mt-6 text-center">
-    <%= link_to "Назад к списку", telegram_sessions_path, class: "text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300" %>
+    <!-- Карточка авторизации -->
+    <div class="relative">
+      <!-- Иконка Telegram -->
+      <div class="text-center mb-8">
+        <div class="relative inline-block">
+          <div class="absolute inset-0 bg-sky-500/30 rounded-full blur-2xl scale-150"></div>
+          <div class="relative w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 flex items-center justify-center shadow-2xl shadow-sky-500/40 transform hover:scale-105 transition-transform">
+            <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
+            </svg>
+          </div>
+        </div>
+        <h1 class="mt-6 text-2xl font-bold text-zinc-900 dark:text-zinc-50">Авторизация Telegram</h1>
+        <p class="mt-2 text-zinc-500 dark:text-zinc-400">
+          Подключите аккаунт для импорта истории каналов
+        </p>
+      </div>
+
+      <!-- Форма -->
+      <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-xl shadow-zinc-200/50 dark:shadow-none p-8">
+        <div id="auth_form">
+          <%= render "telegram_sessions/phone_form" %>
+        </div>
+      </div>
+
+      <!-- Информация о безопасности -->
+      <div class="mt-6 p-4 bg-zinc-50 dark:bg-zinc-900/50 rounded-xl border border-zinc-200 dark:border-zinc-800">
+        <div class="flex gap-3">
+          <div class="flex-shrink-0">
+            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <div class="text-sm text-zinc-600 dark:text-zinc-400">
+            <p class="font-medium text-zinc-900 dark:text-zinc-200 mb-1">Безопасность данных</p>
+            <p>Сессия шифруется и используется только для чтения истории ваших каналов. Мы не отправляем сообщения от вашего имени.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ссылка назад -->
+      <div class="mt-6 text-center">
+        <%= link_to telegram_sessions_path, class: "inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300 transition-colors" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+          </svg>
+          Назад к списку
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

@@ -1,70 +1,93 @@
-<div class="space-y-4">
-  <!-- Current Status -->
-  <div class="flex items-center space-x-3">
+<div class="space-y-5">
+  <!-- Текущий статус -->
+  <div class="flex items-center gap-3">
     <% if project.style_style_completed? %>
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-        </svg>
-        Проанализирован
-      </span>
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <span class="text-sm font-medium text-emerald-700 dark:text-emerald-300">Проанализирован</span>
+      </div>
     <% elsif project.style_style_analyzing? %>
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-        <svg class="animate-spin w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24">
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-sky-100 dark:bg-sky-900/30 rounded-full">
+        <svg class="animate-spin w-3.5 h-3.5 text-sky-600 dark:text-sky-400" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
           <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
-        Анализируется...
-      </span>
+        <span class="text-sm font-medium text-sky-700 dark:text-sky-300">Анализируется...</span>
+      </div>
     <% elsif project.style_style_failed? %>
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
-          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-        </svg>
-        Ошибка анализа
-      </span>
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-red-100 dark:bg-red-900/30 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-red-500"></span>
+        <span class="text-sm font-medium text-red-700 dark:text-red-300">Ошибка анализа</span>
+      </div>
     <% else %>
-      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
-        Не проанализирован
-      </span>
+      <div class="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 dark:bg-zinc-800 rounded-full">
+        <span class="w-2 h-2 rounded-full bg-zinc-400"></span>
+        <span class="text-sm font-medium text-zinc-600 dark:text-zinc-400">Не проанализирован</span>
+      </div>
     <% end %>
   </div>
 
   <% if project.style_analyzed_at.present? %>
-    <p class="text-xs text-gray-500 dark:text-gray-400">
+    <p class="text-xs text-zinc-500 dark:text-zinc-400">
       Последний анализ: <%= l(project.style_analyzed_at, format: :short) %>
     </p>
   <% end %>
 
-  <!-- Enabled Toggle -->
+  <!-- Переключатель использования стиля -->
   <% if project.style_style_completed? %>
-    <%= form_with model: project, url: project_style_settings_path(project), method: :patch, data: { turbo_frame: "_top" } do |f| %>
-      <label class="flex items-center cursor-pointer">
-        <%= f.check_box :custom_style_enabled, class: "sr-only peer", onchange: "this.form.requestSubmit()" %>
-        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
-          Использовать стиль
-        </span>
-      </label>
-    <% end %>
+    <div class="p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl">
+      <%= form_with model: project, url: project_style_settings_path(project), method: :patch, data: { turbo_frame: "_top" } do |f| %>
+        <label class="flex items-center justify-between cursor-pointer group">
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
+              <svg class="w-4 h-4 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-zinc-700 dark:text-zinc-300">Использовать стиль</span>
+          </div>
+          <div class="relative">
+            <%= f.check_box :custom_style_enabled, class: "sr-only peer", onchange: "this.form.requestSubmit()" %>
+            <div class="w-11 h-6 bg-zinc-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 dark:peer-focus:ring-primary-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-primary-600"></div>
+          </div>
+        </label>
+      <% end %>
+    </div>
   <% end %>
 
-  <!-- Actions -->
-  <div class="space-y-3 pt-4">
+  <!-- Кнопки действий -->
+  <div class="space-y-3">
     <% if project.can_analyze_style? %>
-      <%= button_to "Проанализировать стиль", analyze_project_style_settings_path(project), method: :post, class: "w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium" %>
+      <%= button_to analyze_project_style_settings_path(project), method: :post, class: "w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-violet-500 to-fuchsia-600 text-white rounded-xl hover:from-violet-600 hover:to-fuchsia-700 transition-all font-medium shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.01] active:scale-[0.99]" do %>
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+        </svg>
+        Проанализировать стиль
+      <% end %>
     <% elsif project.style_style_analyzing? %>
-      <button disabled class="w-full py-2 px-4 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+      <button disabled class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 rounded-xl cursor-not-allowed font-medium">
+        <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
         Анализируется...
       </button>
     <% else %>
-      <button disabled class="w-full py-2 px-4 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+      <button disabled class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-zinc-200 dark:bg-zinc-700 text-zinc-500 dark:text-zinc-400 rounded-xl cursor-not-allowed font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+        </svg>
         Добавьте примеры
       </button>
     <% end %>
 
     <% if project.custom_style_prompt.present? %>
-      <%= button_to "Сбросить стиль", reset_project_style_settings_path(project), method: :delete, data: { turbo_confirm: "Сбросить все данные стиля?" }, class: "w-full py-2 px-4 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors font-medium" %>
+      <%= button_to reset_project_style_settings_path(project), method: :delete, data: { turbo_confirm: "Сбросить все данные стиля? Это действие необратимо." }, class: "w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+        Сбросить стиль
+      <% end %>
     <% end %>
   </div>
 </div>

@@ -1,49 +1,47 @@
-<li id="sample_<%= sample.id %>" class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-  <div class="flex items-start justify-between">
+<li id="sample_<%= sample.id %>" class="group p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700/50 hover:border-zinc-200 dark:hover:border-zinc-600 transition-all duration-200">
+  <div class="flex items-start justify-between gap-4">
     <div class="flex-1 min-w-0">
-      <p class="text-sm text-gray-900 dark:text-white line-clamp-3">
+      <p class="text-sm text-zinc-700 dark:text-zinc-300 line-clamp-3 leading-relaxed">
         <%= sample.truncated_content(200) %>
       </p>
-      <div class="mt-2 flex items-center space-x-3 text-xs text-gray-500 dark:text-gray-400">
-        <span>
-          <% if sample.telegram_import? %>
-            <span class="inline-flex items-center">
-              <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
-              </svg>
-              <%= sample.source_channel || "Telegram" %>
-            </span>
-          <% elsif sample.file_upload? %>
-            <span class="inline-flex items-center">
-              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-              </svg>
-              Из файла
-            </span>
-          <% else %>
-            <span class="inline-flex items-center">
-              <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-              </svg>
-              Вручную
-            </span>
-          <% end %>
-        </span>
-        <span><%= sample.word_count %> слов</span>
+      <div class="mt-3 flex flex-wrap items-center gap-3 text-xs">
+        <% if sample.telegram_import? %>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-sky-100 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 rounded-full">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
+            </svg>
+            <%= sample.source_channel || "Telegram" %>
+          </span>
+        <% elsif sample.file_upload? %>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300 rounded-full">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+            Из файла
+          </span>
+        <% else %>
+          <span class="inline-flex items-center gap-1.5 px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-full">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+            </svg>
+            Вручную
+          </span>
+        <% end %>
+        <span class="text-zinc-500 dark:text-zinc-400"><%= sample.word_count %> слов</span>
         <% if sample.original_date.present? %>
-          <span><%= l(sample.original_date, format: :short) %></span>
+          <span class="text-zinc-400 dark:text-zinc-500"><%= l(sample.original_date, format: :short) %></span>
         <% end %>
       </div>
     </div>
-    <div class="flex items-center space-x-2 ml-4">
+    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
       <!-- Toggle for analysis -->
-      <%= button_to toggle_project_style_sample_path(sample.project, sample), method: :post, class: "p-1.5 rounded transition-colors #{sample.used_for_analysis? ? 'text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-900/30' : 'text-gray-400 hover:text-gray-500'}", title: sample.used_for_analysis? ? "Используется для анализа" : "Не используется для анализа" do %>
+      <%= button_to toggle_project_style_sample_path(sample.project, sample), method: :post, class: "p-2 rounded-lg transition-all duration-200 #{sample.used_for_analysis? ? 'text-emerald-600 hover:text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50' : 'text-zinc-400 hover:text-zinc-600 bg-zinc-100 dark:bg-zinc-700 hover:bg-zinc-200 dark:hover:bg-zinc-600'}", title: sample.used_for_analysis? ? "Используется для анализа" : "Не используется для анализа" do %>
         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
         </svg>
       <% end %>
       <!-- Delete -->
-      <%= button_to project_style_sample_path(sample.project, sample), method: :delete, data: { turbo_confirm: "Удалить этот пример?" }, class: "p-1.5 text-gray-400 hover:text-red-600 transition-colors" do %>
+      <%= button_to project_style_sample_path(sample.project, sample), method: :delete, data: { turbo_confirm: "Удалить этот пример?" }, class: "p-2 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-all duration-200" do %>
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
         </svg>
