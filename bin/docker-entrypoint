@@ -6,8 +6,8 @@ if [ -z "${LD_PRELOAD+x}" ]; then
     export LD_PRELOAD
 fi
 
-# If running the rails server then create or migrate existing database
-if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+# Function to prepare database
+prepare_database() {
   # Load Solid Queue/Cache/Cable schemas BEFORE db:prepare to avoid migration issues
   # These tables need to exist before Rails tries to migrate
   if ! ./bin/rails runner "ActiveRecord::Base.connection.table_exists?('solid_queue_jobs')" 2>/dev/null; then
@@ -27,6 +27,13 @@ if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
 
   # Now run migrations - Solid tables already exist, so no schema load will be triggered
   ./bin/rails db:prepare
+}
+
+# If running the rails server or supervisord then create or migrate existing database
+if [ "${@: -2:1}" == "./bin/rails" ] && [ "${@: -1:1}" == "server" ]; then
+  prepare_database
+elif [[ "$1" == *"supervisord"* ]]; then
+  prepare_database
 fi
 
 exec "${@}"
