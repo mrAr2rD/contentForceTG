@@ -1,0 +1,256 @@
+<%# Карточка тарифного плана для landing page %>
+<%# Локальные переменные: plan, highlighted (boolean, optional) %>
+<% highlighted = local_assigns.fetch(:highlighted, plan.popular?) %>
+<% is_business = plan.slug == 'business' %>
+
+<% if highlighted && !is_business %>
+  <%# Популярный план (Starter) - выделенный стиль %>
+  <div class="relative group bg-gradient-to-br from-violet-600 to-purple-600 rounded-2xl p-7 shadow-2xl shadow-violet-500/30 hover:shadow-violet-500/50 transform scale-105 hover:scale-110 transition-all duration-300">
+    <% if plan.badge_text.present? %>
+      <div class="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-xs font-bold rounded-full shadow-lg">
+        <span><%= plan.badge_text %></span>
+      </div>
+    <% end %>
+
+    <div class="mb-8">
+      <h3 class="text-xl font-bold text-white mb-2"><%= plan.name %></h3>
+      <div class="flex items-baseline gap-1 mb-1">
+        <span class="text-4xl font-bold text-white"><%= plan.formatted_price %></span>
+        <% unless plan.free? %>
+          <span class="text-violet-100 text-sm">/месяц</span>
+        <% end %>
+      </div>
+      <p class="text-sm text-violet-100"><%= plan.tagline %></p>
+    </div>
+
+    <ul class="space-y-3 mb-8 text-sm">
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.limit_description(:projects, singular: 'проект', plural: 'проектов') %></span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.formatted_limit(:ai_generations_per_month) %> AI-запросов</span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.unlimited?(:posts_per_month) ? 'Безлимит постов' : "#{plan.formatted_limit(:posts_per_month)} постов/месяц" %></span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.analytics_level_name %> аналитика</span>
+      </li>
+      <% if plan.feature?(:email_support) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-white font-medium">Email поддержка</span>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= link_to "Начать бесплатно", new_user_registration_path, class: "w-full block text-center py-3 px-4 bg-white hover:bg-violet-50 text-violet-700 rounded-xl font-bold transition-all duration-200 text-sm shadow-lg hover:shadow-xl" %>
+  </div>
+
+<% elsif is_business %>
+  <%# Business план - темный стиль %>
+  <div class="group bg-gradient-to-br from-slate-900 to-slate-800 border-2 border-slate-700 rounded-2xl p-7 hover:border-slate-600 hover:shadow-2xl transition-all duration-300">
+    <div class="mb-8">
+      <% if plan.badge_text.present? %>
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full text-xs font-bold text-white mb-3">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          <%= plan.badge_text.upcase %>
+        </div>
+      <% end %>
+      <h3 class="text-xl font-bold text-white mb-2"><%= plan.name %></h3>
+      <div class="flex items-baseline gap-1 mb-1">
+        <span class="text-4xl font-bold text-white"><%= plan.formatted_price %></span>
+        <span class="text-slate-400 text-sm">/месяц</span>
+      </div>
+      <p class="text-sm text-slate-400"><%= plan.tagline %></p>
+    </div>
+
+    <ul class="space-y-3 mb-8 text-sm">
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.unlimited?(:projects) ? 'Безлимит проектов' : plan.limit_description(:projects, singular: 'проект', plural: 'проектов') %></span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-white font-medium"><%= plan.unlimited?(:ai_generations_per_month) ? 'Безлимит AI-запросов' : "#{plan.formatted_limit(:ai_generations_per_month)} AI-запросов" %></span>
+      </li>
+      <% if plan.feature?(:multichannel) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-white font-medium">Мультиканальность</span>
+        </li>
+      <% end %>
+      <% if plan.feature?(:personal_manager) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-white font-medium">Личный менеджер</span>
+        </li>
+      <% end %>
+      <% if plan.feature?(:customization) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-gradient-to-br from-blue-500 to-violet-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-white font-medium">Кастомизация</span>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= link_to "Связаться", "#", class: "w-full block text-center py-3 px-4 bg-gradient-to-r from-blue-500 to-violet-500 hover:from-blue-600 hover:to-violet-600 text-white rounded-xl font-bold transition-all duration-200 text-sm shadow-lg hover:shadow-xl" %>
+  </div>
+
+<% elsif plan.free? %>
+  <%# Бесплатный план - простой стиль %>
+  <div class="group bg-white border-2 border-slate-200 rounded-2xl p-7 hover:border-slate-300 hover:shadow-xl transition-all duration-300">
+    <div class="mb-8">
+      <h3 class="text-xl font-bold text-slate-900 mb-2"><%= plan.name %></h3>
+      <div class="flex items-baseline gap-1 mb-1">
+        <span class="text-4xl font-bold text-slate-900"><%= plan.formatted_price %></span>
+      </div>
+      <p class="text-sm text-slate-600"><%= plan.tagline %></p>
+    </div>
+
+    <ul class="space-y-3 mb-8 text-sm">
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.limit_description(:projects, singular: 'проект', plural: 'проектов') %></span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.formatted_limit(:ai_generations_per_month) %> AI-запросов</span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.formatted_limit(:posts_per_month) %> постов/месяц</span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.analytics_level_name %> аналитика</span>
+      </li>
+    </ul>
+
+    <%= link_to "Начать", new_user_registration_path, class: "w-full block text-center py-3 px-4 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-xl font-semibold transition-all duration-200 text-sm" %>
+  </div>
+
+<% else %>
+  <%# Pro план - синий стиль %>
+  <div class="group bg-white border-2 border-slate-200 rounded-2xl p-7 hover:border-blue-300 hover:shadow-xl hover:shadow-blue-100 transition-all duration-300">
+    <div class="mb-8">
+      <h3 class="text-xl font-bold text-slate-900 mb-2"><%= plan.name %></h3>
+      <div class="flex items-baseline gap-1 mb-1">
+        <span class="text-4xl font-bold text-slate-900"><%= plan.formatted_price %></span>
+        <span class="text-slate-500 text-sm">/месяц</span>
+      </div>
+      <p class="text-sm text-slate-600"><%= plan.tagline %></p>
+    </div>
+
+    <ul class="space-y-3 mb-8 text-sm">
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.limit_description(:projects, singular: 'проект', plural: 'проектов') %></span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.formatted_limit(:ai_generations_per_month) %> AI-запросов</span>
+      </li>
+      <li class="flex items-start gap-3">
+        <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+          <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+          </svg>
+        </div>
+        <span class="text-slate-700"><%= plan.unlimited?(:posts_per_month) ? 'Безлимит постов' : "#{plan.formatted_limit(:posts_per_month)} постов/месяц" %></span>
+      </li>
+      <% if plan.feature?(:priority_support) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-slate-700">Приоритет поддержки</span>
+        </li>
+      <% end %>
+      <% if plan.feature?(:api_access) %>
+        <li class="flex items-start gap-3">
+          <div class="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-3 h-3 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+            </svg>
+          </div>
+          <span class="text-slate-700">API доступ</span>
+        </li>
+      <% end %>
+    </ul>
+
+    <%= link_to "Начать", new_user_registration_path, class: "w-full block text-center py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold transition-all duration-200 text-sm shadow-lg hover:shadow-xl" %>
+  </div>
+<% end %>

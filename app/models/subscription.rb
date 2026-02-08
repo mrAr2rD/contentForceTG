@@ -2,7 +2,7 @@
 
 class Subscription < ApplicationRecord
   belongs_to :user
-  belongs_to :plan_record, class_name: 'Plan', foreign_key: 'plan_id', optional: true
+  belongs_to :plan_record, class_name: "Plan", foreign_key: "plan_id", optional: true
   has_many :payments, dependent: :destroy
 
   # Enums
@@ -19,39 +19,40 @@ class Subscription < ApplicationRecord
 
   # Callbacks
   before_create :set_defaults
+  before_create :assign_plan_record
 
   # Instance methods
   def active?
-    status == 'active' || status == 'trialing'
+    status == "active" || status == "trialing"
   end
 
   def can_create_projects?
-    return true if plan == 'business'
+    return true if plan == "business"
     return false unless active?
 
     current_projects_count = user.projects.count
-    current_projects_count < limits['max_projects'].to_i
+    current_projects_count < limits["max_projects"].to_i
   end
 
   def can_create_posts?
-    return true if plan == 'business'
+    return true if plan == "business"
     return false unless active?
 
-    current_month_posts = user.posts.where('created_at > ?', Time.current.beginning_of_month).count
-    current_month_posts < limits['max_posts_per_month'].to_i
+    current_month_posts = user.posts.where("created_at > ?", Time.current.beginning_of_month).count
+    current_month_posts < limits["max_posts_per_month"].to_i
   end
 
   def can_use_ai?
-    return true if plan == 'business'
+    return true if plan == "business"
     return false unless active?
 
-    current_month_ai_requests = usage['ai_requests_this_month'].to_i
-    current_month_ai_requests < limits['max_ai_requests_per_month'].to_i
+    current_month_ai_requests = usage["ai_requests_this_month"].to_i
+    current_month_ai_requests < limits["max_ai_requests_per_month"].to_i
   end
 
   def increment_ai_usage!
     self.usage ||= {}
-    self.usage['ai_requests_this_month'] = (usage['ai_requests_this_month'].to_i + 1)
+    self.usage["ai_requests_this_month"] = (usage["ai_requests_this_month"].to_i + 1)
     save!
   end
 
@@ -71,11 +72,15 @@ class Subscription < ApplicationRecord
     save!
   end
 
+  # Получение лимита для фичи
+  # Приоритет: plan_record → Plan.cached_find_by_slug → PLAN_LIMITS (fallback)
   def limit_for(feature)
-    # Сначала проверяем план из БД, затем fallback на константы
     if plan_record.present?
       plan_record.limit_for(feature)
+    elsif (cached_plan = Plan.cached_find_by_slug(plan))
+      cached_plan.limit_for(feature)
     else
+      # Fallback на константы (deprecated)
       value = PLAN_LIMITS.dig(plan.to_sym, feature)
       return Float::INFINITY if value == -1
       value || 0
@@ -83,23 +88,37 @@ class Subscription < ApplicationRecord
   end
 
   # Цена текущего плана
+  # Приоритет: plan_record → Plan.cached_find_by_slug → PLAN_PRICES (fallback)
   def price
-    plan_record&.price || PLAN_PRICES[plan.to_sym] || 0
+    if plan_record.present?
+      plan_record.price
+    elsif (cached_plan = Plan.cached_find_by_slug(plan))
+      cached_plan.price
+    else
+      # Fallback на константы (deprecated)
+      PLAN_PRICES[plan.to_sym] || 0
+    end
   end
 
   # Название плана
   def plan_name
-    plan_record&.name || plan.to_s.titleize
+    if plan_record.present?
+      plan_record.name
+    elsif (cached_plan = Plan.cached_find_by_slug(plan))
+      cached_plan.name
+    else
+      plan.to_s.titleize
+    end
   end
 
   # Бесплатный ли план
   def free_plan?
-    plan_record&.free? || plan.to_sym == :free
+    plan_record&.free? || Plan.cached_find_by_slug(plan)&.free? || plan.to_sym == :free
   end
 
   # Привязать план из БД по slug
   def assign_plan!(slug)
-    self.plan_record = Plan.find_by_slug(slug)
+    self.plan_record = Plan.cached_find_by_slug(slug) || Plan.find_by_slug(slug)
     self.plan = slug.to_s
     save!
   end
@@ -112,7 +131,7 @@ class Subscription < ApplicationRecord
     limit = limit_for(:ai_generations_per_month)
     return Float::INFINITY if limit == Float::INFINITY || limit == -1
 
-    [limit - usage_for(:ai_generations_per_month), 0].max
+    [ limit - usage_for(:ai_generations_per_month), 0 ].max
   end
 
   def reset_usage!
@@ -120,7 +139,12 @@ class Subscription < ApplicationRecord
     save!
   end
 
-  # Pricing in RUB (rubles)
+  # =============================================================================
+  # DEPRECATED: Константы оставлены для обратной совместимости
+  # Используйте Plan.cached_all и Plan.cached_find_by_slug вместо них
+  # =============================================================================
+
+  # @deprecated Используйте Plan.cached_find_by_slug(slug).price
   PLAN_PRICES = {
     free: 0,
     starter: 590,
@@ -128,6 +152,7 @@ class Subscription < ApplicationRecord
     business: 2990
   }.freeze
 
+  # @deprecated Используйте Plan.cached_find_by_slug(slug).limit_for(feature)
   PLAN_LIMITS = {
     free: {
       projects: 1,
@@ -163,40 +188,48 @@ class Subscription < ApplicationRecord
 
   private
 
+  # Автоматически привязывает plan_record при создании
+  def assign_plan_record
+    return if plan_record.present?
+
+    self.plan_record = Plan.cached_find_by_slug(plan) || Plan.find_by_slug(plan)
+  end
+
   def set_defaults
     self.usage ||= {
-      'ai_requests_this_month' => 0,
-      'posts_this_month' => 0
+      "ai_requests_this_month" => 0,
+      "posts_this_month" => 0
     }
 
-    self.limits ||= case plan
-                    when 'free'
-                      {
-                        'max_projects' => 1,
-                        'max_posts_per_month' => 50,
-                        'max_ai_requests_per_month' => 10
-                      }
-                    when 'starter'
-                      {
-                        'max_projects' => 3,
-                        'max_posts_per_month' => 300,
-                        'max_ai_requests_per_month' => 100
-                      }
-                    when 'pro'
-                      {
-                        'max_projects' => 10,
-                        'max_posts_per_month' => -1, # unlimited
-                        'max_ai_requests_per_month' => 500
-                      }
-                    when 'business'
-                      {
-                        'max_projects' => -1, # unlimited
-                        'max_posts_per_month' => -1, # unlimited
-                        'max_ai_requests_per_month' => 2000
-                      }
-                    end
+    # Копируем лимиты из плана (для фиксации на момент подписки)
+    self.limits ||= build_limits_from_plan
 
     self.current_period_start ||= Time.current
     self.current_period_end ||= 1.month.from_now
+  end
+
+  # Получает лимиты из Plan или fallback на хардкод
+  def build_limits_from_plan
+    source_plan = Plan.cached_find_by_slug(plan) || Plan.find_by_slug(plan)
+
+    if source_plan.present?
+      {
+        "max_projects" => source_plan.limit_for(:projects),
+        "max_posts_per_month" => source_plan.limit_for(:posts_per_month),
+        "max_ai_requests_per_month" => source_plan.limit_for(:ai_generations_per_month)
+      }.transform_values { |v| v == Float::INFINITY ? -1 : v }
+    else
+      # Fallback для случаев когда Plan ещё не существует в БД
+      case plan
+      when "free"
+        { "max_projects" => 1, "max_posts_per_month" => 50, "max_ai_requests_per_month" => 10 }
+      when "starter"
+        { "max_projects" => 3, "max_posts_per_month" => 300, "max_ai_requests_per_month" => 100 }
+      when "pro"
+        { "max_projects" => 10, "max_posts_per_month" => -1, "max_ai_requests_per_month" => 500 }
+      when "business"
+        { "max_projects" => -1, "max_posts_per_month" => -1, "max_ai_requests_per_month" => 2000 }
+      end
+    end
   end
 end

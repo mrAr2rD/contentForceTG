@@ -8,23 +8,22 @@ class SubscriptionsController < ApplicationController
 
   def index
     @current_subscription = current_user.subscription
-    @plans = Subscription::PLAN_LIMITS
-    @prices = Subscription::PLAN_PRICES
+    @plans = Plan.cached_all
   end
 
   def upgrade
-    plan = params[:plan].to_sym
+    plan_slug = params[:plan].to_s
+    @plan = Plan.cached_find_by_slug(plan_slug)
 
-    unless Subscription::PLAN_PRICES.key?(plan)
-      redirect_to subscriptions_path, alert: 'Неверный тарифный план'
+    unless @plan&.active?
+      redirect_to subscriptions_path, alert: "Неверный тарифный план"
       return
     end
 
-    if plan == :free
-      if current_user.subscription.plan == 'free'
-        redirect_to subscriptions_path, alert: 'Вы уже на бесплатном тарифе'
+    if @plan.free?
+      if current_user.subscription.plan == "free"
+        redirect_to subscriptions_path, alert: "Вы уже на бесплатном тарифе"
       else
-        # Позволяем downgrade на бесплатный план
         redirect_to action: :downgrade
       end
       return
@@ -32,7 +31,7 @@ class SubscriptionsController < ApplicationController
 
     # Проверяем настройки Robokassa
     unless robokassa_configured?
-      redirect_to subscriptions_path, alert: 'Платежная система не настроена. Обратитесь к администратору.', status: :see_other
+      redirect_to subscriptions_path, alert: "Платежная система не настроена. Обратитесь к администратору.", status: :see_other
       return
     end
 
@@ -40,11 +39,12 @@ class SubscriptionsController < ApplicationController
     begin
       @payment = current_user.payments.create!(
         subscription: current_user.subscription,
-        amount: Subscription::PLAN_PRICES[plan],
-        provider: 'robokassa',
+        amount: @plan.price,
+        provider: "robokassa",
         status: :pending,
         metadata: {
-          plan: plan.to_s,
+          plan: @plan.slug,
+          plan_id: @plan.id,
           user_email: current_user.email
         }
       )
@@ -60,23 +60,25 @@ class SubscriptionsController < ApplicationController
   def downgrade
     subscription = current_user.subscription
 
-    if subscription.plan == 'free'
-      redirect_to subscriptions_path, alert: 'Вы уже на бесплатном тарифе', status: :see_other
+    if subscription.plan == "free"
+      redirect_to subscriptions_path, alert: "Вы уже на бесплатном тарифе", status: :see_other
       return
     end
 
+    free_plan = Plan.cached_find_by_slug(:free)
     subscription.update!(
       plan: :free,
+      plan_record: free_plan,
       current_period_end: Time.current
     )
     subscription.reset_usage!
 
-    redirect_to subscriptions_path, notice: 'Вы перешли на бесплатный тариф', status: :see_other
+    redirect_to subscriptions_path, notice: "Вы перешли на бесплатный тариф", status: :see_other
   end
 
   def cancel
     current_user.subscription.update!(status: :canceled)
-    redirect_to subscriptions_path, notice: 'Подписка отменена', status: :see_other
+    redirect_to subscriptions_path, notice: "Подписка отменена", status: :see_other
   end
 
   private

@@ -68,10 +68,8 @@
 
   <!-- Pricing Cards -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-    <% [:free, :starter, :pro, :business].each do |plan| %>
-      <% plan_limits = @plans[plan] %>
-      <% price = @prices[plan] %>
-      <% is_current = @current_subscription&.plan == plan.to_s %>
+    <% @plans.each do |plan| %>
+      <% is_current = @current_subscription&.plan == plan.slug %>
 
       <div class="relative bg-white dark:bg-zinc-900 border <%= is_current ? 'border-primary-500 ring-2 ring-primary-500' : 'border-zinc-200 dark:border-zinc-800' %> rounded-lg p-6 flex flex-col h-full">
         <% if is_current %>
@@ -80,15 +78,24 @@
               Текущий план
             </span>
           </div>
+        <% elsif plan.popular? %>
+          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+            <span class="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white">
+              <%= plan.badge_text || 'Популярный' %>
+            </span>
+          </div>
         <% end %>
 
         <!-- Plan Header -->
         <div class="mb-6">
-          <h3 class="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-2"><%= plan.to_s.titleize %></h3>
+          <h3 class="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-2"><%= plan.name %></h3>
           <div class="flex items-baseline">
-            <span class="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50"><%= price %></span>
+            <span class="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50"><%= plan.price.to_i %></span>
             <span class="ml-2 text-zinc-500 dark:text-zinc-400">₽/мес</span>
           </div>
+          <% if plan.tagline.present? %>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1"><%= plan.tagline %></p>
+          <% end %>
         </div>
 
         <!-- Features List -->
@@ -98,8 +105,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan_limits[:projects] == Float::INFINITY ? 'Безлимитные' : plan_limits[:projects] %>
-              <%= plan_limits[:projects] == 1 ? 'проект' : 'проектов' %>
+              <%= plan.unlimited?(:projects) ? 'Безлимит' : plan.formatted_limit(:projects) %>
+              <%= plan.limit_for(:projects) == 1 ? 'проект' : 'проектов' %>
             </span>
           </li>
           <li class="flex items-start gap-2">
@@ -107,8 +114,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan_limits[:bots] == Float::INFINITY ? 'Безлимитные' : plan_limits[:bots] %>
-              <%= plan_limits[:bots] == 1 ? 'бот' : 'ботов' %>
+              <%= plan.unlimited?(:bots) ? 'Безлимит' : plan.formatted_limit(:bots) %>
+              <%= plan.limit_for(:bots) == 1 ? 'бот' : 'ботов' %>
             </span>
           </li>
           <li class="flex items-start gap-2">
@@ -116,7 +123,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan_limits[:posts_per_month] == Float::INFINITY ? 'Безлимитные' : plan_limits[:posts_per_month] %>
+              <%= plan.unlimited?(:posts_per_month) ? 'Безлимит' : plan.formatted_limit(:posts_per_month) %>
               постов в месяц
             </span>
           </li>
@@ -125,17 +132,17 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan_limits[:ai_generations_per_month] == Float::INFINITY ? 'Безлимитные' : plan_limits[:ai_generations_per_month] %>
+              <%= plan.unlimited?(:ai_generations_per_month) ? 'Безлимит' : plan.formatted_limit(:ai_generations_per_month) %>
               AI генераций в месяц
             </span>
           </li>
-          <% if plan_limits[:ai_image_generations_per_month] %>
+          <% if plan.limit_for(:ai_image_generations_per_month) > 0 %>
             <li class="flex items-start gap-2">
               <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
               </svg>
               <span class="text-sm text-zinc-700 dark:text-zinc-300">
-                <%= plan_limits[:ai_image_generations_per_month] %> изображений AI в месяц
+                <%= plan.formatted_limit(:ai_image_generations_per_month) %> изображений AI в месяц
               </span>
             </li>
           <% end %>
@@ -144,14 +151,14 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
             <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              Аналитика: <%= plan_limits[:analytics].to_s.titleize %>
+              Аналитика: <%= plan.analytics_level_name %>
             </span>
           </li>
         </ul>
 
         <!-- Action Button -->
         <% if is_current %>
-          <% if plan != :free %>
+          <% unless plan.free? %>
             <%= button_to 'Отменить подписку', cancel_subscriptions_path, method: :post,
                 class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors",
                 data: { turbo_confirm: 'Вы уверены? Подписка будет отменена.' } %>
@@ -160,11 +167,11 @@
               Текущий план
             </button>
           <% end %>
-        <% elsif plan == :free %>
+        <% elsif plan.free? %>
           <%= button_to 'Перейти на Free', downgrade_subscriptions_path, method: :post,
               class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors" %>
         <% else %>
-          <%= button_to 'Перейти на этот план', upgrade_subscriptions_path(plan: plan), method: :post,
+          <%= button_to 'Перейти на этот план', upgrade_subscriptions_path(plan: plan.slug), method: :post,
               class: "w-full inline-flex justify-center items-center rounded-md bg-primary-600 hover:bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-colors",
               data: { turbo: false } %>
         <% end %>

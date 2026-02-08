@@ -1,5 +1,6 @@
 class PagesController < ApplicationController
   def home
+    @plans = Plan.cached_all
   end
 
   def terms
