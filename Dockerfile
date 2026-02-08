@@ -84,7 +84,7 @@ COPY --from=build /rails /rails
 # Install Python dependencies for telegram_parser (tgcrypto requires gcc to build)
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential python3-dev && \
-    pip3 install --no-cache-dir --break-system-packages \
+    pip3 install --no-cache-dir --break-system-packages --ignore-installed \
     pyrogram==2.0.106 \
     tgcrypto==1.2.5 \
     fastapi==0.109.0 \
