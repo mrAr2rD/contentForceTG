@@ -742,6 +742,7 @@
   </section>
 
   <!-- Mini-Sites for SEO Section -->
+  <% if SiteConfiguration.channel_sites_enabled? %>
   <section class="py-32 px-6 relative overflow-hidden">
     <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-[#8B5CF6]/5 rounded-full blur-[150px]"></div>
     <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-[#00D4AA]/5 rounded-full blur-[120px]"></div>
@@ -1016,6 +1017,7 @@
       </div>
     </div>
   </section>
+  <% end %>
 
   <!-- Features Section -->
   <section id="features" class="py-32 px-6">
