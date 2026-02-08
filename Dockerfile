@@ -81,14 +81,18 @@ FROM base
 COPY --from=build "${BUNDLE_PATH}" "${BUNDLE_PATH}"
 COPY --from=build /rails /rails
 
-# Install Python dependencies for telegram_parser
-RUN pip3 install --no-cache-dir --break-system-packages \
+# Install Python dependencies for telegram_parser (tgcrypto requires gcc to build)
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y build-essential python3-dev && \
+    pip3 install --no-cache-dir --break-system-packages \
     pyrogram==2.0.106 \
     tgcrypto==1.2.5 \
     fastapi==0.109.0 \
     uvicorn==0.27.0 \
     httpx==0.26.0 \
-    python-dotenv==1.0.0
+    python-dotenv==1.0.0 && \
+    apt-get purge -y --auto-remove build-essential python3-dev && \
+    rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Copy supervisord config
 COPY config/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
