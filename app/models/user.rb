@@ -15,6 +15,7 @@ class User < ApplicationRecord
   has_many :posts, dependent: :destroy
   has_one :subscription, dependent: :destroy
   has_many :payments, dependent: :destroy
+  has_many :telegram_sessions, dependent: :destroy
 
   # Validations
   validates :email, presence: true, uniqueness: true, allow_blank: true

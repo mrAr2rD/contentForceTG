@@ -1,0 +1,13 @@
+<% content_for :title, 'Создать мини-сайт' %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+    <%= link_to 'Мини-сайты', dashboard_channel_sites_path, class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <span>Создание</span>
+  </div>
+
+  <h1 class="text-2xl font-bold mb-8">Создать мини-сайт</h1>
+
+  <%= render 'form', channel_site: @channel_site %>
+</div>

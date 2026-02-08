@@ -1,0 +1,27 @@
+<% content_for :title, 'Настройки мини-сайта' %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+    <%= link_to 'Мини-сайты', dashboard_channel_sites_path, class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <%= link_to @channel_site.site_title || @channel_site.telegram_bot.channel_name,
+                dashboard_channel_site_path(@channel_site),
+                class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <span>Настройки</span>
+  </div>
+
+  <h1 class="text-2xl font-bold mb-8">Настройки сайта</h1>
+
+  <%= render 'form', channel_site: @channel_site %>
+
+  <div class="mt-12 pt-8 border-t border-zinc-200 dark:border-zinc-800">
+    <h2 class="text-lg font-semibold text-red-600 mb-4">Опасная зона</h2>
+    <%= button_to dashboard_channel_site_path(@channel_site),
+                  method: :delete,
+                  data: { confirm: 'Вы уверены? Это действие нельзя отменить.' },
+                  class: 'px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors' do %>
+      Удалить сайт
+    <% end %>
+  </div>
+</div>

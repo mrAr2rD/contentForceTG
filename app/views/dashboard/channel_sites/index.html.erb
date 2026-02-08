@@ -1,0 +1,96 @@
+<% content_for :title, 'Мини-сайты' %>
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-bold">Мини-сайты</h1>
+      <p class="text-zinc-500 mt-1">Превратите ваши Telegram каналы в SEO-оптимизированные сайты</p>
+    </div>
+
+    <%= link_to new_dashboard_channel_site_path,
+                class: 'inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors' do %>
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      Создать сайт
+    <% end %>
+  </div>
+
+  <% if @channel_sites.any? %>
+    <div class="grid gap-6">
+      <% @channel_sites.each do |site| %>
+        <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-lg font-semibold">
+                  <%= site.site_title || site.telegram_bot.channel_name %>
+                </h3>
+                <% if !site.telegram_bot.can_create_channel_site? %>
+                  <span class="px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 text-xs font-medium">
+                    Бот не администратор
+                  </span>
+                <% elsif site.enabled? %>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-medium">
+                    Активен
+                  </span>
+                <% else %>
+                  <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 text-xs font-medium">
+                    Отключён
+                  </span>
+                <% end %>
+              </div>
+
+              <% if site.host.present? %>
+                <a href="<%= site.full_url %>"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="text-emerald-500 hover:underline text-sm mb-4 inline-block">
+                  <%= site.host %> ↗
+                </a>
+              <% end %>
+
+              <div class="flex items-center gap-6 text-sm text-zinc-500 mt-4">
+                <span><%= site.posts_count %> постов</span>
+                <% if site.last_synced_at.present? %>
+                  <span>Синхронизировано: <%= time_ago_in_words(site.last_synced_at) %> назад</span>
+                <% else %>
+                  <span class="text-amber-500">Не синхронизировано</span>
+                <% end %>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <%= link_to dashboard_channel_site_path(site),
+                          class: 'p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors' do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                </svg>
+              <% end %>
+
+              <%= link_to edit_dashboard_channel_site_path(site),
+                          class: 'p-2 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors' do %>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center">
+      <div class="w-16 h-16 mx-auto mb-4 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center">
+        <svg class="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-semibold mb-2">Нет мини-сайтов</h3>
+      <p class="text-zinc-500 mb-6">Создайте SEO-сайт для вашего Telegram канала и привлекайте поисковый трафик</p>
+      <%= link_to 'Создать первый сайт', new_dashboard_channel_site_path,
+                  class: 'inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors' %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,128 @@
+<article class="max-w-3xl mx-auto px-4 py-12" itemscope itemtype="https://schema.org/Article">
+  <!-- Breadcrumbs -->
+  <nav class="mb-8 text-sm text-zinc-500">
+    <a href="/" class="hover:text-white transition-colors">Главная</a>
+    <span class="mx-2">/</span>
+    <a href="/posts" class="hover:text-white transition-colors">Публикации</a>
+    <span class="mx-2">/</span>
+    <span class="text-zinc-400"><%= @channel_post.display_title&.truncate(30) %></span>
+  </nav>
+
+  <!-- Header -->
+  <header class="mb-8">
+    <h1 class="text-3xl md:text-4xl font-bold mb-4" itemprop="headline">
+      <%= @channel_post.display_title %>
+    </h1>
+
+    <div class="flex items-center gap-4 text-zinc-500 text-sm">
+      <time datetime="<%= @channel_post.telegram_date.iso8601 %>" itemprop="datePublished">
+        <%= l(@channel_post.telegram_date, format: :long) rescue @channel_post.telegram_date.strftime('%d.%m.%Y') %>
+      </time>
+      <span>·</span>
+      <span><%= @channel_post.views_count %> просмотров в Telegram</span>
+      <span>·</span>
+      <span><%= @channel_post.site_views_count %> просмотров на сайте</span>
+    </div>
+  </header>
+
+  <!-- Media -->
+  <% if @channel_post.first_image.present? %>
+    <figure class="mb-8">
+      <img src="<%= @channel_post.first_image %>"
+           alt="<%= @channel_post.display_title %>"
+           class="w-full rounded-xl"
+           itemprop="image">
+    </figure>
+  <% end %>
+
+  <!-- Content -->
+  <div class="prose prose-invert prose-lg max-w-none mb-12" itemprop="articleBody">
+    <%= simple_format(@channel_post.display_content) %>
+  </div>
+
+  <!-- Telegram Link -->
+  <% if @channel_post.telegram_url.present? %>
+    <div class="card p-6 mb-12">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-zinc-400 mb-1">Читать в Telegram</p>
+          <p class="text-sm text-zinc-500">Оригинальный пост в канале</p>
+        </div>
+        <a href="<%= @channel_post.telegram_url %>"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors">
+          <svg class="w-5 h-5 accent" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.308-.346-.11l-6.4 4.02-2.76-.918c-.6-.187-.612-.6.125-.89l10.782-4.156c.5-.18.94.12.78.89z"/>
+          </svg>
+          Открыть
+        </a>
+      </div>
+    </div>
+  <% end %>
+
+  <!-- Subscribe CTA -->
+  <% if @channel_site.telegram_url.present? %>
+    <div class="card p-8 text-center mb-12 accent-border border-2">
+      <h3 class="text-xl font-bold mb-2">Понравился контент?</h3>
+      <p class="text-zinc-400 mb-4">Подпишитесь на канал, чтобы не пропустить новые публикации</p>
+      <a href="<%= @channel_site.telegram_url %>"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 px-6 py-3 rounded-lg accent-bg text-black font-semibold hover:opacity-90 transition-opacity">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.308-.346-.11l-6.4 4.02-2.76-.918c-.6-.187-.612-.6.125-.89l10.782-4.156c.5-.18.94.12.78.89z"/>
+        </svg>
+        Подписаться в Telegram
+      </a>
+    </div>
+  <% end %>
+
+  <!-- Navigation -->
+  <nav class="flex items-center justify-between">
+    <% if @prev_post %>
+      <a href="/post/<%= @prev_post.to_param %>" class="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors">
+        <span class="text-xl">←</span>
+        <div>
+          <span class="block text-xs uppercase tracking-wide text-zinc-500">Предыдущий</span>
+          <span class="group-hover:accent"><%= @prev_post.display_title&.truncate(40) %></span>
+        </div>
+      </a>
+    <% else %>
+      <div></div>
+    <% end %>
+
+    <% if @next_post %>
+      <a href="/post/<%= @next_post.to_param %>" class="group flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-right">
+        <div>
+          <span class="block text-xs uppercase tracking-wide text-zinc-500">Следующий</span>
+          <span class="group-hover:accent"><%= @next_post.display_title&.truncate(40) %></span>
+        </div>
+        <span class="text-xl">→</span>
+      </a>
+    <% end %>
+  </nav>
+</article>
+
+<!-- Schema.org JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "<%= j(@channel_post.display_title) %>",
+  "datePublished": "<%= @channel_post.telegram_date.iso8601 %>",
+  "dateModified": "<%= @channel_post.updated_at.iso8601 %>",
+  "author": {
+    "@type": "Organization",
+    "name": "<%= j(@channel_site.site_title || @channel_site.telegram_bot.channel_name) %>"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ContentForce"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "<%= @channel_site.full_url %>/post/<%= @channel_post.to_param %>"
+  }
+}
+</script>

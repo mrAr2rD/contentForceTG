@@ -1,0 +1,112 @@
+<% content_for :title, 'Посты мини-сайта' %>
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+  <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+    <%= link_to 'Мини-сайты', dashboard_channel_sites_path, class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <%= link_to @channel_site.site_title || @channel_site.telegram_bot.channel_name,
+                dashboard_channel_site_path(@channel_site),
+                class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <span>Посты</span>
+  </div>
+
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold">Посты</h1>
+
+    <div class="flex items-center gap-4">
+      <span class="text-sm text-zinc-500">
+        Всего: <%= @channel_posts.total_count rescue @channel_posts.count %> постов
+      </span>
+    </div>
+  </div>
+
+  <% if @channel_posts.any? %>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+      <table class="w-full">
+        <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+          <tr>
+            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Заголовок</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Дата</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Просмотры</th>
+            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Статус</th>
+            <th class="text-right px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Действия</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <% @channel_posts.each do |post| %>
+            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <% if post.first_image.present? %>
+                    <img src="<%= post.first_image %>" alt="" class="w-12 h-12 rounded object-cover">
+                  <% end %>
+                  <div>
+                    <div class="font-medium"><%= post.display_title&.truncate(50) %></div>
+                    <div class="text-sm text-zinc-500"><%= post.slug %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-sm text-zinc-500">
+                <%= post.telegram_date.strftime('%d.%m.%Y %H:%M') %>
+              </td>
+              <td class="px-6 py-4">
+                <div class="text-sm">
+                  <div><%= post.views_count %> в TG</div>
+                  <div class="text-zinc-500"><%= post.site_views_count %> на сайте</div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <% if post.featured? %>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs">Избранное</span>
+                <% end %>
+                <% case post.visibility %>
+                <% when 'visible' %>
+                  <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-xs">Виден</span>
+                <% when 'hidden' %>
+                  <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 text-xs">Скрыт</span>
+                <% else %>
+                  <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400 text-xs">Авто</span>
+                <% end %>
+              </td>
+              <td class="px-6 py-4 text-right">
+                <%= link_to edit_dashboard_channel_site_channel_post_path(@channel_site, post),
+                            class: 'text-emerald-500 hover:underline text-sm' do %>
+                  Редактировать
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <% if @channel_posts.respond_to?(:total_pages) && @channel_posts.total_pages > 1 %>
+      <nav class="flex items-center justify-center gap-2 mt-8">
+        <% if @channel_posts.prev_page %>
+          <%= link_to '← Назад', dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.prev_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' %>
+        <% end %>
+
+        <span class="px-4 py-2 text-zinc-500">
+          Страница <%= @channel_posts.current_page %> из <%= @channel_posts.total_pages %>
+        </span>
+
+        <% if @channel_posts.next_page %>
+          <%= link_to 'Вперёд →', dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.next_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' %>
+        <% end %>
+      </nav>
+    <% end %>
+  <% else %>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center">
+      <p class="text-zinc-500">Постов пока нет. Запустите синхронизацию для загрузки контента.</p>
+      <%= button_to sync_dashboard_channel_site_path(@channel_site),
+                    method: :post,
+                    class: 'mt-4 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors' do %>
+        Синхронизировать
+      <% end %>
+    </div>
+  <% end %>
+</div>

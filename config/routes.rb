@@ -1,4 +1,14 @@
+require_relative '../lib/constraints/subdomain_constraint'
+
 Rails.application.routes.draw do
+  # Мини-сайты каналов (subdomain/custom domain routing)
+  constraints SubdomainConstraint.new do
+    get '/', to: 'channel_sites#show', as: :channel_site_root
+    get '/posts', to: 'channel_sites#posts', as: :channel_site_posts
+    get '/post/:slug', to: 'channel_sites#post', as: :channel_site_post
+    get '/sitemap.xml', to: 'channel_sites#sitemap', as: :channel_site_sitemap, defaults: { format: :xml }
+  end
+
   # Health check
   get '/health', to: 'health#index'
 
@@ -21,6 +31,19 @@ Rails.application.routes.draw do
 
   # Calendar
   get 'calendar', to: 'calendar#index', as: :calendar
+
+  # Channel Sites (мини-сайты)
+  namespace :dashboard do
+    resources :channel_sites do
+      member do
+        post :enable
+        post :disable
+        post :sync
+        post :verify_domain
+      end
+      resources :channel_posts, only: [:index, :show, :edit, :update]
+    end
+  end
 
   # Analytics
   get 'analytics', to: 'analytics#index', as: :analytics  # Posts (must be defined before projects for correct route priority)
@@ -92,6 +115,7 @@ Rails.application.routes.draw do
     post 'robokassa/result', to: 'robokassa#result', as: :robokassa_result
     get 'robokassa/success', to: 'robokassa#success', as: :robokassa_success
     get 'robokassa/fail', to: 'robokassa#fail', as: :robokassa_fail
+    post 'channel_sync', to: 'channel_sync#receive', as: :channel_sync
   end
 
   # Static pages

@@ -1,0 +1,57 @@
+<div class="max-w-5xl mx-auto px-4 py-12">
+  <!-- Hero Section -->
+  <section class="text-center mb-16">
+    <h1 class="text-4xl md:text-5xl font-bold mb-4">
+      <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
+    </h1>
+    <% if @channel_site.site_description.present? %>
+      <p class="text-xl text-zinc-400 max-w-2xl mx-auto mb-8">
+        <%= @channel_site.site_description %>
+      </p>
+    <% end %>
+
+    <% if @channel_site.telegram_url.present? %>
+      <a href="<%= @channel_site.telegram_url %>"
+         target="_blank"
+         rel="noopener noreferrer"
+         class="inline-flex items-center gap-2 px-6 py-3 rounded-lg accent-bg text-black font-semibold hover:opacity-90 transition-opacity text-lg">
+        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.223-.548.223l.188-2.85 5.18-4.686c.223-.198-.054-.308-.346-.11l-6.4 4.02-2.76-.918c-.6-.187-.612-.6.125-.89l10.782-4.156c.5-.18.94.12.78.89z"/>
+        </svg>
+        Подписаться в Telegram
+      </a>
+    <% end %>
+  </section>
+
+  <!-- Featured Posts -->
+  <% if @featured_posts.any? %>
+    <section class="mb-16">
+      <h2 class="text-2xl font-bold mb-8">Избранное</h2>
+      <div class="grid md:grid-cols-3 gap-6">
+        <% @featured_posts.each do |post| %>
+          <%= render 'channel_sites/post_card', post: post, featured: true %>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+
+  <!-- Recent Posts -->
+  <section>
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold">Последние публикации</h2>
+      <a href="/posts" class="accent hover:underline">Все посты →</a>
+    </div>
+
+    <% if @recent_posts.any? %>
+      <div class="space-y-6">
+        <% @recent_posts.each do |post| %>
+          <%= render 'channel_sites/post_card', post: post %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="card p-12 text-center">
+        <p class="text-zinc-400 text-lg">Публикации появятся после синхронизации канала</p>
+      </div>
+    <% end %>
+  </section>
+</div>

@@ -1,0 +1,44 @@
+<% content_for :title, @channel_post.display_title %>
+
+<div class="max-w-4xl mx-auto px-4 py-8">
+  <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
+    <%= link_to 'Мини-сайты', dashboard_channel_sites_path, class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <%= link_to @channel_site.site_title || @channel_site.telegram_bot.channel_name,
+                dashboard_channel_site_path(@channel_site),
+                class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <%= link_to 'Посты', dashboard_channel_site_channel_posts_path(@channel_site),
+                class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
+    <span>/</span>
+    <span><%= @channel_post.display_title&.truncate(30) %></span>
+  </div>
+
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-2xl font-bold"><%= @channel_post.display_title %></h1>
+    <%= link_to 'Редактировать', edit_dashboard_channel_site_channel_post_path(@channel_site, @channel_post),
+                class: 'px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors' %>
+  </div>
+
+  <div class="grid grid-cols-3 gap-6 mb-8">
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <div class="text-2xl font-bold"><%= @channel_post.views_count %></div>
+      <div class="text-sm text-zinc-500">Просмотров в Telegram</div>
+    </div>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <div class="text-2xl font-bold"><%= @channel_post.site_views_count %></div>
+      <div class="text-sm text-zinc-500">Просмотров на сайте</div>
+    </div>
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <div class="text-2xl font-bold"><%= @channel_post.telegram_date.strftime('%d.%m.%Y') %></div>
+      <div class="text-sm text-zinc-500">Дата публикации</div>
+    </div>
+  </div>
+
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Контент</h3>
+    <div class="prose dark:prose-invert max-w-none">
+      <%= simple_format(@channel_post.display_content) %>
+    </div>
+  </div>
+</div>

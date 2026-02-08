@@ -1,0 +1,34 @@
+<div class="max-w-5xl mx-auto px-4 py-12">
+  <h1 class="text-3xl font-bold mb-8">Все публикации</h1>
+
+  <% if @posts.any? %>
+    <div class="space-y-6 mb-12">
+      <% @posts.each do |post| %>
+        <%= render 'channel_sites/post_card', post: post %>
+      <% end %>
+    </div>
+
+    <!-- Pagination -->
+    <% if @posts.respond_to?(:total_pages) && @posts.total_pages > 1 %>
+      <nav class="flex items-center justify-center gap-2">
+        <% if @posts.prev_page %>
+          <%= link_to '← Назад', channel_site_posts_path(page: @posts.prev_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors' %>
+        <% end %>
+
+        <span class="px-4 py-2 text-zinc-500">
+          Страница <%= @posts.current_page %> из <%= @posts.total_pages %>
+        </span>
+
+        <% if @posts.next_page %>
+          <%= link_to 'Вперёд →', channel_site_posts_path(page: @posts.next_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition-colors' %>
+        <% end %>
+      </nav>
+    <% end %>
+  <% else %>
+    <div class="card p-12 text-center">
+      <p class="text-zinc-400 text-lg">Публикации пока отсутствуют</p>
+    </div>
+  <% end %>
+</div>

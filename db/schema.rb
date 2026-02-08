@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_173040) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -115,6 +115,55 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
     t.index ["published_at"], name: "index_articles_on_published_at"
     t.index ["slug"], name: "index_articles_on_slug", unique: true
     t.index ["status"], name: "index_articles_on_status"
+  end
+
+  create_table "channel_posts", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.uuid "channel_site_id", null: false
+    t.text "content"
+    t.datetime "created_at", null: false
+    t.text "excerpt"
+    t.boolean "featured", default: false
+    t.jsonb "media", default: []
+    t.text "original_text"
+    t.integer "site_views_count", default: 0
+    t.string "slug"
+    t.datetime "telegram_date", null: false
+    t.bigint "telegram_message_id", null: false
+    t.string "title"
+    t.datetime "updated_at", null: false
+    t.integer "views_count", default: 0
+    t.integer "visibility", default: 0
+    t.index ["channel_site_id", "slug"], name: "idx_channel_posts_on_site_and_slug", unique: true, where: "(slug IS NOT NULL)"
+    t.index ["channel_site_id", "telegram_message_id"], name: "idx_channel_posts_on_site_and_message", unique: true
+    t.index ["channel_site_id"], name: "index_channel_posts_on_channel_site_id"
+    t.index ["featured"], name: "index_channel_posts_on_featured"
+    t.index ["telegram_date"], name: "index_channel_posts_on_telegram_date"
+    t.index ["visibility"], name: "index_channel_posts_on_visibility"
+  end
+
+  create_table "channel_sites", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "custom_domain"
+    t.boolean "custom_domain_verified", default: false
+    t.string "domain_verification_token"
+    t.boolean "enabled", default: false
+    t.datetime "last_synced_at"
+    t.text "meta_description"
+    t.string "meta_title"
+    t.integer "posts_count", default: 0
+    t.uuid "project_id", null: false
+    t.jsonb "settings", default: {}
+    t.text "site_description"
+    t.string "site_title"
+    t.string "subdomain"
+    t.uuid "telegram_bot_id", null: false
+    t.string "theme", default: "default"
+    t.datetime "updated_at", null: false
+    t.index ["custom_domain"], name: "index_channel_sites_on_custom_domain", unique: true, where: "(custom_domain IS NOT NULL)"
+    t.index ["enabled"], name: "index_channel_sites_on_enabled"
+    t.index ["project_id"], name: "index_channel_sites_on_project_id"
+    t.index ["subdomain"], name: "index_channel_sites_on_subdomain", unique: true, where: "(subdomain IS NOT NULL)"
+    t.index ["telegram_bot_id"], name: "index_channel_sites_on_telegram_bot_id"
   end
 
   create_table "channel_subscriber_metrics", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -335,6 +384,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
     t.index ["verified"], name: "index_telegram_bots_on_verified"
   end
 
+  create_table "telegram_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "active", default: true
+    t.datetime "created_at", null: false
+    t.string "phone_number"
+    t.text "session_string", null: false
+    t.datetime "updated_at", null: false
+    t.uuid "user_id", null: false
+    t.index ["user_id", "active"], name: "index_telegram_sessions_on_user_id_and_active"
+    t.index ["user_id"], name: "index_telegram_sessions_on_user_id"
+  end
+
   create_table "users", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.string "avatar_url"
     t.datetime "created_at", null: false
@@ -366,6 +426,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
   add_foreign_key "ai_usage_logs", "projects"
   add_foreign_key "ai_usage_logs", "users"
   add_foreign_key "articles", "users", column: "author_id"
+  add_foreign_key "channel_posts", "channel_sites"
+  add_foreign_key "channel_sites", "projects"
+  add_foreign_key "channel_sites", "telegram_bots"
   add_foreign_key "channel_subscriber_metrics", "telegram_bots"
   add_foreign_key "invite_links", "telegram_bots"
   add_foreign_key "notifications", "users"
@@ -381,4 +444,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_141323) do
   add_foreign_key "subscriptions", "plans"
   add_foreign_key "subscriptions", "users"
   add_foreign_key "telegram_bots", "projects"
+  add_foreign_key "telegram_sessions", "users"
 end

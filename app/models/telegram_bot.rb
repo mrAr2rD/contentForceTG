@@ -5,6 +5,7 @@ class TelegramBot < ApplicationRecord
   has_many :channel_subscriber_metrics, dependent: :destroy
   has_many :invite_links, dependent: :destroy
   has_many :subscriber_events, dependent: :destroy
+  has_one :channel_site, dependent: :destroy
   # Encryption for sensitive data
   encrypts :bot_token
 
@@ -56,6 +57,16 @@ class TelegramBot < ApplicationRecord
 
   def display_name
     bot_username || channel_name || "Bot ##{id.first(8)}"
+  end
+
+  # Проверка, что бот может быть использован для мини-сайта
+  def can_create_channel_site?
+    verified? && channel_id.present?
+  end
+
+  # Проверка, что бот является администратором канала
+  def channel_admin?
+    verified?
   end
 
   private

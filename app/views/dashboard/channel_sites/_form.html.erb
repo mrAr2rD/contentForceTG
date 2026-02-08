@@ -1,0 +1,143 @@
+<%= form_with model: [:dashboard, channel_site], class: 'space-y-8' do |form| %>
+  <% if channel_site.errors.any? %>
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+      <ul class="list-disc list-inside text-red-700 dark:text-red-300 text-sm">
+        <% channel_site.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <!-- Telegram Bot Selection -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Канал</h3>
+
+    <% if @telegram_bots.empty? %>
+      <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4 mb-4">
+        <div class="flex items-start gap-3">
+          <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          </svg>
+          <div>
+            <p class="font-medium text-amber-800 dark:text-amber-200">Нет подходящих каналов</p>
+            <p class="text-sm text-amber-700 dark:text-amber-300 mt-1">
+              Для создания мини-сайта необходимо:
+            </p>
+            <ul class="text-sm text-amber-700 dark:text-amber-300 mt-2 list-disc list-inside space-y-1">
+              <li>Подключить Telegram бота к проекту</li>
+              <li>Добавить бота администратором канала</li>
+              <li>Верифицировать бота в настройках проекта</li>
+            </ul>
+            <%= link_to 'Перейти к проектам', projects_path, class: 'inline-block mt-3 text-amber-800 dark:text-amber-200 underline hover:no-underline' %>
+          </div>
+        </div>
+      </div>
+    <% else %>
+      <div class="space-y-4">
+        <div>
+          <%= form.label :telegram_bot_id, 'Telegram канал', class: 'block text-sm font-medium mb-2' %>
+          <%= form.select :telegram_bot_id,
+                          options_from_collection_for_select(@telegram_bots, :id, :display_name, channel_site.telegram_bot_id),
+                          { include_blank: 'Выберите канал...' },
+                          class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+          <p class="text-sm text-zinc-500 mt-1">
+            Показаны только верифицированные боты-администраторы каналов.
+          </p>
+        </div>
+
+        <%= form.hidden_field :project_id, value: @telegram_bots.first&.project_id %>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- Domain Settings -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Домен</h3>
+
+    <div class="space-y-4">
+      <div>
+        <%= form.label :subdomain, 'Поддомен', class: 'block text-sm font-medium mb-2' %>
+        <div class="flex items-center">
+          <%= form.text_field :subdomain,
+                              placeholder: 'mychannel',
+                              class: 'flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-l-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+          <span class="px-4 py-2 bg-zinc-100 dark:bg-zinc-800 border border-l-0 border-zinc-300 dark:border-zinc-700 rounded-r-lg text-zinc-500">
+            .contentforce.app
+          </span>
+        </div>
+        <p class="text-sm text-zinc-500 mt-1">Латинские буквы, цифры и дефисы. Минимум 3 символа.</p>
+      </div>
+
+      <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800">
+        <%= form.label :custom_domain, 'Свой домен (опционально)', class: 'block text-sm font-medium mb-2' %>
+        <%= form.text_field :custom_domain,
+                            placeholder: 'blog.example.com',
+                            class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+        <p class="text-sm text-zinc-500 mt-1">Направьте CNAME запись на contentforce.app и добавьте TXT запись для верификации.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Settings -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Настройки сайта</h3>
+
+    <div class="space-y-4">
+      <div>
+        <%= form.label :site_title, 'Название сайта', class: 'block text-sm font-medium mb-2' %>
+        <%= form.text_field :site_title,
+                            placeholder: 'Название вашего канала',
+                            class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+      </div>
+
+      <div>
+        <%= form.label :site_description, 'Описание', class: 'block text-sm font-medium mb-2' %>
+        <%= form.text_area :site_description,
+                           rows: 3,
+                           placeholder: 'Краткое описание канала для посетителей',
+                           class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none' %>
+      </div>
+
+      <div>
+        <%= form.label :theme, 'Тема оформления', class: 'block text-sm font-medium mb-2' %>
+        <%= form.select :theme,
+                        [['Тёмная (по умолчанию)', 'default'], ['Светлая', 'light'], ['Минимальная', 'minimal']],
+                        {},
+                        class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEO Settings -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">SEO</h3>
+
+    <div class="space-y-4">
+      <div>
+        <%= form.label :meta_title, 'Meta Title', class: 'block text-sm font-medium mb-2' %>
+        <%= form.text_field :meta_title,
+                            maxlength: 70,
+                            placeholder: 'Заголовок для поисковиков (до 70 символов)',
+                            class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
+      </div>
+
+      <div>
+        <%= form.label :meta_description, 'Meta Description', class: 'block text-sm font-medium mb-2' %>
+        <%= form.text_area :meta_description,
+                           rows: 2,
+                           maxlength: 160,
+                           placeholder: 'Описание для поисковиков (до 160 символов)',
+                           class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none' %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="flex items-center justify-end gap-4">
+    <%= link_to 'Отмена', dashboard_channel_sites_path,
+                class: 'px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors' %>
+    <%= form.submit channel_site.persisted? ? 'Сохранить' : 'Создать',
+                    class: 'px-6 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition-colors cursor-pointer' %>
+  </div>
+<% end %>
