@@ -32,7 +32,15 @@ module Dashboard
       @channel_site = ChannelSite.new(channel_site_params)
 
       if @channel_site.save
-        redirect_to dashboard_channel_site_path(@channel_site), notice: "Мини-сайт успешно создан"
+        # Автоматически включаем мини-сайт если бот верифицирован
+        if @channel_site.telegram_bot.can_create_channel_site?
+          @channel_site.enable!
+          redirect_to dashboard_channel_site_path(@channel_site),
+                      notice: "Мини-сайт создан и автоматически включён"
+        else
+          redirect_to dashboard_channel_site_path(@channel_site),
+                      notice: "Мини-сайт создан. Верифицируйте бота для активации."
+        end
       else
         render :new, status: :unprocessable_entity
       end
@@ -83,8 +91,20 @@ module Dashboard
         return
       end
 
-      ChannelSites::SyncJob.perform_later(@channel_site.id)
-      redirect_to dashboard_channel_site_path(@channel_site), notice: "Синхронизация запущена"
+      # Проверяем есть ли Telegram сессия для полной синхронизации
+      has_telegram_session = @channel_site.project.user.telegram_sessions&.active&.exists?
+
+      if has_telegram_session
+        # Запускаем в фоне, т.к. синхронизация с Pyrogram может занять время
+        ChannelSites::SyncJob.perform_later(@channel_site.id)
+        redirect_to dashboard_channel_site_path(@channel_site),
+                    notice: "Синхронизация истории канала запущена в фоне"
+      else
+        # Быстрое обновление — новые посты приходят через webhook
+        @channel_site.update(last_synced_at: Time.current)
+        redirect_to dashboard_channel_site_path(@channel_site),
+                    notice: "Новые посты добавляются автоматически через webhook. Для импорта истории канала требуется авторизация Telegram."
+      end
     end
 
     # POST /dashboard/channel_sites/:id/verify_domain

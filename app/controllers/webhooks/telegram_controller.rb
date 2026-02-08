@@ -42,7 +42,10 @@ module Webhooks
       message_id = post_data['message_id']
       views = post_data['views'] || 0
 
-      # Find our post by message_id
+      # Сохраняем пост для мини-сайта (если есть channel_site)
+      save_channel_post_for_site(bot, post_data)
+
+      # Find our post by message_id (для аналитики наших постов)
       post = bot.posts.find_by(telegram_message_id: message_id)
       return unless post
 
@@ -252,6 +255,68 @@ module Webhooks
       non_member_statuses = %w[left kicked]
 
       member_statuses.include?(old_status) && non_member_statuses.include?(new_status)
+    end
+
+    # Helper: Сохранить пост канала для мини-сайта
+    def save_channel_post_for_site(bot, post_data)
+      channel_site = bot.channel_site
+      return unless channel_site&.enabled?
+
+      message_id = post_data['message_id']
+      text = post_data['text'] || post_data['caption'] || ''
+
+      # Пропускаем пустые посты
+      return if text.blank? && post_data['photo'].blank? && post_data['video'].blank?
+
+      # Собираем медиа
+      media = []
+      if post_data['photo'].present?
+        # photo - массив размеров, берём последний (самый большой)
+        largest_photo = post_data['photo'].is_a?(Array) ? post_data['photo'].last : post_data['photo']
+        media << {
+          type: 'photo',
+          file_id: largest_photo['file_id'],
+          width: largest_photo['width'],
+          height: largest_photo['height']
+        }
+      end
+
+      if post_data['video'].present?
+        media << {
+          type: 'video',
+          file_id: post_data['video']['file_id'],
+          duration: post_data['video']['duration']
+        }
+      end
+
+      if post_data['document'].present?
+        media << {
+          type: 'document',
+          file_id: post_data['document']['file_id'],
+          file_name: post_data['document']['file_name']
+        }
+      end
+
+      # Создаём или обновляем пост
+      channel_post = channel_site.channel_posts.find_or_initialize_by(
+        telegram_message_id: message_id
+      )
+
+      channel_post.assign_attributes(
+        telegram_date: post_data['date'] ? Time.at(post_data['date']).utc : Time.current,
+        original_text: text,
+        media: media,
+        views_count: post_data['views'] || 0
+      )
+
+      if channel_post.save
+        channel_site.update_posts_count!
+        Rails.logger.info("Saved channel post #{message_id} for site #{channel_site.id}")
+      else
+        Rails.logger.error("Failed to save channel post: #{channel_post.errors.full_messages.join(', ')}")
+      end
+    rescue StandardError => e
+      Rails.logger.error("Error saving channel post for site: #{e.message}")
     end
   end
 end

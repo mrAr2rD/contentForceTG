@@ -9,21 +9,29 @@ module ChannelSites
     end
 
     def call
-      # Получаем сессию пользователя для Pyrogram
-      telegram_session = @channel_site.project.user.telegram_sessions.active.first
+      # Новые посты приходят автоматически через webhook
+      # Для импорта старой истории нужна Telegram сессия (Pyrogram)
 
-      unless telegram_session
-        return { success: false, error: "Telegram сессия не найдена. Подключите аккаунт." }
-      end
+      telegram_session = @channel_site.project.user.telegram_sessions&.active&.first
 
-      # Вызываем Python microservice
-      response = request_sync(telegram_session)
+      if telegram_session
+        # Есть сессия — запускаем полную синхронизацию истории через Pyrogram
+        response = request_sync(telegram_session)
 
-      if response[:success]
-        @channel_site.update(last_synced_at: Time.current)
-        { success: true, message: "Синхронизация запущена" }
+        if response[:success]
+          @channel_site.update(last_synced_at: Time.current)
+          { success: true, message: "Синхронизация истории канала запущена" }
+        else
+          { success: false, error: response[:error] }
+        end
       else
-        { success: false, error: response[:error] }
+        # Нет сессии — только обновляем метку времени
+        # Новые посты будут приходить через webhook автоматически
+        @channel_site.update(last_synced_at: Time.current)
+        {
+          success: true,
+          message: "Новые посты будут добавляться автоматически. Для импорта истории канала требуется авторизация Telegram."
+        }
       end
     rescue StandardError => e
       Rails.logger.error("ChannelSites::SyncService error: #{e.message}")
