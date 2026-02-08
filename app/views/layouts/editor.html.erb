@@ -1,26 +1,25 @@
 <!DOCTYPE html>
-<html lang="ru" data-controller="theme">
+<html lang="ru" data-controller="theme" class="dark">
   <head>
-    <!-- Prevent FOUC - Load theme before rendering -->
     <script>
-      (function() {
-        const theme = localStorage.getItem('theme') || 'light';
-        if (theme === 'dark') {
-          document.documentElement.classList.add('dark');
-        }
-      })();
+      // Always use dark theme for editor
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     </script>
 
     <title>AI Редактор - ContentForce</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0A0A0B">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <%= yield :head %>
   </head>
 
-  <body class="bg-white dark:bg-zinc-950 min-h-screen">
+  <body class="bg-[#0A0A0B] min-h-screen antialiased">
     <%= yield %>
   </body>
 </html>

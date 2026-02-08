@@ -1,3 +1,122 @@
+<%= content_for :head do %>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<% end %>
+
+<style>
+  .ai-editor {
+    --accent: #00D4AA;
+    --accent-glow: rgba(0, 212, 170, 0.5);
+    --bg-base: #0A0A0B;
+    --bg-elevated: #111113;
+    --bg-surface: #18181B;
+    --border: #27272A;
+    --border-bright: #3F3F46;
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .ai-editor .mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Grain overlay */
+  .grain-overlay {
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.015;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Grid pattern */
+  .grid-pattern {
+    background-image:
+      linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  /* Glow effects */
+  .glow-accent {
+    box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(0, 212, 170, 0.2);
+  }
+
+  .glow-accent-subtle {
+    box-shadow: 0 0 10px rgba(0, 212, 170, 0.15);
+  }
+
+  .text-glow {
+    text-shadow: 0 0 20px var(--accent-glow);
+  }
+
+  /* Scrollbar */
+  .tech-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .tech-scrollbar::-webkit-scrollbar-track {
+    background: var(--bg-base);
+  }
+
+  .tech-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--border-bright);
+    border-radius: 3px;
+  }
+
+  .tech-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--accent);
+  }
+
+  /* Pulse animation */
+  @keyframes pulse-glow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  /* Typing animation */
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  .cursor-blink::after {
+    content: '▋';
+    animation: blink 1s infinite;
+    color: var(--accent);
+  }
+
+  /* Chat message animation */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .chat-message {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  /* Input glow on focus */
+  .input-tech:focus {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 20px rgba(0, 212, 170, 0.2);
+    border-color: transparent;
+  }
+
+  /* Button hover glow */
+  .btn-tech:hover {
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+</style>
+
 <div data-controller="post-editor chat editor-panels"
      data-chat-project-id-value="<%= @project&.id %>"
      data-chat-ai-model-value="<%= @project&.ai_model || 'anthropic/claude-3.5-sonnet' %>"
@@ -5,42 +124,48 @@
      data-post-editor-post-id-value="<%= @post.id %>"
      data-post-editor-remove-image-url-value="<%= @post.persisted? ? remove_image_post_path(@post) : '' %>"
      data-editor-panels-active-panel-value="preview"
-     class="h-screen flex flex-col bg-white dark:bg-zinc-950">
-  <!-- Header - Notion style -->
-  <header class="h-12 sm:h-14 border-b border-zinc-200 dark:border-zinc-800 px-3 sm:px-6 flex items-center justify-between bg-white dark:bg-zinc-950">
+     class="ai-editor h-screen flex flex-col bg-[#0A0A0B] text-[#FAFAFA]">
+
+  <div class="grain-overlay"></div>
+
+  <!-- Header -->
+  <header class="relative h-14 border-b border-[#27272A] px-4 flex items-center justify-between bg-[#0A0A0B]/95 backdrop-blur-xl z-50">
+    <!-- Accent line -->
+    <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#00D4AA]/50 to-transparent"></div>
+
     <div class="flex items-center gap-4">
-      <%= link_to posts_path, class: "p-2 text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors" do %>
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+      <%= link_to posts_path, class: "group flex items-center gap-2 px-3 py-1.5 rounded-lg text-[#A1A1AA] hover:text-[#00D4AA] hover:bg-[#00D4AA]/10 transition-all" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
         </svg>
+        <span class="text-sm hidden sm:inline">Назад</span>
       <% end %>
-      <div class="flex items-center gap-2">
-        <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-        </svg>
-        <h1 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">AI Редактор</h1>
+
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <div class="absolute inset-0 bg-[#00D4AA]/30 rounded-lg blur-md"></div>
+          <div class="relative w-8 h-8 bg-gradient-to-br from-[#00D4AA] to-[#00A896] rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-[#0A0A0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h1 class="text-base font-semibold tracking-tight">AI Редактор</h1>
+          <p class="text-[10px] text-[#00D4AA] mono tracking-widest uppercase">Neural Content Engine</p>
+        </div>
       </div>
     </div>
 
     <div class="flex items-center gap-2">
-      <!-- Theme Toggle -->
-      <button
-        data-action="click->theme#toggle"
-        class="p-2 rounded-md text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-50 dark:hover:bg-zinc-800 transition-colors"
-        title="Переключить тему"
-      >
-        <!-- Sun icon (visible in dark mode) -->
-        <svg class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/>
-        </svg>
-        <!-- Moon icon (visible in light mode) -->
-        <svg class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
-        </svg>
-      </button>
+      <!-- Status indicator -->
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-[#111113] border border-[#27272A] rounded-lg mr-2">
+        <span class="w-2 h-2 bg-[#00D4AA] rounded-full pulse-glow"></span>
+        <span class="text-xs text-[#A1A1AA] mono">ONLINE</span>
+      </div>
 
       <% if @post.persisted? %>
-        <%= link_to @post, class: "inline-flex items-center gap-2 px-2 sm:px-3 py-1.5 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md transition-colors" do %>
+        <%= link_to @post, class: "flex items-center gap-2 px-3 py-1.5 text-sm text-[#A1A1AA] hover:text-[#00D4AA] hover:bg-[#00D4AA]/10 rounded-lg transition-all" do %>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
@@ -48,9 +173,10 @@
           <span class="hidden sm:inline">Просмотр</span>
         <% end %>
       <% end %>
+
       <button
         data-action="click->post-editor#save"
-        class="inline-flex items-center gap-2 px-4 py-1.5 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm"
+        class="btn-tech inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#00D4AA] to-[#00A896] text-[#0A0A0B] rounded-lg text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
           <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
@@ -60,37 +186,25 @@
     </div>
   </header>
 
-  <!-- Mobile Panel Tabs (visible on < lg) -->
-  <nav class="lg:hidden flex border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950">
-    <button
-      type="button"
-      data-editor-panels-target="chatTab"
-      data-action="click->editor-panels#showChat"
-      class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-    >
+  <!-- Mobile Panel Tabs -->
+  <nav class="lg:hidden flex border-b border-[#27272A] bg-[#0A0A0B]">
+    <button type="button" data-editor-panels-target="chatTab" data-action="click->editor-panels#showChat"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-[#71717A] hover:text-[#00D4AA] border-b-2 border-transparent hover:border-[#00D4AA]/50 transition-all">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
       </svg>
-      <span>AI Чат</span>
+      <span>AI</span>
     </button>
-    <button
-      type="button"
-      data-editor-panels-target="settingsTab"
-      data-action="click->editor-panels#showSettings"
-      class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-    >
+    <button type="button" data-editor-panels-target="settingsTab" data-action="click->editor-panels#showSettings"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-[#71717A] hover:text-[#00D4AA] border-b-2 border-transparent hover:border-[#00D4AA]/50 transition-all">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
         <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
       </svg>
       <span>Настройки</span>
     </button>
-    <button
-      type="button"
-      data-editor-panels-target="previewTab"
-      data-action="click->editor-panels#showPreview"
-      class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium border-b-2 border-primary-500 text-primary-600 dark:text-primary-400 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-    >
+    <button type="button" data-editor-panels-target="previewTab" data-action="click->editor-panels#showPreview"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-medium text-[#00D4AA] border-b-2 border-[#00D4AA] transition-all">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
       </svg>
@@ -98,44 +212,74 @@
     </button>
   </nav>
 
-  <!-- Three Panel Layout - Notion style (responsive) -->
+  <!-- Three Panel Layout -->
   <div class="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
-    <!-- Left Panel: AI Chat (hidden on mobile, 30% on desktop) -->
-    <aside data-editor-panels-target="chatPanel"
-           class="hidden lg:flex lg:w-[30%] bg-zinc-50 dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex-col">
-      <div class="px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-200 dark:border-zinc-800">
-        <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
-          <div class="w-6 h-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-md flex items-center justify-center">
-            <svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-            </svg>
-          </div>
-          AI Ассистент
-        </h2>
-      </div>
 
-      <div class="flex-1 flex flex-col overflow-hidden">
-        <!-- Chat Messages -->
-        <div data-chat-target="messages" class="flex-1 overflow-y-auto notion-scrollbar px-4 sm:px-6 py-4 space-y-4">
-          <div class="bg-primary-50 dark:bg-primary-900/30 border border-primary-200 dark:border-primary-700 rounded-lg p-4">
-            <p class="text-sm text-primary-900 dark:text-primary-50 font-medium mb-2">👋 Привет! Я помогу создать пост.</p>
-            <p class="text-sm text-primary-800 dark:text-primary-100">Напиши тему или идею, и я сгенерирую текст для Telegram.</p>
+    <!-- Left Panel: AI Chat -->
+    <aside data-editor-panels-target="chatPanel"
+           class="hidden lg:flex lg:w-[30%] bg-[#0A0A0B] border-r border-[#27272A] flex-col relative">
+      <!-- Grid pattern background -->
+      <div class="absolute inset-0 grid-pattern opacity-50"></div>
+
+      <div class="relative px-5 py-4 border-b border-[#27272A] bg-[#111113]/80">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="absolute inset-0 bg-[#00D4AA]/20 rounded-lg blur"></div>
+            <div class="relative w-9 h-9 bg-gradient-to-br from-[#00D4AA] to-[#00A896] rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 text-[#0A0A0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h2 class="text-sm font-semibold">Neural Assistant</h2>
+            <p class="text-[10px] text-[#00D4AA] mono tracking-wider">GPT-4 • Claude 3.5 • Gemini</p>
           </div>
         </div>
-        
+      </div>
+
+      <div class="relative flex-1 flex flex-col overflow-hidden">
+        <!-- Chat Messages -->
+        <div data-chat-target="messages" class="flex-1 overflow-y-auto tech-scrollbar px-5 py-5 space-y-4">
+          <!-- Welcome message -->
+          <div class="chat-message relative">
+            <div class="absolute -left-1 top-3 w-2 h-2 bg-[#00D4AA] rounded-full glow-accent-subtle"></div>
+            <div class="ml-4 p-4 bg-gradient-to-br from-[#00D4AA]/10 to-[#00D4AA]/5 border border-[#00D4AA]/20 rounded-xl">
+              <p class="text-sm text-[#00D4AA] font-medium mb-2">
+                <span class="mono text-[10px] uppercase tracking-wider opacity-70">SYSTEM</span>
+              </p>
+              <p class="text-sm text-[#FAFAFA] leading-relaxed">
+                Привет! Я AI-ассистент для создания контента.
+                Опиши тему поста — и я сгенерирую текст для Telegram.
+              </p>
+              <div class="mt-3 flex flex-wrap gap-2">
+                <button class="px-2 py-1 text-[10px] mono bg-[#18181B] border border-[#27272A] rounded text-[#A1A1AA] hover:border-[#00D4AA] hover:text-[#00D4AA] transition-colors">
+                  /generate продающий пост
+                </button>
+                <button class="px-2 py-1 text-[10px] mono bg-[#18181B] border border-[#27272A] rounded text-[#A1A1AA] hover:border-[#00D4AA] hover:text-[#00D4AA] transition-colors">
+                  /improve текст
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Chat Input -->
-        <div class="px-4 sm:px-6 py-3 sm:py-4 border-t border-zinc-200 dark:border-zinc-800">
+        <div class="relative px-5 py-4 border-t border-[#27272A] bg-[#111113]/80">
           <form data-action="submit->chat#sendMessage" class="flex gap-2">
-            <input 
-              type="text" 
-              data-chat-target="input"
-              placeholder="Напиши тему поста..."
-              class="flex-1 h-10 px-3 py-2 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-md text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-950 dark:focus:ring-zinc-300 focus:ring-offset-2 dark:ring-offset-zinc-950 transition-shadow"
-            >
+            <div class="relative flex-1">
+              <input
+                type="text"
+                data-chat-target="input"
+                placeholder="Напиши тему поста или команду..."
+                class="input-tech w-full h-11 px-4 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] placeholder:text-[#71717A] mono focus:outline-none transition-all"
+              >
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-[#3F3F46] mono">⌘+Enter</div>
+            </div>
             <button
               type="submit"
               data-chat-target="submitButton"
-              class="inline-flex items-center justify-center h-10 px-4 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors"
+              class="btn-tech w-11 h-11 bg-gradient-to-r from-[#00D4AA] to-[#00A896] rounded-lg flex items-center justify-center text-[#0A0A0B] transition-all hover:scale-105 active:scale-95"
             >
               <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -146,80 +290,89 @@
       </div>
     </aside>
 
-    <!-- Center Panel: Settings (hidden on mobile by default, 25% on desktop) -->
+    <!-- Center Panel: Settings -->
     <aside data-editor-panels-target="settingsPanel"
-           class="hidden lg:block lg:w-1/4 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto notion-scrollbar">
-      <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800">
-        <h2 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Настройки</h2>
+           class="hidden lg:flex lg:w-[25%] bg-[#111113] border-r border-[#27272A] flex-col overflow-y-auto tech-scrollbar">
+
+      <div class="px-5 py-4 border-b border-[#27272A]">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          <h2 class="text-sm font-semibold">Параметры</h2>
+        </div>
       </div>
-      
-      <%= form_with model: @post, url: @post.persisted? ? post_path(@post) : posts_path, method: @post.persisted? ? :patch : :post, local: true, multipart: true, data: { post_editor_target: "form" }, class: "px-6 py-4 space-y-6" do |f| %>
+
+      <%= form_with model: @post, url: @post.persisted? ? post_path(@post) : posts_path, method: @post.persisted? ? :patch : :post, local: true, multipart: true, data: { post_editor_target: "form" }, class: "p-5 space-y-5" do |f| %>
+
         <!-- Project -->
-        <div>
-          <%= f.label :project_id, "Проект", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.collection_select :project_id, current_user.projects.active, :id, :name, 
-              { prompt: "Выберите проект" }, 
-              { class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" } %>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-[#00D4AA] rounded-full"></span>
+            Проект
+          </label>
+          <%= f.collection_select :project_id, current_user.projects.active, :id, :name,
+              { prompt: "Выберите проект" },
+              { class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all" } %>
         </div>
 
         <!-- Telegram Bot -->
-        <div>
-          <%= f.label :telegram_bot_id, "Telegram Бот", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+            Telegram канал
+          </label>
           <%= f.collection_select :telegram_bot_id, @telegram_bots, :id, :display_name,
-              { include_blank: "Выберите бота" },
-              {
-                data: {
-                  post_editor_target: "botSelect",
-                  action: "change->post-editor#updateChannelName"
-                },
-                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
-              } %>
+              { include_blank: "Выберите канал" },
+              { data: { post_editor_target: "botSelect", action: "change->post-editor#updateChannelName" },
+                class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all" } %>
         </div>
 
         <!-- Title -->
-        <div>
-          <%= f.label :title, "Заголовок", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <%= f.text_field :title,
-              placeholder: "Название поста",
-              class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+            Заголовок
+          </label>
+          <%= f.text_field :title, placeholder: "Название поста",
+              class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] placeholder:text-[#71717A] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all" %>
         </div>
 
         <!-- Post Type -->
-        <div>
-          <%= f.label :post_type, "Тип поста", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+            Тип поста
+          </label>
           <%= f.select :post_type,
-              [
-                ['Текстовый', 'text'],
-                ['С изображением', 'image'],
-                ['С изображением и кнопкой', 'image_button']
-              ],
+              [['Текстовый', 'text'], ['С изображением', 'image'], ['Изображение + Кнопка', 'image_button']],
               {},
-              {
-                data: {
-                  post_editor_target: "postType",
-                  action: "change->post-editor#toggleButtonFields"
-                },
-                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow"
-              } %>
+              { data: { post_editor_target: "postType", action: "change->post-editor#toggleButtonFields" },
+                class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all" } %>
         </div>
 
-        <!-- Image Upload (show for image and image_button types) -->
-        <div data-post-editor-target="imageField" class="<%= @post.post_type == 'text' ? 'hidden' : '' %>">
-          <%= f.label :image, "Изображение", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-          <div class="flex items-center gap-2">
-            <%= f.file_field :image,
-                accept: "image/*",
-                data: {
-                  action: "change->post-editor#previewImage"
-                },
-                class: "block w-full text-sm text-zinc-900 dark:text-zinc-50 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-zinc-100 dark:file:bg-zinc-800 file:text-zinc-900 dark:file:text-zinc-50 hover:file:bg-zinc-200 dark:hover:file:bg-zinc-700 transition-colors cursor-pointer" %>
+        <!-- Image Upload -->
+        <div data-post-editor-target="imageField" class="space-y-3 <%= @post.post_type == 'text' ? 'hidden' : '' %>">
+          <label class="flex items-center gap-2 text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">
+            <span class="w-1.5 h-1.5 bg-pink-500 rounded-full"></span>
+            Изображение
+          </label>
+
+          <div class="border border-dashed border-[#27272A] rounded-xl p-4 hover:border-[#00D4AA]/50 transition-colors">
+            <%= f.file_field :image, accept: "image/*", data: { action: "change->post-editor#previewImage" },
+                class: "block w-full text-sm text-[#A1A1AA] file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#00D4AA]/10 file:text-[#00D4AA] hover:file:bg-[#00D4AA]/20 cursor-pointer" %>
           </div>
+
           <% if @post.image.attached? %>
-            <div class="mt-2 relative">
-              <%= image_tag @post.image, class: "w-full rounded-md max-h-48 object-cover" %>
-              <%= link_to "Удалить", "#",
-                  data: { action: "click->post-editor#removeImage" },
-                  class: "absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-md text-xs hover:bg-red-600 transition-colors" %>
+            <div class="relative rounded-xl overflow-hidden border border-[#27272A]">
+              <%= image_tag @post.image, class: "w-full max-h-40 object-cover" %>
+              <%= link_to "#", data: { action: "click->post-editor#removeImage" },
+                  class: "absolute top-2 right-2 p-2 bg-red-500/90 backdrop-blur text-white rounded-lg text-xs font-medium hover:bg-red-600 transition-colors" do %>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              <% end %>
             </div>
           <% end %>
 
@@ -227,289 +380,251 @@
           <div data-controller="image-generator"
                data-image-generator-project-id-value="<%= @project&.id %>"
                data-image-generator-post-editor-outlet="[data-controller~='post-editor']"
-               class="mt-4 p-4 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg bg-zinc-50 dark:bg-zinc-900/50">
+               class="p-4 bg-gradient-to-br from-[#00D4AA]/5 to-transparent border border-[#00D4AA]/20 rounded-xl">
 
             <div class="flex items-center gap-2 mb-3">
-              <div class="w-5 h-5 bg-gradient-to-br from-primary-500 to-primary-600 rounded flex items-center justify-center">
-                <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <div class="w-6 h-6 bg-gradient-to-br from-[#00D4AA] to-[#00A896] rounded-md flex items-center justify-center">
+                <svg class="w-3.5 h-3.5 text-[#0A0A0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
                 </svg>
               </div>
-              <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50">Сгенерировать с AI</span>
+              <span class="text-xs font-medium text-[#00D4AA]">AI Image Generator</span>
             </div>
 
             <textarea data-image-generator-target="promptInput"
-                      placeholder="Опишите желаемое изображение... Например: современный минималистичный логотип для технологического стартапа"
-                      rows="3"
-                      class="w-full px-3 py-2 text-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 rounded-md text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 resize-none"></textarea>
+                      placeholder="Опишите изображение..."
+                      rows="2"
+                      class="w-full px-3 py-2 text-sm bg-[#18181B] border border-[#27272A] rounded-lg text-[#FAFAFA] placeholder:text-[#71717A] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] resize-none transition-all"></textarea>
 
-            <div class="flex flex-wrap items-center gap-2 mt-3">
+            <div class="flex items-center gap-2 mt-3">
               <select data-image-generator-target="aspectRatio"
-                      class="h-9 px-3 text-sm border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-950 rounded-md text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <option value="1:1">1:1 (Квадрат)</option>
-                <option value="16:9">16:9 (Широкое)</option>
-                <option value="9:16">9:16 (Вертикальное)</option>
-                <option value="4:3">4:3 (Стандартное)</option>
+                      class="h-9 px-3 text-xs bg-[#18181B] border border-[#27272A] rounded-lg text-[#FAFAFA] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA]">
+                <option value="1:1">1:1</option>
+                <option value="16:9">16:9</option>
+                <option value="9:16">9:16</option>
               </select>
 
               <button type="button"
                       data-image-generator-target="generateButton"
                       data-action="click->image-generator#generate"
-                      class="inline-flex items-center gap-2 h-9 px-4 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-md transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                </svg>
+                      class="flex-1 h-9 bg-gradient-to-r from-[#00D4AA] to-[#00A896] text-[#0A0A0B] text-xs font-semibold rounded-lg hover:shadow-lg hover:shadow-[#00D4AA]/20 transition-all">
                 Сгенерировать
               </button>
             </div>
 
-            <!-- Loading indicator -->
-            <div data-image-generator-target="loading" class="hidden mt-4">
-              <div class="flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
-                <svg class="w-5 h-5 text-primary-600 dark:text-primary-400 animate-spin" fill="none" viewBox="0 0 24 24">
+            <div data-image-generator-target="loading" class="hidden mt-3">
+              <div class="flex items-center gap-2 p-3 bg-[#00D4AA]/10 border border-[#00D4AA]/20 rounded-lg">
+                <svg class="w-4 h-4 text-[#00D4AA] animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span class="text-sm text-primary-700 dark:text-primary-300">Генерация изображения... Это может занять 10-30 секунд</span>
+                <span class="text-xs text-[#00D4AA]">Генерация...</span>
               </div>
             </div>
 
-            <!-- Error message -->
-            <div data-image-generator-target="error" class="hidden mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-              <p class="text-sm text-red-700 dark:text-red-300"></p>
+            <div data-image-generator-target="error" class="hidden mt-3 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+              <p class="text-xs text-red-400"></p>
             </div>
 
-            <!-- Preview with apply button -->
-            <div data-image-generator-target="preview" class="hidden mt-4">
-              <div class="relative rounded-lg overflow-hidden border border-zinc-200 dark:border-zinc-700">
-                <img data-image-generator-target="generatedImage"
-                     class="w-full max-h-48 object-contain bg-zinc-100 dark:bg-zinc-800"
-                     alt="Сгенерированное изображение" />
+            <div data-image-generator-target="preview" class="hidden mt-3">
+              <div class="rounded-lg overflow-hidden border border-[#27272A]">
+                <img data-image-generator-target="generatedImage" class="w-full max-h-40 object-contain bg-[#18181B]" alt="Generated" />
               </div>
-              <button type="button"
-                      data-image-generator-target="applyButton"
-                      data-action="click->image-generator#applyImage"
-                      class="mt-3 w-full inline-flex items-center justify-center gap-2 h-10 px-4 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-md transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                </svg>
-                Применить к посту
+              <button type="button" data-image-generator-target="applyButton" data-action="click->image-generator#applyImage"
+                      class="mt-2 w-full h-9 bg-emerald-500 text-white text-xs font-semibold rounded-lg hover:bg-emerald-600 transition-colors">
+                Применить
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Button Fields (show only for image_button type) -->
+        <!-- Button Fields -->
         <div data-post-editor-target="buttonFields" class="space-y-4 <%= @post.post_type == 'image_button' ? '' : 'hidden' %>">
-          <div>
-            <%= f.label :button_text, "Текст кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-            <%= f.text_field :button_text,
-                placeholder: "Например: Перейти на сайт",
-                maxlength: 64,
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">Текст кнопки</label>
+            <%= f.text_field :button_text, placeholder: "Перейти на сайт", maxlength: 64,
                 data: { action: "input->post-editor#updateButtonText" },
-                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow" %>
-            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Максимум 64 символа</p>
+                class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] placeholder:text-[#71717A] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all" %>
           </div>
-
-          <div>
-            <%= f.label :button_url, "Ссылка кнопки", class: "block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-2" %>
-            <%= f.url_field :button_url,
-                placeholder: "https://example.com",
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">Ссылка</label>
+            <%= f.url_field :button_url, placeholder: "https://example.com",
                 data: { action: "input->post-editor#updateButtonUrl" },
-                class: "flex h-10 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-500 dark:placeholder:text-zinc-400 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow font-mono" %>
-            <p class="mt-1 text-xs text-zinc-500 dark:text-zinc-400">Полный URL с https://</p>
+                class: "w-full h-10 px-3 bg-[#18181B] border border-[#27272A] rounded-lg text-sm text-[#FAFAFA] placeholder:text-[#71717A] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] transition-all mono" %>
           </div>
         </div>
 
-        <!-- AI Settings Section -->
+        <!-- AI Settings -->
         <% if @project %>
-          <div class="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-            <h3 class="text-xs font-semibold text-zinc-900 dark:text-zinc-50 mb-3 flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-              </svg>
-              AI Настройки
-            </h3>
-
-            <!-- AI Model -->
-            <div class="mb-4">
-              <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Модель AI</label>
-              <select data-chat-target="modelSelect"
-                      data-action="change->chat#changeModel"
-                      class="flex h-9 w-full rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-2 py-1.5 text-xs text-zinc-900 dark:text-zinc-50 ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300 transition-shadow">
-                <% Project::AI_MODELS.each do |value, label| %>
-                  <option value="<%= value %>" <%= 'selected' if @project.ai_model == value %>>
-                    <%= label %>
-                  </option>
-                <% end %>
-              </select>
+          <div class="pt-4 border-t border-[#27272A]">
+            <div class="flex items-center gap-2 mb-4">
+              <span class="w-1.5 h-1.5 bg-[#00D4AA] rounded-full pulse-glow"></span>
+              <span class="text-xs font-medium text-[#A1A1AA] mono uppercase tracking-wider">AI Config</span>
             </div>
 
-            <!-- Writing Style -->
-            <div>
-              <label class="block text-xs font-medium text-zinc-700 dark:text-zinc-300 mb-1.5">Стиль написания</label>
-              <p class="text-xs text-zinc-500 dark:text-zinc-400 mb-2">
-                <%= @project.writing_style_name %>
-              </p>
-              <%= link_to "Изменить в настройках", edit_project_path(@project),
-                  class: "text-xs text-primary-600 dark:text-primary-400 hover:underline",
-                  target: "_blank" %>
+            <div class="space-y-4">
+              <div class="space-y-2">
+                <label class="text-xs text-[#71717A]">Модель</label>
+                <select data-chat-target="modelSelect" data-action="change->chat#changeModel"
+                        class="w-full h-9 px-3 text-xs bg-[#18181B] border border-[#27272A] rounded-lg text-[#FAFAFA] focus:border-[#00D4AA] focus:ring-1 focus:ring-[#00D4AA] mono transition-all">
+                  <% Project::AI_MODELS.each do |value, label| %>
+                    <option value="<%= value %>" <%= 'selected' if @project.ai_model == value %>><%= label %></option>
+                  <% end %>
+                </select>
+              </div>
+
+              <div class="space-y-2">
+                <label class="text-xs text-[#71717A]">Стиль</label>
+                <div class="flex items-center justify-between p-3 bg-[#18181B] border border-[#27272A] rounded-lg">
+                  <span class="text-xs text-[#FAFAFA]"><%= @project.writing_style_name %></span>
+                  <%= link_to project_style_settings_path(@project), class: "text-[10px] text-[#00D4AA] hover:underline", target: "_blank" do %>
+                    Настроить →
+                  <% end %>
+                </div>
+              </div>
             </div>
           </div>
         <% end %>
 
-        <!-- Hidden fields -->
         <%= f.hidden_field :content, data: { post_editor_target: "content" } %>
       <% end %>
     </aside>
 
-    <!-- Right Panel: Preview & Editor (flex-1 for remaining space) -->
+    <!-- Right Panel: Preview & Editor -->
     <main data-editor-panels-target="previewPanel"
-          class="flex-1 min-h-0 bg-white dark:bg-zinc-950 overflow-y-auto notion-scrollbar">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-12 py-4 sm:py-8">
+          class="flex-1 min-h-0 bg-[#0A0A0B] overflow-y-auto tech-scrollbar">
+      <div class="max-w-3xl mx-auto px-6 py-8">
+
         <!-- Preview Header -->
-        <div class="mb-6 flex items-center justify-between">
-          <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">Превью поста</h2>
-          <div class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400">
-            <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            Обновляется в реальном времени
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-3">
+            <h2 class="text-sm font-semibold">Превью</h2>
+            <div class="flex items-center gap-2 px-2 py-1 bg-[#111113] border border-[#27272A] rounded-lg">
+              <span class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
+              <span class="text-[10px] text-[#A1A1AA] mono">LIVE</span>
+            </div>
           </div>
+          <span data-post-editor-target="charCount" class="text-xs text-[#71717A] mono">0 / 4096</span>
         </div>
 
-        <!-- Telegram Preview Card - Real Telegram Style -->
-        <div class="mb-8 rounded-2xl border border-zinc-200 dark:border-zinc-700 overflow-hidden shadow-lg hover:shadow-xl transition-shadow bg-white dark:bg-zinc-900">
-          <!-- Channel Header (как в Telegram) -->
-          <div class="bg-white dark:bg-zinc-900 px-4 py-3 border-b border-zinc-100 dark:border-zinc-800">
+        <!-- Telegram Preview Card -->
+        <div class="mb-8 rounded-2xl border border-[#27272A] overflow-hidden bg-[#111113] shadow-2xl shadow-black/20">
+          <!-- Channel Header -->
+          <div class="px-4 py-3 border-b border-[#18181B] bg-gradient-to-r from-[#111113] to-[#18181B]">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <div class="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.18.717-.962 3.767-1.362 5.001-.168.52-.504.694-.826.71-.702.033-1.235-.464-1.913-.908-1.061-.695-1.662-1.127-2.693-1.805-.119-.078-.238-.158-.356-.239a.734.734 0 01.05-1.171c.294-.24 2.661-2.426 2.661-2.426s.172-.177.161-.284a.316.316 0 00-.189-.238 1.02 1.02 0 00-.373-.05c-.177.011-2.986 1.897-8.428 5.571-.797.548-1.52.815-2.165.801-.713-.016-2.082-.403-3.104-.736-.125-.041-.247-.081-.364-.121a.722.722 0 01-.437-.873c.056-.148.146-.258.256-.354.851-.748 8.666-3.758 10.818-4.677 5.112-2.186 6.184-2.568 6.876-2.58.153-.002.495.035.716.214.186.149.238.351.263.494.024.143.056.466.032.72z"/>
                 </svg>
               </div>
-              <div class="flex-1 min-w-0">
-                <p data-post-editor-target="channelName" class="text-zinc-900 dark:text-zinc-50 font-semibold text-sm truncate">
-                  <%= @post.telegram_bot&.channel_name || @telegram_bots.first&.channel_name || "Выберите бота" %>
+              <div class="flex-1">
+                <p data-post-editor-target="channelName" class="text-sm font-semibold">
+                  <%= @post.telegram_bot&.channel_name || @telegram_bots.first&.channel_name || "Выберите канал" %>
                 </p>
-                <p class="text-zinc-500 dark:text-zinc-400 text-xs"><%= Time.current.strftime("%H:%M") %></p>
+                <p class="text-xs text-[#71717A]"><%= Time.current.strftime("%H:%M") %></p>
               </div>
             </div>
           </div>
 
-          <!-- Post Image (если есть) -->
+          <!-- Post Image -->
           <div data-post-editor-target="imagePreview" class="<%= @post.image.attached? ? '' : 'hidden' %>">
             <% if @post.image.attached? %>
-              <%= image_tag @post.image, alt: "Post image", class: "w-full object-cover max-h-96" %>
+              <%= image_tag @post.image, alt: "Post image", class: "w-full object-cover max-h-80" %>
             <% else %>
-              <img src="" alt="Post image" class="w-full object-cover max-h-96" data-post-editor-target="imagePreviewImg" />
+              <img src="" alt="Post image" class="w-full object-cover max-h-80" data-post-editor-target="imagePreviewImg" />
             <% end %>
           </div>
 
-          <!-- Post Content: Title + Text (как в Telegram) -->
-          <div class="bg-white dark:bg-zinc-900 px-4 py-4">
-            <!-- Title (жирный, как в Telegram) -->
-            <h3 data-post-editor-target="titlePreview" class="text-base font-bold text-zinc-900 dark:text-zinc-50 mb-3 <%= @post.title.present? ? '' : 'hidden' %>"><%= @post.title %></h3>
-
-            <!-- Content with Rich Telegram Formatting -->
-            <div data-post-editor-target="preview" class="telegram-content text-[15px] text-zinc-900 dark:text-zinc-50 leading-relaxed space-y-3" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
+          <!-- Post Content -->
+          <div class="px-4 py-4">
+            <h3 data-post-editor-target="titlePreview" class="text-base font-bold mb-3 <%= @post.title.present? ? '' : 'hidden' %>"><%= @post.title %></h3>
+            <div data-post-editor-target="preview" class="telegram-content text-[15px] leading-relaxed">
               <% if @post.content.present? %>
                 <%= simple_format(@post.content, class: '') %>
               <% else %>
-                <p class="text-zinc-400 dark:text-zinc-500 italic">
-                  Начните писать или используйте AI для генерации...
-                </p>
+                <p class="text-[#71717A] italic">Начните писать или используйте AI...</p>
               <% end %>
             </div>
 
-            <!-- Button (для типа image_button) -->
+            <!-- Button -->
             <div data-post-editor-target="buttonPreview" class="mt-4 <%= @post.post_type == 'image_button' && @post.button_text.present? ? '' : 'hidden' %>">
               <a href="<%= @post.button_url %>" target="_blank"
-                 class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-md transition-colors text-sm">
+                 class="inline-flex items-center justify-center w-full px-4 py-2.5 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors text-sm">
                 <span data-post-editor-target="buttonTextPreview"><%= @post.button_text || 'Кнопка' %></span>
               </a>
             </div>
           </div>
 
-          <!-- Post Meta (views, reactions, forwards) -->
-          <div class="bg-white dark:bg-zinc-900 px-4 py-2.5 border-t border-zinc-100 dark:border-zinc-800">
-            <div class="flex items-center justify-between text-[13px]">
-              <div class="flex items-center gap-4 text-zinc-500 dark:text-zinc-400">
+          <!-- Post Meta -->
+          <div class="px-4 py-3 border-t border-[#18181B]">
+            <div class="flex items-center justify-between text-xs text-[#71717A]">
+              <div class="flex items-center gap-4">
                 <span class="flex items-center gap-1.5">
-                  <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                   </svg>
                   1.2k
                 </span>
                 <span class="flex items-center gap-1.5">
-                  <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/>
                   </svg>
                   72
                 </span>
               </div>
-              <span data-post-editor-target="charCount" class="font-medium tabular-nums text-zinc-500 dark:text-zinc-400">0 / 4096 символов</span>
             </div>
           </div>
         </div>
 
-        <!-- Content Editor - Notion style -->
+        <!-- Content Editor -->
         <div class="mb-8">
-          <label class="block text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-3">
-            Содержимое поста
+          <label class="flex items-center gap-2 text-sm font-medium mb-3">
+            <svg class="w-4 h-4 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+            </svg>
+            Редактор
           </label>
-          <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 focus-within:ring-2 focus-within:ring-zinc-950 dark:focus-within:ring-zinc-300 focus-within:ring-offset-2 dark:ring-offset-zinc-950 transition-shadow">
-            <textarea 
+          <div class="rounded-xl border border-[#27272A] bg-[#111113] overflow-hidden focus-within:border-[#00D4AA]/50 focus-within:shadow-lg focus-within:shadow-[#00D4AA]/5 transition-all">
+            <textarea
               data-post-editor-target="contentEditor"
               data-action="input->post-editor#updatePreview"
-              rows="16"
+              rows="14"
               placeholder="Напишите текст поста или используйте AI для генерации...
 
 Поддерживается Markdown:
-**жирный текст**
-*курсив*
-`код`
-[ссылка](https://example.com)"
-              class="w-full px-6 py-4 bg-transparent text-sm text-zinc-900 dark:text-zinc-50 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none resize-none font-mono leading-relaxed"
+**жирный** *курсив* `код` [ссылка](url)"
+              class="w-full px-5 py-4 bg-transparent text-sm text-[#FAFAFA] placeholder:text-[#3F3F46] focus:outline-none resize-none mono leading-relaxed"
             ><%= @post.content %></textarea>
           </div>
-          <p class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-            Используйте Markdown для форматирования текста
-          </p>
+          <p class="mt-2 text-[10px] text-[#71717A] mono">Markdown • Turbo sync • Auto-save</p>
         </div>
 
-        <!-- Quick Actions - Notion style -->
+        <!-- Quick Actions -->
         <div class="flex flex-wrap gap-2">
-          <button
-            type="button"
-            data-action="click->post-editor#addEmoji"
-            class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <button type="button" data-action="click->post-editor#addEmoji"
+                  class="inline-flex items-center gap-2 px-3 py-2 bg-[#111113] border border-[#27272A] rounded-lg text-xs text-[#A1A1AA] hover:text-[#00D4AA] hover:border-[#00D4AA]/50 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
-            Добавить эмодзи
+            Эмодзи
           </button>
-          <button
-            type="button"
-            data-action="click->post-editor#addHashtags"
-            class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <button type="button" data-action="click->post-editor#addHashtags"
+                  class="inline-flex items-center gap-2 px-3 py-2 bg-[#111113] border border-[#27272A] rounded-lg text-xs text-[#A1A1AA] hover:text-[#00D4AA] hover:border-[#00D4AA]/50 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"/>
             </svg>
-            Добавить хештеги
+            Хештеги
           </button>
-          <button
-            type="button"
-            data-action="click->post-editor#triggerImageUpload"
-            class="inline-flex items-center gap-2 px-3 py-1.5 border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 hover:bg-zinc-50 dark:hover:bg-zinc-900 rounded-md text-xs font-medium text-zinc-700 dark:text-zinc-300 transition-colors"
-          >
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <button type="button" data-action="click->post-editor#triggerImageUpload"
+                  class="inline-flex items-center gap-2 px-3 py-2 bg-[#111113] border border-[#27272A] rounded-lg text-xs text-[#A1A1AA] hover:text-[#00D4AA] hover:border-[#00D4AA]/50 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
             </svg>
-            Добавить изображение
+            Изображение
           </button>
         </div>
+
       </div>
     </main>
   </div>
