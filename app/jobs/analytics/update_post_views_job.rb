@@ -39,25 +39,5 @@ module Analytics
     def fetch_post_statistics(bot, post)
       Telegram::AnalyticsService.new(bot).fetch_post_statistics(post)
     end
-
-    def old_fetch_post_statistics(bot, post)
-      # This would call Telegram Bot API to get message statistics
-      # For now, return mock data (implement real API call later)
-
-      # Real implementation would use:
-      # client = Telegram::Bot::Client.new(bot.bot_token)
-      # message = client.api.get_message_statistics(chat_id: bot.channel_id, message_id: post.telegram_message_id)
-
-      {
-        views: rand(100..1000),
-        forwards: rand(5..50),
-        reactions: {
-          '👍' => rand(10..100),
-          '❤️' => rand(5..50),
-          '🔥' => rand(2..20)
-        },
-        button_clicks: {}
-      }
-    end
   end
 end

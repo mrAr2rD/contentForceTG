@@ -1,0 +1,124 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Notifications</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">История уведомлений пользователям</p>
+    </div>
+  </div>
+
+  <!-- Статистика -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Всего</div>
+      <div class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@stats[:total]) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Ожидают</div>
+      <div class="text-2xl font-bold text-yellow-600 dark:text-yellow-400"><%= number_with_delimiter(@stats[:pending]) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Отправлено</div>
+      <div class="text-2xl font-bold text-green-600 dark:text-green-400"><%= number_with_delimiter(@stats[:sent]) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Ошибок</div>
+      <div class="text-2xl font-bold text-red-600 dark:text-red-400"><%= number_with_delimiter(@stats[:failed]) %></div>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+    <%= form_tag admin_notifications_path, method: :get, class: "flex flex-wrap gap-4" do %>
+      <div>
+        <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :email, params[:user_id]), include_blank: "Все пользователи", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :type, options_for_select(Notification::TYPES.map { |t| [t.humanize, t] }, params[:type]), include_blank: "Все типы", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :status, options_for_select(Notification.statuses.keys.map { |s| [s.capitalize, s] }, params[:status]), include_blank: "Все статусы", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :channel, options_for_select(Notification.channels.keys.map { |c| [c.capitalize, c] }, params[:channel]), include_blank: "Все каналы", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <%= submit_tag "Применить", class: "px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 cursor-pointer" %>
+      <%= link_to "Сбросить", admin_notifications_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700" %>
+    <% end %>
+  </div>
+
+  <!-- Статистика по типам -->
+  <% if @stats[:by_type].any? %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-3">По типам</h3>
+      <div class="flex flex-wrap gap-2">
+        <% @stats[:by_type].each do |type, count| %>
+          <span class="px-3 py-1 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full">
+            <%= type.humanize %>: <%= number_with_delimiter(count) %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Пользователь</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Тип</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Канал</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Дата</th>
+          <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Действия</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @notifications.each do |notification| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-zinc-900 dark:text-zinc-50">
+                <%= link_to notification.user.email, admin_user_path(notification.user), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded">
+                <%= notification.notification_type.humanize %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm">
+              <% if notification.email? %>
+                <span class="text-blue-600 dark:text-blue-400">Email</span>
+              <% else %>
+                <span class="text-cyan-600 dark:text-cyan-400">Telegram</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <% case notification.status %>
+              <% when 'pending' %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">Ожидает</span>
+              <% when 'sent' %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">Отправлено</span>
+              <% when 'failed' %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">Ошибка</span>
+              <% when 'read' %>
+                <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">Прочитано</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= time_ago_in_words(notification.created_at) %> назад
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+              <%= link_to "View", admin_notification_path(notification), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @notifications.respond_to?(:total_pages) && @notifications.total_pages > 1 %>
+    <div class="flex justify-center">
+      <%= paginate @notifications %>
+    </div>
+  <% end %>
+</div>

@@ -7,7 +7,12 @@
         Детальная информация о платеже
       </p>
     </div>
-    <%= link_to 'Назад к списку', admin_payments_path, class: "inline-flex items-center px-4 py-2 border border-border rounded-md text-sm font-medium text-foreground bg-background hover:bg-accent" %>
+    <div class="flex gap-2">
+      <% if @payment.completed? %>
+        <%= button_to 'Вернуть платёж', refund_admin_payment_path(@payment), method: :post, data: { confirm: "Вы уверены, что хотите отметить платёж как возвращённый?" }, class: "inline-flex items-center px-4 py-2 border border-red-300 rounded-md text-sm font-medium text-red-700 bg-red-50 hover:bg-red-100" %>
+      <% end %>
+      <%= link_to 'Назад к списку', admin_payments_path, class: "inline-flex items-center px-4 py-2 border border-border rounded-md text-sm font-medium text-foreground bg-background hover:bg-accent" %>
+    </div>
   </div>
 
   <!-- Payment Details -->

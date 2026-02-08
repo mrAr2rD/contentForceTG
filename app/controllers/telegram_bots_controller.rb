@@ -24,10 +24,8 @@ class TelegramBotsController < ApplicationController
     authorize @telegram_bot
 
     if @telegram_bot.save
-      # Verify bot in background
-      VerifyTelegramBotJob.perform_later(@telegram_bot.id) if defined?(VerifyTelegramBotJob)
-      redirect_to project_telegram_bot_path(@project, @telegram_bot), 
-                  notice: 'Бот добавлен! Проверка подключения...'
+      redirect_to project_telegram_bot_path(@project, @telegram_bot),
+                  notice: 'Бот добавлен! Нажмите "Проверить" для верификации.'
     else
       render :new, status: :unprocessable_entity
     end

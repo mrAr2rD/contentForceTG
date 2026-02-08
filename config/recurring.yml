@@ -13,3 +13,23 @@ production:
   clear_solid_queue_finished_jobs:
     command: "SolidQueue::Job.clear_finished_in_batches(sleep_between_batches: 0.3)"
     schedule: every hour at minute 12
+
+  check_expiring_subscriptions:
+    class: CheckExpiringSubscriptionsJob
+    schedule: every day at midnight
+
+  sync_invite_link_stats:
+    class: SyncInviteLinkStatsJob
+    schedule: every hour
+
+  calculate_churn_rates:
+    class: Analytics::CalculateChurnRateJob
+    schedule: every day at 1am
+
+  update_post_views:
+    class: Analytics::UpdatePostViewsJob
+    schedule: every 30 minutes
+
+  snapshot_channel_metrics:
+    class: Analytics::SnapshotChannelMetricsJob
+    schedule: every day at 2am

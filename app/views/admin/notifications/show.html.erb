@@ -1,0 +1,99 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Notification</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Детали уведомления</p>
+    </div>
+    <div>
+      <%= link_to admin_notifications_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700" do %>
+        ← Назад к списку
+      <% end %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Основная информация -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Информация</h3>
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Пользователь</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <%= link_to @notification.user.email, admin_user_path(@notification.user), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Тип</dt>
+          <dd class="mt-1">
+            <span class="px-2 py-1 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded">
+              <%= @notification.notification_type.humanize %>
+            </span>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Канал</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <% if @notification.email? %>
+              <span class="text-blue-600 dark:text-blue-400">Email</span>
+            <% else %>
+              <span class="text-cyan-600 dark:text-cyan-400">Telegram</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Статус</dt>
+          <dd class="mt-1">
+            <% case @notification.status %>
+            <% when 'pending' %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">Ожидает</span>
+            <% when 'sent' %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">Отправлено</span>
+            <% when 'failed' %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">Ошибка</span>
+            <% when 'read' %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-blue-100 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400">Прочитано</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Создано</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= l(@notification.created_at, format: :long) %></dd>
+        </div>
+        <% if @notification.sent_at %>
+          <div>
+            <dt class="text-sm text-zinc-500 dark:text-zinc-400">Отправлено</dt>
+            <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= l(@notification.sent_at, format: :long) %></dd>
+          </div>
+        <% end %>
+        <% if @notification.read_at %>
+          <div>
+            <dt class="text-sm text-zinc-500 dark:text-zinc-400">Прочитано</dt>
+            <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= l(@notification.read_at, format: :long) %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Содержимое -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Содержимое</h3>
+      <% if @notification.subject.present? %>
+        <div class="mb-4">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">Тема</div>
+          <div class="mt-1 text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @notification.subject %></div>
+        </div>
+      <% end %>
+      <div>
+        <div class="text-sm text-zinc-500 dark:text-zinc-400">Сообщение</div>
+        <div class="mt-2 p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg text-sm text-zinc-900 dark:text-zinc-50 whitespace-pre-wrap"><%= @notification.body %></div>
+      </div>
+    </div>
+  </div>
+
+  <% if @notification.metadata.present? && @notification.metadata.any? %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Metadata</h3>
+      <pre class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg text-sm text-zinc-900 dark:text-zinc-50 overflow-x-auto"><%= JSON.pretty_generate(@notification.metadata) %></pre>
+    </div>
+  <% end %>
+</div>

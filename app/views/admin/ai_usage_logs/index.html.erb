@@ -1,0 +1,118 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">AI Usage Logs</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">История использования AI</p>
+    </div>
+  </div>
+
+  <!-- Статистика -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Всего запросов</div>
+      <div class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@stats[:total_requests]) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Всего токенов</div>
+      <div class="text-2xl font-bold text-primary-600 dark:text-primary-400"><%= number_with_delimiter(@stats[:total_tokens]) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Общая стоимость</div>
+      <div class="text-2xl font-bold text-green-600 dark:text-green-400">$<%= number_with_precision(@stats[:total_cost], precision: 4) %></div>
+    </div>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <div class="text-sm text-zinc-500 dark:text-zinc-400">Моделей</div>
+      <div class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @stats[:models].keys.count %></div>
+    </div>
+  </div>
+
+  <!-- Фильтры -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+    <%= form_tag admin_ai_usage_logs_path, method: :get, class: "flex flex-wrap gap-4" do %>
+      <div>
+        <%= select_tag :user_id, options_from_collection_for_select(@users, :id, :email, params[:user_id]), include_blank: "Все пользователи", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :model, options_for_select(@models.map { |m| [m, m] }, params[:model]), include_blank: "Все модели", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :purpose, options_for_select(AiUsageLog.purposes.keys.map { |p| [p.humanize, p] }, params[:purpose]), include_blank: "Все типы", class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <div>
+        <%= select_tag :period, options_for_select([["За всё время", nil], ["7 дней", 7], ["30 дней", 30], ["90 дней", 90]], params[:period]), class: "px-3 py-2 text-sm bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-md" %>
+      </div>
+      <%= submit_tag "Применить", class: "px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700 cursor-pointer" %>
+      <%= link_to "Сбросить", admin_ai_usage_logs_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700" %>
+    <% end %>
+  </div>
+
+  <!-- Статистика по моделям -->
+  <% if @stats[:models].any? %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 mb-3">По моделям</h3>
+      <div class="flex flex-wrap gap-2">
+        <% @stats[:models].each do |model, count| %>
+          <span class="px-3 py-1 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded-full">
+            <%= model %>: <%= number_with_delimiter(count) %>
+          </span>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+      <thead class="bg-zinc-50 dark:bg-zinc-900">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Пользователь</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Модель</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Тип</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Токены</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Стоимость</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Дата</th>
+        </tr>
+      </thead>
+      <tbody class="bg-white dark:bg-zinc-950 divide-y divide-zinc-200 dark:divide-zinc-800">
+        <% @logs.each do |log| %>
+          <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-900/50">
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-zinc-900 dark:text-zinc-50">
+                <%= link_to log.user.email, admin_user_path(log.user), class: "text-primary-600 dark:text-primary-400 hover:underline" %>
+              </div>
+              <% if log.project %>
+                <div class="text-xs text-zinc-500 dark:text-zinc-400"><%= log.project.name %></div>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span class="px-2 py-1 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 rounded">
+                <%= log.model_used %>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= log.purpose.humanize %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+              <%= number_with_delimiter(log.tokens_used) %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+              <% if log.total_cost > 0 %>
+                $<%= number_with_precision(log.total_cost, precision: 6) %>
+              <% else %>
+                <span class="text-zinc-400">Free</span>
+              <% end %>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-500 dark:text-zinc-400">
+              <%= time_ago_in_words(log.created_at) %> назад
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+
+  <% if @logs.respond_to?(:total_pages) && @logs.total_pages > 1 %>
+    <div class="flex justify-center">
+      <%= paginate @logs %>
+    </div>
+  <% end %>
+</div>

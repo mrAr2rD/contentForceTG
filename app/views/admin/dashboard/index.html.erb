@@ -111,6 +111,94 @@
   </div>
   <% end %>
 
+  <!-- Extended Stats -->
+  <% if @post_analytics || @channel_metrics || @ai_usage %>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <% if @post_analytics %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Аналитика постов</h3>
+        <span class="text-xs text-zinc-500 dark:text-zinc-400">За всё время</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Всего просмотров</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@post_analytics[:total_views]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Репостов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@post_analytics[:total_forwards]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Среднее просмотров</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @post_analytics[:average_views] %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Опубликовано</span>
+          <span class="text-sm font-medium text-green-600 dark:text-green-400"><%= @post_analytics[:published_posts] %></span>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
+    <% if @channel_metrics %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">Метрики каналов</h3>
+        <span class="text-xs text-zinc-500 dark:text-zinc-400">30 дней</span>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Всего подписчиков</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@channel_metrics[:total_subscribers]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Прирост за месяц</span>
+          <span class="text-sm font-medium <%= @channel_metrics[:total_growth] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400' %>">
+            <%= @channel_metrics[:total_growth] >= 0 ? '+' : '' %><%= number_with_delimiter(@channel_metrics[:total_growth]) %>
+          </span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Средний отток</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= @channel_metrics[:average_churn] %>%</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Активных ботов</span>
+          <span class="text-sm font-medium text-primary-600 dark:text-primary-400"><%= @channel_metrics[:active_bots] %></span>
+        </div>
+      </div>
+    </div>
+    <% end %>
+
+    <% if @ai_usage %>
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-sm font-semibold text-zinc-900 dark:text-zinc-50">AI использование</h3>
+        <%= link_to 'Подробнее →', admin_ai_usage_logs_path, class: "text-xs text-primary-600 dark:text-primary-400 hover:underline" %>
+      </div>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Всего запросов</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@ai_usage[:total_requests]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">За сегодня</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@ai_usage[:requests_today]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Токенов использовано</span>
+          <span class="text-sm font-medium text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@ai_usage[:total_tokens]) %></span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-zinc-500 dark:text-zinc-400">Общая стоимость</span>
+          <span class="text-sm font-medium text-green-600 dark:text-green-400">$<%= number_with_precision(@ai_usage[:total_cost], precision: 4) %></span>
+        </div>
+      </div>
+    </div>
+    <% end %>
+  </div>
+  <% end %>
+
   <!-- Quick Actions Grid -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
     <!-- AI Настройки -->

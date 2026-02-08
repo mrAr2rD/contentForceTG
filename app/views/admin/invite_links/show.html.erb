@@ -1,0 +1,97 @@
+<div class="space-y-6">
+  <div class="flex items-center justify-between">
+    <div>
+      <h2 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50">Invite Link</h2>
+      <p class="mt-2 text-zinc-600 dark:text-zinc-400">Детали пригласительной ссылки</p>
+    </div>
+    <div class="flex gap-2">
+      <%= link_to admin_invite_links_path, class: "px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 border border-zinc-300 dark:border-zinc-700 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-700" do %>
+        ← Назад к списку
+      <% end %>
+      <%= link_to "Удалить", admin_invite_link_path(@invite_link), method: :delete, data: { confirm: "Удалить ссылку?" }, class: "px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Основная информация -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Информация</h3>
+      <dl class="space-y-4">
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Ссылка</dt>
+          <dd class="mt-1 text-sm font-mono text-zinc-900 dark:text-zinc-50 break-all"><%= @invite_link.invite_link %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Канал</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @invite_link.channel_name || 'N/A' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Telegram Bot</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <%= link_to @invite_link.telegram_bot&.username || 'N/A', admin_telegram_bot_path(@invite_link.telegram_bot), class: "text-primary-600 dark:text-primary-400 hover:underline" if @invite_link.telegram_bot %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Проект</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50">
+            <%= link_to @invite_link.telegram_bot&.project&.name || 'N/A', admin_project_path(@invite_link.telegram_bot&.project), class: "text-primary-600 dark:text-primary-400 hover:underline" if @invite_link.telegram_bot&.project %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Источник</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= @invite_link.source || '—' %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Статус</dt>
+          <dd class="mt-1">
+            <% if @invite_link.revoked? %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400">Отозвана</span>
+            <% elsif @invite_link.expired? %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400">Истекла</span>
+            <% elsif @invite_link.limit_reached? %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-orange-100 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400">Лимит достигнут</span>
+            <% else %>
+              <span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400">Активна</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm text-zinc-500 dark:text-zinc-400">Создана</dt>
+          <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= l(@invite_link.created_at, format: :long) %></dd>
+        </div>
+        <% if @invite_link.expire_date %>
+          <div>
+            <dt class="text-sm text-zinc-500 dark:text-zinc-400">Истекает</dt>
+            <dd class="mt-1 text-sm text-zinc-900 dark:text-zinc-50"><%= l(@invite_link.expire_date, format: :long) %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <!-- Статистика -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Статистика</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">Вступлений</div>
+          <div class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @invite_link.join_count %></div>
+          <% if @invite_link.member_limit %>
+            <div class="text-xs text-zinc-500 dark:text-zinc-400">из <%= @invite_link.member_limit %></div>
+          <% end %>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">Текущих подписчиков</div>
+          <div class="text-2xl font-bold text-green-600 dark:text-green-400"><%= @invite_link.current_subscribers_count %></div>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">Ушло</div>
+          <div class="text-2xl font-bold text-red-600 dark:text-red-400"><%= @invite_link.left_count %></div>
+        </div>
+        <div class="bg-zinc-50 dark:bg-zinc-900 rounded-lg p-4">
+          <div class="text-sm text-zinc-500 dark:text-zinc-400">Конверсия</div>
+          <div class="text-2xl font-bold text-primary-600 dark:text-primary-400"><%= @invite_link.conversion_rate %>%</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

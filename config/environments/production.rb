@@ -24,10 +24,6 @@ Rails.application.configure do
   # Store uploaded files on S3 (or local if S3 not configured)
   config.active_storage.service = ENV['S3_BUCKET'].present? ? :amazon : :local
 
-  # Skip automatic image analysis until Solid Queue tables are created
-  # TODO: Remove this after running db:schema:load:queue on production
-  config.active_storage.analyzers = []
-
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true
 

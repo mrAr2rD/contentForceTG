@@ -108,8 +108,6 @@ Rails.application.routes.draw do
     resources :posts, only: [:index, :show, :destroy]
     resources :telegram_bots, only: [:index, :show, :destroy]
     resources :subscriptions
-    resources :payments, only: [:index, :show]
-
     # AI Settings (singleton resource)
     resource :ai_settings, only: [:edit, :update]
 
@@ -120,12 +118,28 @@ Rails.application.routes.draw do
     resources :plans
 
     # AI модели с ценами
-    resources :ai_models, only: [:index, :edit, :update] do
+    resources :ai_models do
       member do
         patch :toggle_active
       end
       collection do
         post :sync_defaults
+      end
+    end
+
+    # Пригласительные ссылки
+    resources :invite_links, only: [:index, :show, :destroy]
+
+    # Логи AI
+    resources :ai_usage_logs, only: [:index]
+
+    # Уведомления
+    resources :notifications, only: [:index, :show]
+
+    # Платежи с возвратом
+    resources :payments, only: [:index, :show] do
+      member do
+        post :refund
       end
     end
 

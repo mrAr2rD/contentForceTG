@@ -3,11 +3,27 @@
 module Admin
   class AiModelsController < Admin::ApplicationController
     before_action :check_table_exists
-    before_action :set_ai_model, only: [:edit, :update, :toggle_active]
+    before_action :set_ai_model, only: [:show, :edit, :update, :destroy, :toggle_active]
 
     def index
       @ai_models = AiModel.order(:tier, :name)
       @grouped_models = @ai_models.group_by(&:tier)
+    end
+
+    def show; end
+
+    def new
+      @ai_model = AiModel.new
+    end
+
+    def create
+      @ai_model = AiModel.new(ai_model_params)
+
+      if @ai_model.save
+        redirect_to admin_ai_models_path, notice: 'Модель создана'
+      else
+        render :new, status: :unprocessable_entity
+      end
     end
 
     def edit; end
@@ -18,6 +34,11 @@ module Admin
       else
         render :edit, status: :unprocessable_entity
       end
+    end
+
+    def destroy
+      @ai_model.destroy
+      redirect_to admin_ai_models_path, notice: 'Модель удалена'
     end
 
     def toggle_active
@@ -44,7 +65,7 @@ module Admin
 
     def ai_model_params
       params.require(:ai_model).permit(
-        :name, :provider, :tier, :active,
+        :model_id, :name, :provider, :tier, :active,
         :input_cost_per_1k, :output_cost_per_1k, :max_tokens
       )
     end
