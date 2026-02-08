@@ -1,0 +1,70 @@
+<div class="space-y-4">
+  <!-- Current Status -->
+  <div class="flex items-center space-x-3">
+    <% if project.style_style_completed? %>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        Проанализирован
+      </span>
+    <% elsif project.style_style_analyzing? %>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+        <svg class="animate-spin w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Анализируется...
+      </span>
+    <% elsif project.style_style_failed? %>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+        <svg class="w-4 h-4 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+        </svg>
+        Ошибка анализа
+      </span>
+    <% else %>
+      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200">
+        Не проанализирован
+      </span>
+    <% end %>
+  </div>
+
+  <% if project.style_analyzed_at.present? %>
+    <p class="text-xs text-gray-500 dark:text-gray-400">
+      Последний анализ: <%= l(project.style_analyzed_at, format: :short) %>
+    </p>
+  <% end %>
+
+  <!-- Enabled Toggle -->
+  <% if project.style_style_completed? %>
+    <%= form_with model: project, url: project_style_settings_path(project), method: :patch, data: { turbo_frame: "_top" } do |f| %>
+      <label class="flex items-center cursor-pointer">
+        <%= f.check_box :custom_style_enabled, class: "sr-only peer", onchange: "this.form.requestSubmit()" %>
+        <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+        <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">
+          Использовать стиль
+        </span>
+      </label>
+    <% end %>
+  <% end %>
+
+  <!-- Actions -->
+  <div class="space-y-3 pt-4">
+    <% if project.can_analyze_style? %>
+      <%= button_to "Проанализировать стиль", analyze_project_style_settings_path(project), method: :post, class: "w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium" %>
+    <% elsif project.style_style_analyzing? %>
+      <button disabled class="w-full py-2 px-4 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+        Анализируется...
+      </button>
+    <% else %>
+      <button disabled class="w-full py-2 px-4 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
+        Добавьте примеры
+      </button>
+    <% end %>
+
+    <% if project.custom_style_prompt.present? %>
+      <%= button_to "Сбросить стиль", reset_project_style_settings_path(project), method: :delete, data: { turbo_confirm: "Сбросить все данные стиля?" }, class: "w-full py-2 px-4 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/30 transition-colors font-medium" %>
+    <% end %>
+  </div>
+</div>

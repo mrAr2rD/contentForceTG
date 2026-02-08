@@ -57,11 +57,45 @@ Rails.application.routes.draw do
     end
   end
 
+  # Telegram Sessions (авторизация через Pyrogram)
+  resources :telegram_sessions, only: [:index, :new, :destroy] do
+    collection do
+      post :send_code
+    end
+    member do
+      post :verify_code
+      post :verify_2fa
+    end
+  end
+
   # Projects
   resources :projects do
     member do
       post :archive
       post :activate
+    end
+
+    # Style settings (анализ стиля)
+    resource :style_settings, only: [:show, :update], controller: 'projects/style_settings' do
+      post :analyze
+      delete :reset
+    end
+
+    # Style samples (примеры для анализа)
+    resources :style_samples, only: [:index, :create, :destroy], controller: 'projects/style_samples' do
+      collection do
+        post :import_from_telegram
+      end
+      member do
+        post :toggle
+      end
+    end
+
+    # Style documents (загруженные документы)
+    resources :style_documents, only: [:index, :create, :destroy], controller: 'projects/style_documents' do
+      member do
+        post :toggle
+      end
     end
 
     # Nested resources
@@ -114,6 +148,7 @@ Rails.application.routes.draw do
     get 'robokassa/success', to: 'robokassa#success', as: :robokassa_success
     get 'robokassa/fail', to: 'robokassa#fail', as: :robokassa_fail
     post 'channel_sync', to: 'channel_sync#receive', as: :channel_sync
+    post 'style_import', to: 'style_import#receive', as: :style_import
   end
 
   # Static pages

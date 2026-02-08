@@ -1,0 +1,14 @@
+<% if local_assigns[:success] %>
+  <div class="p-3 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-lg">
+    <div class="flex items-center">
+      <svg class="w-4 h-4 mr-2 text-green-600 dark:text-green-400" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+      <span class="text-sm text-green-700 dark:text-green-300">Файл успешно загружен</span>
+    </div>
+  </div>
+<% elsif local_assigns[:error] %>
+  <div class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+    <p class="text-sm text-red-600 dark:text-red-400"><%= error %></p>
+  </div>
+<% end %>

@@ -1,0 +1,33 @@
+<% error ||= nil %>
+
+<%= form_with url: send_code_telegram_sessions_path, method: :post, data: { controller: "telegram-auth", turbo_frame: "_top" } do |f| %>
+  <div class="space-y-4">
+    <% if error %>
+      <div class="p-3 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg">
+        <p class="text-sm text-red-600 dark:text-red-400"><%= error %></p>
+      </div>
+    <% end %>
+
+    <div>
+      <label for="phone_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Номер телефона
+      </label>
+      <input type="tel"
+             name="phone_number"
+             id="phone_number"
+             placeholder="+7 999 123 45 67"
+             class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+             data-telegram-auth-target="phone"
+             autofocus>
+      <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">
+        Введите номер с кодом страны
+      </p>
+    </div>
+
+    <button type="submit"
+            class="w-full py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            data-telegram-auth-target="submit">
+      Получить код
+    </button>
+  </div>
+<% end %>

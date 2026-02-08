@@ -145,6 +145,14 @@ module Ai
         end
 
         base_prompt += "\nОписание: #{@project.description}" if @project.description.present?
+
+        # Добавляем кастомный стиль, если включён и проанализирован
+        if @project.custom_style_enabled? && @project.custom_style_prompt.present?
+          base_prompt += "\n\n=== АВТОРСКИЙ СТИЛЬ ===\n"
+          base_prompt += @project.custom_style_prompt
+          base_prompt += "\n=== КОНЕЦ СТИЛЯ ===\n"
+          base_prompt += "\nВАЖНО: Строго следуй инструкциям по авторскому стилю выше."
+        end
       end
 
       if context[:previous_posts]

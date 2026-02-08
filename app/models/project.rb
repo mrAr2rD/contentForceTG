@@ -64,9 +64,17 @@ class Project < ApplicationRecord
   has_many :posts, dependent: :destroy
   has_many :telegram_bots, dependent: :destroy
   has_many :channel_sites, dependent: :destroy
+  has_many :style_samples, dependent: :destroy
+  has_many :style_documents, dependent: :destroy
 
   # Enums
   enum :status, { draft: 0, active: 1, archived: 2 }, default: :draft
+  enum :style_analysis_status, {
+    style_pending: 0,
+    style_analyzing: 1,
+    style_completed: 2,
+    style_failed: 3
+  }, prefix: :style
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
@@ -161,5 +169,37 @@ class Project < ApplicationRecord
     else
       'deepseek/deepseek-chat'
     end
+  end
+
+  # Style methods
+  def has_style_data?
+    style_samples.for_analysis.exists? || style_documents.for_analysis.exists?
+  end
+
+  def style_samples_count
+    style_samples.for_analysis.count
+  end
+
+  def style_documents_count
+    style_documents.for_analysis.count
+  end
+
+  def total_style_words
+    samples_words = style_samples.for_analysis.sum { |s| s.word_count }
+    docs_words = style_documents.for_analysis.sum { |d| d.word_count }
+    samples_words + docs_words
+  end
+
+  def can_analyze_style?
+    has_style_data? && !style_style_analyzing?
+  end
+
+  def reset_style!
+    update!(
+      custom_style_enabled: false,
+      custom_style_prompt: nil,
+      style_analysis_status: :style_pending,
+      style_analyzed_at: nil
+    )
   end
 end

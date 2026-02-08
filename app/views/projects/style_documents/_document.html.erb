@@ -1,0 +1,37 @@
+<li id="document_<%= document.id %>" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+  <div class="flex items-center space-x-3 min-w-0">
+    <div class="flex-shrink-0">
+      <% if document.markdown? %>
+        <svg class="w-8 h-8 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M22.269 19.385H1.731a1.73 1.73 0 01-1.73-1.73V6.345a1.73 1.73 0 011.73-1.73h20.538a1.73 1.73 0 011.73 1.73v11.31a1.73 1.73 0 01-1.73 1.73zm-16.5-3.462v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.077H10.23l-2.308 2.885-2.307-2.885H3.462v7.846h2.307zm14.423 0l-3.23-4.039v4.039h-2.308V8.077h2.308l3.23 4.039V8.077h2.308v7.846h-2.308z"/>
+        </svg>
+      <% else %>
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
+      <% end %>
+    </div>
+    <div class="min-w-0">
+      <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+        <%= document.filename %>
+      </p>
+      <p class="text-xs text-gray-500 dark:text-gray-400">
+        <%= document.formatted_file_size %> &middot; <%= document.word_count %> слов
+      </p>
+    </div>
+  </div>
+  <div class="flex items-center space-x-2 ml-4">
+    <!-- Toggle for analysis -->
+    <%= button_to toggle_project_style_document_path(document.project, document), method: :post, class: "p-1.5 rounded transition-colors #{document.used_for_analysis? ? 'text-green-600 hover:text-green-700 bg-green-50 dark:bg-green-900/30' : 'text-gray-400 hover:text-gray-500'}", title: document.used_for_analysis? ? "Используется для анализа" : "Не используется для анализа" do %>
+      <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+      </svg>
+    <% end %>
+    <!-- Delete -->
+    <%= button_to project_style_document_path(document.project, document), method: :delete, data: { turbo_confirm: "Удалить этот документ?" }, class: "p-1.5 text-gray-400 hover:text-red-600 transition-colors" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+      </svg>
+    <% end %>
+  </div>
+</li>

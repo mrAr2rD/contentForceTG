@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_09_000004) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -317,9 +317,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
     t.decimal "ai_temperature", precision: 3, scale: 2, default: "0.7"
     t.datetime "archived_at"
     t.datetime "created_at", null: false
+    t.boolean "custom_style_enabled", default: false
+    t.text "custom_style_prompt"
     t.text "description"
     t.string "name"
     t.integer "status"
+    t.integer "style_analysis_status", default: 0
+    t.datetime "style_analyzed_at"
     t.text "system_prompt"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
@@ -331,6 +335,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
     t.boolean "channel_sites_enabled", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "style_documents", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "content", null: false
+    t.string "content_type"
+    t.datetime "created_at", null: false
+    t.integer "file_size"
+    t.string "filename", null: false
+    t.uuid "project_id", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "used_for_analysis", default: true
+    t.index ["project_id"], name: "index_style_documents_on_project_id"
+    t.index ["used_for_analysis"], name: "index_style_documents_on_used_for_analysis"
+  end
+
+  create_table "style_samples", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.jsonb "metadata", default: {}
+    t.datetime "original_date"
+    t.uuid "project_id", null: false
+    t.string "source_channel"
+    t.string "source_type"
+    t.bigint "telegram_message_id"
+    t.datetime "updated_at", null: false
+    t.boolean "used_for_analysis", default: true
+    t.index ["project_id", "telegram_message_id"], name: "idx_style_samples_project_message_unique", unique: true, where: "(telegram_message_id IS NOT NULL)"
+    t.index ["project_id"], name: "index_style_samples_on_project_id"
+    t.index ["source_type"], name: "index_style_samples_on_source_type"
+    t.index ["used_for_analysis"], name: "index_style_samples_on_used_for_analysis"
   end
 
   create_table "subscriber_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
@@ -392,11 +426,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
 
   create_table "telegram_sessions", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
     t.boolean "active", default: true
+    t.datetime "auth_expires_at"
+    t.integer "auth_status", default: 0
     t.datetime "created_at", null: false
+    t.string "phone_code_hash"
     t.string "phone_number"
-    t.text "session_string", null: false
+    t.text "session_string"
     t.datetime "updated_at", null: false
     t.uuid "user_id", null: false
+    t.index ["auth_status"], name: "index_telegram_sessions_on_auth_status"
     t.index ["user_id", "active"], name: "index_telegram_sessions_on_user_id_and_active"
     t.index ["user_id"], name: "index_telegram_sessions_on_user_id"
   end
@@ -445,6 +483,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
   add_foreign_key "posts", "telegram_bots"
   add_foreign_key "posts", "users"
   add_foreign_key "projects", "users"
+  add_foreign_key "style_documents", "projects"
+  add_foreign_key "style_samples", "projects"
   add_foreign_key "subscriber_events", "invite_links"
   add_foreign_key "subscriber_events", "telegram_bots"
   add_foreign_key "subscriptions", "plans"
