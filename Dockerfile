@@ -68,8 +68,9 @@ COPY . .
 RUN bundle exec bootsnap precompile app/ lib/
 
 # Precompiling assets for production without requiring secret RAILS_MASTER_KEY
-# Clear bootsnap cache to avoid path scanning issues
-RUN rm -rf tmp/cache/bootsnap* && SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
+# DISABLE_BOOTSNAP=1 полностью отключает bootsnap, чтобы избежать ошибок rb_sys_fail(opendir)
+# при сканировании путей в Docker-сборке
+RUN DISABLE_BOOTSNAP=1 SECRET_KEY_BASE_DUMMY=1 ./bin/rails assets:precompile
 
 
 RUN rm -rf node_modules
