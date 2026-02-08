@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 ## Project Overview
 
 **ContentForce** — монолитное Rails 8.1.2 приложение для автоматизации создания и публикации контента в Telegram с использованием AI.
@@ -48,7 +50,8 @@ rails console                        # Консоль
 Бизнес-логика в `app/services/`:
 
 - **Telegram::*** — `VerifyService`, `PublishService`, `WebhookService`, `AnalyticsService`
-- **AI::*** — `ContentGenerator`, `PostImprover`, `HashtagGenerator`
+- **AI::*** — `ContentGenerator`, `PostImprover`, `HashtagGenerator`, `ImageGenerator`
+- **Analytics::*** — `RoiCalculatorService`
 - **Payment::*** — `RobokassaService`
 
 ### Background Jobs (Solid Queue)
@@ -79,18 +82,24 @@ Post
 ├── belongs_to :project, :user
 ├── belongs_to :telegram_bot (optional)
 ├── enum status: [:draft, :scheduled, :published, :failed]
-└── error_details (text)
+└── has_one_attached :image
 
 Subscription
 ├── belongs_to :user
+├── belongs_to :plan_record (Plan)
 └── jsonb :usage, :limits
+
+AiUsageLog
+├── belongs_to :user
+├── belongs_to :project (optional)
+└── tracks: cost, tokens_used, input_cost, output_cost
 ```
 
 ### Database Patterns
 
 - UUID primary keys везде
 - JSONB для гибких данных (`settings`, `usage`)
-- `encrypts :bot_token` для токенов
+- `encrypts :bot_token` для токенов (Active Record Encryption)
 - Enums для статусов (integer-backed)
 
 ## Testing
@@ -121,13 +130,20 @@ OPENROUTER_API_KEY=<key>
 # Telegram OAuth
 TELEGRAM_BOT_TOKEN=<token>
 TELEGRAM_BOT_USERNAME=<username>
-TELEGRAM_ORIGIN_URL=http://localhost:3000
 
-# Production
-AWS_ACCESS_KEY_ID=<key>
-AWS_SECRET_ACCESS_KEY=<secret>
-AWS_BUCKET=contentforce-uploads
-SENTRY_DSN=<dsn>
+# Active Record Encryption (production)
+AR_ENCRYPTION_PRIMARY_KEY=<32-byte-key>
+AR_ENCRYPTION_DETERMINISTIC_KEY=<32-byte-key>
+AR_ENCRYPTION_KEY_DERIVATION_SALT=<32-byte-salt>
+
+# S3 Storage (production)
+S3_ACCESS_KEY_ID=<key>
+S3_SECRET_ACCESS_KEY=<secret>
+S3_BUCKET=<bucket>
+S3_REGION=<region>
+S3_ENDPOINT=<url>  # для S3-совместимых (Yandex, Selectel)
+
+# Payments
 ROBOKASSA_MERCHANT_LOGIN=<login>
 ROBOKASSA_PASSWORD_1=<password>
 ROBOKASSA_PASSWORD_2=<password>
@@ -136,12 +152,8 @@ ROBOKASSA_PASSWORD_2=<password>
 ## Code Style
 
 - **Linter**: rubocop-rails-omakase (Rails defaults)
-- **Комментарии**: на русском языке (см. `.qoder/rules/russian.md`)
-- **Skills**: см. `.claude/skills/` для специализированных правил
-
-```bash
-rubocop -a  # Auto-fix перед коммитом
-```
+- **Комментарии**: на русском языке
+- Запускать `rubocop -a` перед коммитом
 
 ## Key Business Logic
 
@@ -157,20 +169,23 @@ rubocop -a  # Auto-fix перед коммитом
 - Free tier с лимитами AI
 - Платные тарифы: Starter (590₽), Pro (1490₽), Business (2990₽)
 - Оплата через Robokassa
-- Usage в `Subscription#usage` JSONB
+- Usage tracking в `AiUsageLog`
 
 ### AI Integration
 
 - OpenRouter client: `lib/openrouter/client.rb`
-- Модели: Claude, GPT-4, Gemini
-- Бесплатные модели не расходуют лимит (`AiConfiguration.free_model?`)
+- Модели: Claude, GPT-4, Gemini (настраиваются в admin)
+- Генерация изображений: Gemini Flash Image
 - Логирование в `ai_usage_logs`
 
 ## Deployment
 
+Production деплоится через **Coolify** (self-hosted PaaS):
+
 ```bash
-docker-compose up              # Local
-git push origin main           # Production (Coolify)
+git push origin dev    # Триггерит автодеплой
 ```
 
-Health check: `/health`
+- Branch: `dev` → production
+- Health check: `/health`
+- Docker build с multi-stage (см. `Dockerfile`)
