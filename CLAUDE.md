@@ -53,6 +53,7 @@ rails console                        # Консоль
 - **AI::*** — `ContentGenerator`, `PostImprover`, `HashtagGenerator`, `ImageGenerator`
 - **Analytics::*** — `RoiCalculatorService`
 - **Payment::*** — `RobokassaService`
+- **ChannelSites::*** — `SyncService`, `ImportPostsService`, `VerifyDomainService`
 
 ### Background Jobs (Solid Queue)
 
@@ -93,6 +94,16 @@ AiUsageLog
 ├── belongs_to :user
 ├── belongs_to :project (optional)
 └── tracks: cost, tokens_used, input_cost, output_cost
+
+ChannelSite (Mini-sites для SEO)
+├── belongs_to :telegram_bot
+├── belongs_to :project
+├── has_many :channel_posts
+├── subdomain/custom_domain routing
+└── enabled/disabled через SiteConfiguration
+
+SiteConfiguration (Feature flags, singleton)
+└── channel_sites_enabled: boolean
 ```
 
 ### Database Patterns
@@ -177,6 +188,17 @@ ROBOKASSA_PASSWORD_2=<password>
 - Модели: Claude, GPT-4, Gemini (настраиваются в admin)
 - Генерация изображений: Gemini Flash Image
 - Логирование в `ai_usage_logs`
+
+### Mini-Sites (Channel Sites)
+
+SEO-оптимизированные сайты из Telegram каналов:
+
+- **Routing**: `SubdomainConstraint` в `app/constraints/`
+- **Public**: `ChannelSitesController` (show, posts, post, sitemap)
+- **Dashboard**: `Dashboard::ChannelSitesController`, `Dashboard::ChannelPostsController`
+- **Feature flag**: `SiteConfiguration.channel_sites_enabled?`
+- **Layout**: `app/views/layouts/channel_site.html.erb` (тёмная тема с сайдбаром)
+- **Admin**: `Admin::SiteSettingsController` — включение/выключение функции
 
 ## Deployment
 
