@@ -69,7 +69,8 @@ module Admin
     private
 
     def set_article
-      @article = Article.find(params[:id])
+      # Поддержка поиска как по UUID, так и по slug (из-за to_param)
+      @article = Article.find_by(id: params[:id]) || Article.find_by!(slug: params[:id])
     end
 
     def article_params
