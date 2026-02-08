@@ -45,12 +45,14 @@
     border-color: var(--accent);
   }
 
-  .tech-icon {
-    transition: transform 0.3s ease;
+  .partner-logo {
+    transition: all 0.3s ease;
+    filter: grayscale(100%) brightness(0.7);
   }
 
-  .tech-icon:hover {
-    transform: scale(1.1);
+  .partner-logo:hover {
+    filter: grayscale(0%) brightness(1);
+    transform: scale(1.05);
   }
 </style>
 
@@ -158,52 +160,74 @@
       </div>
     </section>
 
-    <!-- Technologies -->
+    <!-- Partners -->
     <section class="mb-16">
-      <div class="section-card bg-[#111113] border border-[#27272A] rounded-2xl p-8">
-        <div class="flex items-center gap-4 mb-6">
-          <div class="w-12 h-12 bg-[#00D4AA]/10 rounded-xl flex items-center justify-center">
-            <svg class="w-6 h-6 text-[#00D4AA]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+      <div class="text-center mb-10">
+        <h2 class="text-2xl font-bold mb-3">Наши партнёры</h2>
+        <p class="text-[#A1A1AA]">Мы сотрудничаем с ведущими технологическими компаниями</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 items-center">
+        <!-- Google -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <svg class="h-8 w-auto" viewBox="0 0 272 92" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M115.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18C71.25 34.32 81.24 25 93.5 25s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44S80.99 39.2 80.99 47.18c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#EA4335"/>
+            <path d="M163.75 47.18c0 12.77-9.99 22.18-22.25 22.18s-22.25-9.41-22.25-22.18c0-12.85 9.99-22.18 22.25-22.18s22.25 9.32 22.25 22.18zm-9.74 0c0-7.98-5.79-13.44-12.51-13.44s-12.51 5.46-12.51 13.44c0 7.9 5.79 13.44 12.51 13.44s12.51-5.55 12.51-13.44z" fill="#FBBC05"/>
+            <path d="M209.75 26.34v39.82c0 16.38-9.66 23.07-21.08 23.07-10.75 0-17.22-7.19-19.66-13.07l8.48-3.53c1.51 3.61 5.21 7.87 11.17 7.87 7.31 0 11.84-4.51 11.84-13v-3.19h-.34c-2.18 2.69-6.38 5.04-11.68 5.04-11.09 0-21.25-9.66-21.25-22.09 0-12.52 10.16-22.26 21.25-22.26 5.29 0 9.49 2.35 11.68 4.96h.34v-3.61h9.25zm-8.56 20.92c0-7.81-5.21-13.52-11.84-13.52-6.72 0-12.35 5.71-12.35 13.52 0 7.73 5.63 13.36 12.35 13.36 6.63 0 11.84-5.63 11.84-13.36z" fill="#4285F4"/>
+            <path d="M225 3v65h-9.5V3h9.5z" fill="#34A853"/>
+            <path d="M262.02 54.48l7.56 5.04c-2.44 3.61-8.32 9.83-18.48 9.83-12.6 0-22.01-9.74-22.01-22.18 0-13.19 9.49-22.18 20.92-22.18 11.51 0 17.14 9.16 18.98 14.11l1.01 2.52-29.65 12.28c2.27 4.45 5.8 6.72 10.75 6.72 4.96 0 8.4-2.44 10.92-6.14zm-23.27-7.98l19.82-8.23c-1.09-2.77-4.37-4.7-8.23-4.7-4.95 0-11.84 4.37-11.59 12.93z" fill="#EA4335"/>
+            <path d="M35.29 41.41V32H68c.31 1.64.47 3.58.47 5.68 0 7.06-1.93 15.79-8.15 22.01-6.05 6.3-13.78 9.66-24.02 9.66C16.32 69.35.36 53.89.36 33.91.36 13.93 16.32-1.53 36.3-1.53c11.01 0 18.82 4.31 24.69 9.99l-6.94 6.94c-4.21-3.95-9.91-7.03-17.75-7.03-14.49 0-25.83 11.68-25.83 25.54 0 13.86 11.34 25.54 25.83 25.54 9.4 0 14.74-3.78 18.15-7.19 2.77-2.77 4.59-6.73 5.3-12.14H35.29z" fill="#4285F4"/>
+          </svg>
+        </div>
+
+        <!-- Microsoft -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <svg class="h-7 w-auto" viewBox="0 0 318 69" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 0h32.8v32.8H0V0z" fill="#F25022"/>
+            <path d="M35.6 0h32.8v32.8H35.6V0z" fill="#7FBA00"/>
+            <path d="M0 35.6h32.8v32.8H0V35.6z" fill="#00A4EF"/>
+            <path d="M35.6 35.6h32.8v32.8H35.6V35.6z" fill="#FFB900"/>
+            <path d="M94.5 18.5h7.1l11.3 30.9h.1l11.2-30.9h6.8v36.8h-4.6V23.1h-.1l-11.7 32.2h-4.2L99.3 23.1h-.1v32.2h-4.6V18.5zm51.2 8.1c-8.6 0-12.7 6.7-12.7 13.6 0 8.1 4.7 13.3 12.9 13.3 3.5 0 6.6-.7 9.3-2.4v-4.2c-2.6 1.8-5.6 2.8-8.8 2.8-5.7 0-8.7-3.6-8.8-8.7h19.1v-2.5c0-6.5-3.5-11.9-11-11.9zm-8.1 10.3c.3-4.1 2.8-6.8 7.3-6.8 4.9 0 6.5 3.3 6.5 6.8h-13.8zm31.5-10.3c-8.6 0-12.7 6.7-12.7 13.6 0 8.1 4.7 13.3 12.9 13.3 3.5 0 6.6-.7 9.3-2.4v-4.2c-2.6 1.8-5.6 2.8-8.8 2.8-5.7 0-8.7-3.6-8.8-8.7h19.1v-2.5c0-6.5-3.5-11.9-11-11.9zm-8.1 10.3c.3-4.1 2.8-6.8 7.3-6.8 4.9 0 6.5 3.3 6.5 6.8h-13.8zm34.3-10.3c-3.9 0-6.4 2.4-7.6 4.6h-.1v-4h-4.5v28.1h4.6V38.7c0-5.1 2.5-8.5 7-8.5.8 0 1.6.1 2.4.3v-4.5c-.6-.1-1.2-.1-1.8-.1zm9 19.1c0 5.7 4.5 7.8 9.8 7.8 5.3 0 9.8-2.5 9.8-8.3 0-4.8-3.9-6.5-7.6-7.5-3.5-1-7.2-1.3-7.2-4.2 0-2.4 2.4-3.3 4.6-3.3 2.7 0 5.3 1.1 5.9 4h4.5c-.6-5.4-5-7.6-10-7.6-4.7 0-9.5 2.2-9.5 7.6 0 4.8 4 6.3 7.8 7.4 3.6 1 7 1.6 7 4.5 0 3-3 3.9-5.5 3.9-3.4 0-5.9-1.6-6.2-4.4h-4.5v.1zm22.9-18.5c-2.6 0-5 2.2-5 5.1 0 2.8 2.4 5.1 5 5.1 2.6 0 5-2.2 5-5.1 0-2.8-2.4-5.1-5-5.1zm0 9.3c-2 0-4.1-1.6-4.1-4.2 0-2.6 2.1-4.2 4.1-4.2 2.1 0 4.1 1.6 4.1 4.2s-2 4.2-4.1 4.2zm4.6-5v-.7h-.9v-.4h2.2v.4h-.9v2.6h-.4v-1.9zm1.5-1.1h.6l.8 2.1.8-2.1h.6v3h-.4V28l-.8 2.1h-.4l-.8-2.1v2.1h-.4v-3zm-2.5 8.2h4.6v28.1h-4.6V27.2zm21.6-.6c-3.9 0-6.4 2.4-7.6 4.6h-.1v-4h-4.5v28.1h4.6V38.7c0-5.1 2.5-8.5 7-8.5.8 0 1.6.1 2.4.3v-4.5c-.6-.1-1.2-.1-1.8-.1zm9.6.6c-8.6 0-12.7 6.7-12.7 13.6 0 8.1 4.7 13.3 12.9 13.3 3.5 0 6.6-.7 9.3-2.4v-4.2c-2.6 1.8-5.6 2.8-8.8 2.8-5.7 0-8.7-3.6-8.8-8.7h19.1v-2.5c0-6.5-3.5-11.9-11-11.9zm-8.1 10.3c.3-4.1 2.8-6.8 7.3-6.8 4.9 0 6.5 3.3 6.5 6.8h-13.8zm31.5-10.3c-3.9 0-6.4 2.4-7.6 4.6h-.1v-4h-4.5v28.1h4.6V38.7c0-5.1 2.5-8.5 7-8.5.8 0 1.6.1 2.4.3v-4.5c-.6-.1-1.2-.1-1.8-.1z" fill="#737373"/>
+          </svg>
+        </div>
+
+        <!-- Telegram -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <svg class="h-10 w-auto" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="120" cy="120" r="120" fill="url(#tg-gradient)"/>
+            <path d="M98 175c-3.9 0-3.2-1.5-4.6-5.2L82 132.2 174 80" fill="#C8DAEA"/>
+            <path d="M98 175c3 0 4.3-1.4 6-3l16-15.6-20-12" fill="#A9C9DD"/>
+            <path d="M100 144.4l48.4 35.7c5.5 3 9.5 1.5 10.9-5.1l19.7-93c2-8-3-11.6-8.4-9.2L52 117.8c-7.8 3.1-7.7 7.5-1.4 9.4l36.4 11.4 84.3-53.1c4-2.4 7.6-1.1 4.6 1.5" fill="#fff"/>
+            <defs>
+              <linearGradient id="tg-gradient" x1="120" y1="0" x2="120" y2="240" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#2AABEE"/>
+                <stop offset="1" stop-color="#229ED9"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+
+        <!-- Yandex -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <svg class="h-8 w-auto" viewBox="0 0 66 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13.87 23.5h-3.2V7.12L4.1 23.5H.88L7.57 9.6C6.1 8.5 5.2 6.55 5.2 4.04 5.2 1.08 7.1 0 10.3 0h3.58v23.5zm-3.2-20.5h-.63c-1.7 0-2.28.84-2.28 2.27 0 1.5.84 2.77 2.28 3.4h.63V3zm27.5 3.23L34 23.5h-2.5L27.35 6.23h3.04l2.92 12.83 2.92-12.83h1.94zm14.92 10.9v3.37h-9.62V6.23h9.42v3.37h-6.18v3.8h5.57v3.1h-5.57v4.04h6.38v-.4zm-20.74 0v3.37H22.73V6.23h9.42v3.37H25.97v3.8h5.57v3.1h-5.57v4.04h6.38v-.4zm29.38-10.9h-2.8l-3.66 6.08V6.23h-3.25v17.28h3.25v-6.56l3.87 6.56h3.58l-4.94-8.53 3.95-6.74zm-45.94 6.1v7.82H12.5V12.4h3.3z" fill="#FC3F1D"/>
+          </svg>
+        </div>
+
+        <!-- VK -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <svg class="h-8 w-auto" viewBox="0 0 97 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M93.93 39.56c-2.67-2.93-7.54-6.43-9.86-7.58-1.42-.71-1.5-1.97-.42-3.8l.4-.65c2.5-4.06 6.1-10.12 3.07-14.46-1.63-2.34-5.3-2.82-10.5-2.82h-6.5c-1.4 0-2.4.5-2.9 1.47-.62 1.2-.4 2.87.63 4.6 1.1 1.82 4.72 7.4 7.5 10.56 1.17 1.32.88 2.44-.38 3.03-7.14 3.35-14.36 8.13-20.05 14.4-.83.92-1.57 1.3-2.2 1.3-.87 0-1.47-.7-1.68-1.4-.93-3.2-1.2-10.53-1.3-17.55-.1-6.9-.2-13.47-1.15-15.8C48.2 9.4 46.8 9 44.12 9H36.8c-3.8 0-6.22.38-8.56 1.35-2.38 1-4.4 2.74-5.67 4.92-.93 1.58-1.1 3.36-.45 4.67.78 1.6 2.57 2.22 4.1 2.22.96 0 1.82-.26 2.5-.75 2.13-1.54 3.5-1.94 4.54-1.94 1.66 0 2.46 1.54 2.63 5.08.25 5.4.08 11.14-.5 17.08-.3 3.07-.8 4.75-1.44 5.25-.72.56-2.3-.28-4.2-2.25-5.2-5.4-10.15-15.1-12.27-21.04-.62-1.74-2.1-2.83-3.88-2.83H4.56c-1.64 0-3.07.78-3.82 2.08-.86 1.5-.74 3.38.3 5.02.35.54.73 1.1 1.14 1.66 8.45 11.6 15.93 20.22 24.1 27.16C34.9 54.32 44.25 55 52.73 55c5.34 0 10.12-.4 14.1-1.17 3.77-.74 7.8-2.3 10.15-4.88.57-.62 1.08-1.28 1.53-1.97 3.26-4.95 11.55-4.75 14.72-3.67 1.24.42 2.46.1 3.24-.86 1.64-2.02.93-4.08-2.54-7.9z" fill="#0077FF"/>
+          </svg>
+        </div>
+
+        <!-- Anthropic / Claude -->
+        <div class="partner-logo flex items-center justify-center p-6 bg-[#111113] border border-[#27272A] rounded-xl h-24">
+          <div class="flex items-center gap-2">
+            <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.304 5H13.07l4.156 14h4.234L17.304 5zM6.696 5l-4.156 14h4.234l.846-3.108h4.76L13.226 19h4.234L13.304 5H6.696zm1.17 7.892L9.5 7.504l1.634 5.388H7.866z" fill="#D4A27F"/>
             </svg>
-          </div>
-          <h2 class="text-2xl font-bold">Технологии</h2>
-        </div>
-
-        <p class="text-[#A1A1AA] mb-8 leading-relaxed">
-          ContentForce построен на современном технологическом стеке, который обеспечивает высокую производительность, безопасность и масштабируемость.
-        </p>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
-            <div class="text-2xl mb-2">💎</div>
-            <div class="font-medium text-sm">Ruby on Rails</div>
-            <div class="text-xs text-[#71717A]">Backend</div>
-          </div>
-          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
-            <div class="text-2xl mb-2">🤖</div>
-            <div class="font-medium text-sm">OpenRouter AI</div>
-            <div class="text-xs text-[#71717A]">AI Models</div>
-          </div>
-          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
-            <div class="text-2xl mb-2">📱</div>
-            <div class="font-medium text-sm">Telegram API</div>
-            <div class="text-xs text-[#71717A]">Publishing</div>
-          </div>
-          <div class="tech-icon p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A] text-center">
-            <div class="text-2xl mb-2">🐘</div>
-            <div class="font-medium text-sm">PostgreSQL</div>
-            <div class="text-xs text-[#71717A]">Database</div>
-          </div>
-        </div>
-
-        <div class="mt-6 p-4 bg-[#1A1A1D] rounded-xl border border-[#27272A]">
-          <h3 class="font-medium mb-3">AI-модели для генерации контента:</h3>
-          <div class="flex flex-wrap gap-2">
-            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">Claude</span>
-            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">GPT-4</span>
-            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">Gemini</span>
-            <span class="px-3 py-1 bg-[#0A0A0B] rounded-full text-sm text-[#00D4AA]">DeepSeek</span>
+            <span class="text-sm font-medium text-[#A1A1AA]">Anthropic</span>
           </div>
         </div>
       </div>
