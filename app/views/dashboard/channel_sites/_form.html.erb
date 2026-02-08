@@ -85,75 +85,168 @@
           </summary>
 
           <div class="mt-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg border border-zinc-200 dark:border-zinc-700">
-            <div class="space-y-4 text-sm">
-              <div>
-                <h4 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Шаг 1: Добавьте CNAME запись</h4>
-                <p class="text-zinc-600 dark:text-zinc-400 mb-2">
-                  В DNS-настройках вашего домена создайте CNAME запись:
-                </p>
-                <div class="bg-zinc-900 dark:bg-zinc-950 rounded-lg p-3 font-mono text-xs overflow-x-auto">
-                  <table class="w-full text-zinc-300">
-                    <thead>
-                      <tr class="text-zinc-500 border-b border-zinc-700">
-                        <th class="text-left pb-2 pr-4">Тип</th>
-                        <th class="text-left pb-2 pr-4">Имя/Хост</th>
-                        <th class="text-left pb-2">Значение</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td class="py-2 pr-4 text-emerald-400">CNAME</td>
-                        <td class="py-2 pr-4">blog <span class="text-zinc-500">(или @, www)</span></td>
-                        <td class="py-2 text-amber-400">contentforce.app</td>
-                      </tr>
-                    </tbody>
-                  </table>
+            <div class="space-y-5 text-sm">
+
+              <!-- Вариант 1: Поддомен -->
+              <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="px-2 py-0.5 bg-emerald-500 text-white text-xs font-medium rounded">Рекомендуется</span>
+                  <h4 class="font-semibold text-emerald-800 dark:text-emerald-200">Поддомен (blog.example.com)</h4>
                 </div>
-                <p class="text-zinc-500 mt-2 text-xs">
-                  Пример: для <code class="px-1 py-0.5 bg-zinc-200 dark:bg-zinc-700 rounded">blog.example.com</code> — хост будет <code class="px-1 py-0.5 bg-zinc-200 dark:bg-zinc-700 rounded">blog</code>
+                <p class="text-emerald-700 dark:text-emerald-300 mb-3">
+                  Самый простой способ — используйте поддомен вашего сайта:
                 </p>
+
+                <div class="space-y-3">
+                  <div>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mb-1 font-medium">1. Добавьте CNAME запись в DNS:</p>
+                    <div class="bg-zinc-900 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                      <table class="w-full text-zinc-300">
+                        <thead>
+                          <tr class="text-zinc-500 border-b border-zinc-700">
+                            <th class="text-left pb-2 pr-4">Тип</th>
+                            <th class="text-left pb-2 pr-4">Имя (Host)</th>
+                            <th class="text-left pb-2">Значение (Value)</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td class="py-2 pr-4 text-emerald-400">CNAME</td>
+                            <td class="py-2 pr-4 text-white">blog</td>
+                            <td class="py-2 text-amber-400">contentforce.app</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mb-1 font-medium">2. Введите домен в поле выше:</p>
+                    <code class="block px-3 py-2 bg-zinc-900 text-amber-400 rounded-lg font-mono text-xs">blog.example.com</code>
+                  </div>
+                </div>
               </div>
 
+              <!-- Примеры для разных провайдеров -->
               <div>
-                <h4 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Шаг 2: Добавьте TXT запись для верификации</h4>
-                <p class="text-zinc-600 dark:text-zinc-400 mb-2">
-                  После создания мини-сайта вы получите уникальный токен верификации. Добавьте TXT запись:
+                <h4 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-3">Примеры настройки у популярных провайдеров</h4>
+
+                <div class="space-y-3">
+                  <!-- Cloudflare -->
+                  <details class="group/cf">
+                    <summary class="flex items-center gap-2 cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100">
+                      <svg class="w-4 h-4 transition-transform group-open/cf:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                      </svg>
+                      <span class="font-medium">Cloudflare</span>
+                    </summary>
+                    <div class="mt-2 ml-6 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs space-y-2">
+                      <p>1. Перейдите в <strong>DNS → Records → Add record</strong></p>
+                      <p>2. Type: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">CNAME</code></p>
+                      <p>3. Name: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">blog</code></p>
+                      <p>4. Target: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">contentforce.app</code></p>
+                      <p>5. Proxy status: <span class="text-amber-600 dark:text-amber-400">DNS only</span> (серое облако)</p>
+                    </div>
+                  </details>
+
+                  <!-- REG.RU -->
+                  <details class="group/reg">
+                    <summary class="flex items-center gap-2 cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100">
+                      <svg class="w-4 h-4 transition-transform group-open/reg:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                      </svg>
+                      <span class="font-medium">REG.RU</span>
+                    </summary>
+                    <div class="mt-2 ml-6 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs space-y-2">
+                      <p>1. Личный кабинет → Домены → <strong>DNS-серверы и управление зоной</strong></p>
+                      <p>2. Нажмите <strong>Добавить запись</strong></p>
+                      <p>3. Тип записи: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">CNAME</code></p>
+                      <p>4. Subdomain: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">blog</code></p>
+                      <p>5. Canonical name: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">contentforce.app</code></p>
+                    </div>
+                  </details>
+
+                  <!-- Beget -->
+                  <details class="group/beget">
+                    <summary class="flex items-center gap-2 cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100">
+                      <svg class="w-4 h-4 transition-transform group-open/beget:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                      </svg>
+                      <span class="font-medium">Beget</span>
+                    </summary>
+                    <div class="mt-2 ml-6 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs space-y-2">
+                      <p>1. Панель управления → <strong>DNS</strong></p>
+                      <p>2. Выберите домен → <strong>Управление DNS-записями</strong></p>
+                      <p>3. Добавить запись типа <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">CNAME</code></p>
+                      <p>4. Поддомен: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">blog</code></p>
+                      <p>5. Значение: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">contentforce.app.</code> (с точкой в конце)</p>
+                    </div>
+                  </details>
+
+                  <!-- TimeWeb -->
+                  <details class="group/tw">
+                    <summary class="flex items-center gap-2 cursor-pointer text-zinc-700 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-zinc-100">
+                      <svg class="w-4 h-4 transition-transform group-open/tw:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                      </svg>
+                      <span class="font-medium">TimeWeb</span>
+                    </summary>
+                    <div class="mt-2 ml-6 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-lg text-xs space-y-2">
+                      <p>1. Панель управления → <strong>Домены</strong> → выберите домен</p>
+                      <p>2. Вкладка <strong>DNS</strong></p>
+                      <p>3. Нажмите <strong>Добавить запись</strong></p>
+                      <p>4. Тип: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">CNAME</code></p>
+                      <p>5. Хост: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">blog</code>, Значение: <code class="px-1 bg-zinc-200 dark:bg-zinc-700 rounded">contentforce.app</code></p>
+                    </div>
+                  </details>
+                </div>
+              </div>
+
+              <!-- TXT верификация -->
+              <div class="pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <h4 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Верификация домена (после создания сайта)</h4>
+                <p class="text-zinc-600 dark:text-zinc-400 mb-3">
+                  После создания мини-сайта вы получите уникальный токен. Добавьте TXT запись для подтверждения владения:
                 </p>
-                <div class="bg-zinc-900 dark:bg-zinc-950 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+                <div class="bg-zinc-900 rounded-lg p-3 font-mono text-xs overflow-x-auto">
                   <table class="w-full text-zinc-300">
                     <thead>
                       <tr class="text-zinc-500 border-b border-zinc-700">
                         <th class="text-left pb-2 pr-4">Тип</th>
-                        <th class="text-left pb-2 pr-4">Имя/Хост</th>
+                        <th class="text-left pb-2 pr-4">Имя</th>
                         <th class="text-left pb-2">Значение</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
                         <td class="py-2 pr-4 text-emerald-400">TXT</td>
-                        <td class="py-2 pr-4">_contentforce <span class="text-zinc-500">(или _contentforce.blog)</span></td>
+                        <td class="py-2 pr-4 text-white">_contentforce.blog</td>
                         <td class="py-2 text-amber-400">contentforce-verify=ваш_токен</td>
                       </tr>
                     </tbody>
                   </table>
                 </div>
-              </div>
-
-              <div>
-                <h4 class="font-semibold text-zinc-900 dark:text-zinc-100 mb-2">Шаг 3: Подтвердите домен</h4>
-                <p class="text-zinc-600 dark:text-zinc-400">
-                  DNS-записи обычно обновляются в течение 1-24 часов. После этого нажмите кнопку "Проверить DNS" в настройках мини-сайта.
+                <p class="text-zinc-500 mt-2 text-xs">
+                  DNS-записи обновляются от 5 минут до 24 часов. После этого нажмите "Проверить DNS" в настройках.
                 </p>
               </div>
 
-              <div class="pt-3 border-t border-zinc-200 dark:border-zinc-700">
+              <!-- Важно -->
+              <div class="pt-3 border-t border-zinc-200 dark:border-zinc-700 space-y-2">
                 <p class="text-zinc-500 flex items-start gap-2">
-                  <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                  </svg>
+                  <span><strong>Корневой домен (example.com):</strong> Не все провайдеры поддерживают CNAME для корневых доменов. Используйте поддомен (blog, news, channel) для надёжности.</span>
+                </p>
+                <p class="text-zinc-500 flex items-start gap-2">
+                  <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                   </svg>
-                  <span>Рекомендуем использовать поддомен (blog.example.com) вместо корневого домена (example.com), так как не все DNS-провайдеры поддерживают CNAME для корневых доменов.</span>
+                  <span><strong>SSL-сертификат:</strong> Будет выпущен автоматически после верификации домена (Let's Encrypt).</span>
                 </p>
               </div>
+
             </div>
           </div>
         </details>
