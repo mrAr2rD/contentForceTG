@@ -85,7 +85,7 @@ class ChannelSite < ApplicationRecord
 
   # Базовый домен
   def base_domain
-    Rails.application.config.action_controller.default_url_options[:host] || "contentforce.app"
+    Rails.application.config.action_controller.default_url_options&.dig(:host) || "contentforce.app"
   end
 
   # SEO методы
