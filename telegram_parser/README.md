@@ -51,7 +51,7 @@ docker run -p 8000:8000 --env-file .env telegram-parser
   "channel_site_id": "uuid",
   "channel_username": "channelname",
   "session_string": "pyrogram_session_string",
-  "callback_url": "https://app.contentforce.app/webhooks/channel_sync",
+  "callback_url": "https://app.contentforce.ru/webhooks/channel_sync",
   "limit": 1000
 }
 ```

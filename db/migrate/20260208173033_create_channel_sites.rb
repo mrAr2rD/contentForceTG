@@ -5,7 +5,7 @@ class CreateChannelSites < ActiveRecord::Migration[8.1]
       t.references :project, type: :uuid, null: false, foreign_key: true
 
       # Домены
-      t.string :subdomain                    # mychannel.contentforce.app
+      t.string :subdomain                    # mychannel.contentforce.ru
       t.string :custom_domain                # blog.example.com
       t.boolean :custom_domain_verified, default: false
       t.string :domain_verification_token

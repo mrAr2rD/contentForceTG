@@ -10,7 +10,7 @@ module Openrouter
     def initialize(api_key: nil)
       # Используем API ключ из параметра, админки или ENV
       @api_key = api_key || AiConfiguration.current.api_key
-      @site_url = ENV['OPENROUTER_SITE_URL'] || 'https://contentforce.app'
+      @site_url = ENV['OPENROUTER_SITE_URL'] || 'https://contentforce.ru'
       @site_name = ENV['OPENROUTER_SITE_NAME'] || 'ContentForce'
     end
 

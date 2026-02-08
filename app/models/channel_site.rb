@@ -60,7 +60,7 @@ class ChannelSite < ApplicationRecord
     return nil if host.blank?
 
     parts = host.split(".")
-    # Ожидаем формат: subdomain.contentforce.app
+    # Ожидаем формат: subdomain.contentforce.ru
     return nil if parts.length < 3
 
     subdomain = parts.first
