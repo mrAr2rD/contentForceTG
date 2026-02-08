@@ -296,16 +296,18 @@
             <% end %>
           <% end %>
 
-          <!-- Integrations Section -->
-          <div class="px-3 py-2 mt-4 text-[10px] font-semibold text-[#71717A] mono uppercase tracking-widest">
-            Интеграции
-          </div>
+          <% if SiteConfiguration.telegram_integration_enabled? %>
+            <!-- Integrations Section -->
+            <div class="px-3 py-2 mt-4 text-[10px] font-semibold text-[#71717A] mono uppercase tracking-widest">
+              Интеграции
+            </div>
 
-          <%= link_to telegram_sessions_path, class: "nav-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium #{controller_name == 'telegram_sessions' ? 'active' : 'text-[#A1A1AA]'}" do %>
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
-            </svg>
-            <span>Telegram</span>
+            <%= link_to telegram_sessions_path, class: "nav-link group flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium #{controller_name == 'telegram_sessions' ? 'active' : 'text-[#A1A1AA]'}" do %>
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
+              </svg>
+              <span>Telegram</span>
+            <% end %>
           <% end %>
 
           <!-- Coming Soon Section -->
@@ -328,6 +330,15 @@
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
               </svg>
               <span>Мини-сайты</span>
+            </div>
+          <% end %>
+
+          <% unless SiteConfiguration.telegram_integration_enabled? %>
+            <div class="nav-link-disabled flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295l.213-3.054 5.56-5.022c.242-.213-.054-.334-.373-.121L8.32 13.617l-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.833.94z"/>
+              </svg>
+              <span>Telegram интеграция</span>
             </div>
           <% end %>
 

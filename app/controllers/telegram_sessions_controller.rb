@@ -2,6 +2,7 @@
 
 class TelegramSessionsController < ApplicationController
   before_action :authenticate_user!
+  before_action :ensure_telegram_integration_enabled!
   before_action :set_telegram_session, only: [:destroy]
 
   layout "dashboard"
@@ -170,6 +171,12 @@ class TelegramSessionsController < ApplicationController
   end
 
   private
+
+  def ensure_telegram_integration_enabled!
+    return if SiteConfiguration.telegram_integration_enabled?
+
+    redirect_to dashboard_path, alert: "Функция Telegram интеграции временно недоступна"
+  end
 
   def set_telegram_session
     @telegram_session = current_user.telegram_sessions.find(params[:id])

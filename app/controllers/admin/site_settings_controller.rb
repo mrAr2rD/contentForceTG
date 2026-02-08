@@ -19,7 +19,7 @@ module Admin
     private
 
     def site_config_params
-      params.require(:site_configuration).permit(:channel_sites_enabled, :analytics_enabled)
+      params.require(:site_configuration).permit(:channel_sites_enabled, :analytics_enabled, :telegram_integration_enabled)
     end
   end
 end
