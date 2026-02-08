@@ -1,5 +1,3 @@
-require_relative '../lib/constraints/subdomain_constraint'
-
 Rails.application.routes.draw do
   # Мини-сайты каналов (subdomain/custom domain routing)
   constraints SubdomainConstraint.new do
