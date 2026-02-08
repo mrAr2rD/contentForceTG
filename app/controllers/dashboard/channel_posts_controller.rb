@@ -2,6 +2,7 @@
 
 module Dashboard
   class ChannelPostsController < BaseController
+    before_action :check_feature_enabled
     before_action :set_channel_site
     before_action :set_channel_post, only: [ :show, :edit, :update ]
 
@@ -29,6 +30,12 @@ module Dashboard
     end
 
     private
+
+    def check_feature_enabled
+      unless SiteConfiguration.channel_sites_enabled?
+        redirect_to dashboard_path, alert: "Функция мини-сайтов временно недоступна"
+      end
+    end
 
     def set_channel_site
       @channel_site = ChannelSite.find(params[:channel_site_id])

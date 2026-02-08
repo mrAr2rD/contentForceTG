@@ -123,11 +123,13 @@
             <span>Календарь</span>
           <% end %>
 
-          <%= link_to dashboard_channel_sites_path, class: "group flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all #{controller_name == 'channel_sites' || controller_name == 'channel_posts' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'}" do %>
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
-            </svg>
-            <span>Мини-сайты</span>
+          <% if SiteConfiguration.channel_sites_enabled? %>
+            <%= link_to dashboard_channel_sites_path, class: "group flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all #{controller_name == 'channel_sites' || controller_name == 'channel_posts' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'}" do %>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/>
+              </svg>
+              <span>Мини-сайты</span>
+            <% end %>
           <% end %>
 
           <%= link_to subscriptions_path, class: "group flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all #{controller_name == 'subscriptions' ? 'bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50' : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'}" do %>

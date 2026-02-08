@@ -145,6 +145,9 @@ Rails.application.routes.draw do
     # Payment Settings (Robokassa)
     resource :payment_settings, only: [:edit, :update]
 
+    # Site Settings (Feature flags)
+    resource :site_settings, only: [:edit, :update]
+
     # Тарифные планы
     resources :plans
 

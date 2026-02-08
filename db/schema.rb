@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_08_173040) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_184556) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pgcrypto"
@@ -325,6 +325,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_08_173040) do
     t.uuid "user_id", null: false
     t.string "writing_style", default: "professional"
     t.index ["user_id"], name: "index_projects_on_user_id"
+  end
+
+  create_table "site_configurations", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
+    t.boolean "channel_sites_enabled", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "subscriber_events", id: :uuid, default: -> { "gen_random_uuid()" }, force: :cascade do |t|
