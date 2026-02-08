@@ -19,6 +19,30 @@
       <h3 class="font-semibold mb-6">Функции платформы</h3>
 
       <div class="space-y-4">
+        <!-- Аналитика -->
+        <div class="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
+          <div class="flex-1">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center">
+                <svg class="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+              </div>
+              <div>
+                <h4 class="font-medium text-zinc-900 dark:text-zinc-100">Аналитика</h4>
+                <p class="text-sm text-zinc-500">Статистика просмотров, вовлечённости и ROI для постов</p>
+              </div>
+            </div>
+          </div>
+
+          <label class="relative inline-flex items-center cursor-pointer">
+            <%= form.check_box :analytics_enabled,
+                               class: "sr-only peer",
+                               id: "analytics_toggle" %>
+            <div class="w-11 h-6 bg-zinc-300 dark:bg-zinc-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-violet-300 dark:peer-focus:ring-violet-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-violet-500"></div>
+          </label>
+        </div>
+
         <!-- Мини-сайты -->
         <div class="flex items-center justify-between p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
           <div class="flex-1">
@@ -51,7 +75,7 @@
           </svg>
           <div class="text-sm text-amber-700 dark:text-amber-300">
             <p class="font-medium">Обратите внимание</p>
-            <p class="mt-1">При отключении функции пункт меню "Мини-сайты" скрывается из личного кабинета пользователей. Уже созданные сайты продолжат работать.</p>
+            <p class="mt-1">При отключении функции соответствующий пункт меню скрывается из личного кабинета пользователей и перемещается в раздел "Скоро". Уже существующие данные сохраняются.</p>
           </div>
         </div>
       </div>
