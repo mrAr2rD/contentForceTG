@@ -1,53 +1,37 @@
-<div class="max-w-7xl mx-auto px-8 py-8" data-controller="calendar" data-calendar-events-value="<%= @calendar_events.to_json %>">
+<div class="dashboard-page" data-controller="calendar" data-calendar-events-value="<%= @calendar_events.to_json %>">
   <!-- Header -->
-  <div class="mb-6">
-    <div class="flex items-center justify-between mb-4">
-      <div>
-        <h1 class="text-xl font-semibold text-foreground">Календарь публикаций</h1>
-        <p class="text-xs text-muted-foreground mt-1">Планируйте и управляйте своими постами</p>
-      </div>
-
-      <div class="flex items-center gap-3">
-        <!-- Project Filter -->
-        <% if @projects.any? %>
-          <select data-action="change->calendar#filterProject" class="px-3 py-2 border border-input bg-background rounded text-sm focus:ring-1 focus:ring-ring outline-none">
-            <option value="">Все проекты</option>
-            <% @projects.each do |project| %>
-              <option value="<%= project.id %>" <%= 'selected' if @selected_project&.id == project.id %>>
-                <%= project.name %>
-              </option>
-            <% end %>
-          </select>
+  <% header_actions = capture do %>
+    <% if @projects.any? %>
+      <select data-action="change->calendar#filterProject" class="px-3 py-2 border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 rounded-md text-sm text-zinc-900 dark:text-zinc-50 focus:ring-1 focus:ring-primary-500 outline-none">
+        <option value="">Все проекты</option>
+        <% @projects.each do |project| %>
+          <option value="<%= project.id %>" <%= 'selected' if @selected_project&.id == project.id %>>
+            <%= project.name %>
+          </option>
         <% end %>
-
-        <!-- View Toggle -->
-        <div class="inline-flex rounded-lg border border-input p-1 bg-background">
-          <button data-action="click->calendar#switchView" data-view="month" class="px-3 py-1.5 text-xs font-medium rounded transition-colors bg-primary text-primary-foreground">
-            Месяц
-          </button>
-          <button data-action="click->calendar#switchView" data-view="list" class="px-3 py-1.5 text-xs font-medium rounded transition-colors text-muted-foreground hover:text-foreground">
-            Список
-          </button>
-        </div>
-
-        <% if @projects.any? %>
-          <%= link_to new_project_post_path(@selected_project || @projects.first), class: "inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            Новый пост
-          <% end %>
-        <% else %>
-          <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-xs font-semibold hover:bg-primary/90 transition-colors" do %>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
-            </svg>
-            Создать проект
-          <% end %>
-        <% end %>
-      </div>
+      </select>
+    <% end %>
+    <div class="inline-flex rounded-lg border border-zinc-200 dark:border-zinc-700 p-1 bg-zinc-50 dark:bg-zinc-800">
+      <button data-action="click->calendar#switchView" data-view="month" class="px-3 py-1.5 text-xs font-medium rounded transition-colors bg-zinc-900 text-zinc-50 dark:bg-zinc-50 dark:text-zinc-900">
+        Месяц
+      </button>
+      <button data-action="click->calendar#switchView" data-view="list" class="px-3 py-1.5 text-xs font-medium rounded transition-colors text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-50">
+        Список
+      </button>
     </div>
-  </div>
+    <% if @projects.any? %>
+      <%= link_to new_project_post_path(@selected_project || @projects.first), class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm" do %>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+        Новый пост
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= render 'shared/page_header',
+      title: "Календарь публикаций",
+      subtitle: "Планируйте и управляйте своими постами",
+      actions: header_actions %>
 
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
     <!-- Main Calendar Area -->

@@ -1,19 +1,17 @@
-<div class="notion-page py-12">
-  <!-- Header - Notion style -->
-  <div class="flex items-center justify-between mb-8">
-    <div>
-      <h1 class="notion-h1 mb-2">Проекты</h1>
-      <p class="notion-text text-zinc-500 dark:text-zinc-400">
-        Управляйте вашими контент-проектами
-      </p>
-    </div>
+<div class="dashboard-page">
+  <!-- Header -->
+  <% header_actions = capture do %>
     <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
       </svg>
       Новый проект
     <% end %>
-  </div>
+  <% end %>
+  <%= render 'shared/page_header',
+      title: "Проекты",
+      subtitle: "Управляйте вашими контент-проектами",
+      actions: header_actions %>
 
   <% if @projects.any? %>
     <!-- Projects Grid - Notion style cards -->

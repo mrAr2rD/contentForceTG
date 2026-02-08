@@ -1,9 +1,8 @@
-<div class="p-6 lg:p-8">
+<div class="dashboard-page">
   <!-- Header -->
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-zinc-900 dark:text-zinc-50 mb-2">Тарифные планы</h1>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400">Выберите подходящий тариф для вашего бизнеса</p>
-  </div>
+  <%= render 'shared/page_header',
+      title: "Тарифные планы",
+      subtitle: "Выберите подходящий тариф для вашего бизнеса" %>
 
   <!-- Current Subscription Status -->
   <% if @current_subscription %>

@@ -74,9 +74,14 @@
 }
 
 @layer components {
-  /* Notion-style page layout */
+  /* Dashboard page container - стандартный контейнер для всех страниц дашборда */
+  .dashboard-page {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8;
+  }
+
+  /* Notion-style page layout (deprecated - use dashboard-page) */
   .notion-page {
-    @apply max-w-[900px] mx-auto px-24 py-12;
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8;
   }
 
   /* Notion-style headings */
