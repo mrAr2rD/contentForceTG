@@ -1,64 +1,507 @@
-<div class="dashboard-page">
+<% content_for :title, "Тарифные планы" %>
+
+<style>
+  .subscriptions-tech {
+    --accent: #00D4AA;
+    --accent-glow: rgba(0, 212, 170, 0.5);
+    --accent-dim: rgba(0, 212, 170, 0.15);
+    --bg-card: rgba(17, 17, 19, 0.8);
+    --border-color: rgba(255, 255, 255, 0.06);
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+  }
+
+  .page-header-tech {
+    margin-bottom: 32px;
+  }
+
+  .page-title-tech {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+
+  .page-title-tech .title-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.1));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .page-subtitle-tech {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  /* Current Subscription Card */
+  .current-sub-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .current-sub-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .current-sub-card .sub-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (min-width: 640px) {
+    .current-sub-card .sub-header {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  }
+
+  .current-sub-card .sub-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+  }
+
+  .current-sub-card .sub-badges {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .current-sub-card .plan-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(0, 212, 170, 0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .current-sub-card .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .current-sub-card .status-badge.active {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22C55E;
+  }
+
+  .current-sub-card .status-badge.active .status-dot {
+    width: 6px;
+    height: 6px;
+    background: #22C55E;
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  .current-sub-card .status-badge.inactive {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+  }
+
+  .current-sub-card .sub-expiry {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  /* Usage Stats Grid */
+  .usage-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 16px;
+  }
+
+  @media (min-width: 768px) {
+    .usage-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .usage-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 16px;
+    transition: all 0.2s ease;
+  }
+
+  .usage-card:hover {
+    border-color: rgba(0, 212, 170, 0.15);
+    background: rgba(0, 212, 170, 0.02);
+  }
+
+  .usage-card .usage-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .usage-card .usage-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .usage-card .usage-value .usage-limit {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  /* Plan Cards Grid */
+  .plans-grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 20px;
+    margin-bottom: 48px;
+  }
+
+  @media (min-width: 768px) {
+    .plans-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .plans-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .plan-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 0 40px rgba(0, 212, 170, 0.08);
+  }
+
+  .plan-card.current {
+    border-color: var(--accent);
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.1);
+  }
+
+  .plan-card.popular {
+    border-color: rgba(234, 179, 8, 0.3);
+  }
+
+  .plan-card .plan-badge {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 16px;
+    border-radius: 0 0 8px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .plan-card .plan-badge.current {
+    background: var(--accent);
+    color: #0A0A0B;
+  }
+
+  .plan-card .plan-badge.popular {
+    background: #EAB308;
+    color: #0A0A0B;
+  }
+
+  .plan-card .plan-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+
+  .plan-card .plan-price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    margin-bottom: 4px;
+  }
+
+  .plan-card .plan-price .amount {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+
+  .plan-card .plan-price .period {
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .plan-card .plan-tagline {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .plan-card .plan-features {
+    flex: 1;
+    margin-bottom: 20px;
+  }
+
+  .plan-card .feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 8px 0;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .plan-card .feature-item svg {
+    width: 16px;
+    height: 16px;
+    color: #22C55E;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .plan-card .plan-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .plan-card .plan-btn.primary {
+    background: linear-gradient(135deg, var(--accent), #00B894);
+    color: #0A0A0B;
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  }
+
+  .plan-card .plan-btn.primary:hover {
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .plan-card .plan-btn.secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+  }
+
+  .plan-card .plan-btn.secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .plan-card .plan-btn.disabled {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    cursor: not-allowed;
+  }
+
+  /* Payment History */
+  .history-section {
+    margin-top: 48px;
+  }
+
+  .history-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .history-table {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .history-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .history-table thead {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .history-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .history-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .history-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .history-table tr:hover td {
+    background: rgba(0, 212, 170, 0.02);
+  }
+
+  .history-table .payment-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .history-table .payment-status.completed {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22C55E;
+  }
+
+  .history-table .payment-status.pending {
+    background: rgba(234, 179, 8, 0.15);
+    color: #EAB308;
+  }
+
+  .history-table .payment-status.failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+  }
+</style>
+
+<div class="subscriptions-tech">
   <!-- Header -->
-  <%= render 'shared/page_header',
-      title: "Тарифные планы",
-      subtitle: "Выберите подходящий тариф для вашего бизнеса" %>
+  <div class="page-header-tech">
+    <h1 class="page-title-tech">
+      <div class="title-icon">
+        <svg class="w-5 h-5" style="color: #8B5CF6;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+        </svg>
+      </div>
+      Тарифные планы
+    </h1>
+    <p class="page-subtitle-tech">Выберите подходящий тариф для вашего бизнеса</p>
+  </div>
 
   <!-- Current Subscription Status -->
   <% if @current_subscription %>
-    <div class="mb-8 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div class="current-sub-card">
+      <div class="sub-header">
         <div>
-          <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Текущая подписка</h3>
-          <div class="flex items-center gap-4">
-            <span class="inline-flex items-center rounded-md bg-primary-100 dark:bg-primary-900/30 px-3 py-1 text-sm font-medium text-primary-700 dark:text-primary-300">
-              <%= @current_subscription.plan.titleize %>
-            </span>
+          <h3 class="sub-title">Текущая подписка</h3>
+          <div class="sub-badges">
+            <span class="plan-badge"><%= @current_subscription.plan.titleize %></span>
             <% if @current_subscription.active? %>
-              <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
+              <span class="status-badge active">
+                <span class="status-dot"></span>
                 Активна
               </span>
             <% else %>
-              <span class="inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
+              <span class="status-badge inactive">
                 <%= @current_subscription.status.titleize %>
               </span>
             <% end %>
           </div>
         </div>
         <% if @current_subscription.current_period_end %>
-          <div class="text-sm text-zinc-500 dark:text-zinc-400">
-            Продлится до: <%= @current_subscription.current_period_end.strftime("%d.%m.%Y") %>
+          <div class="sub-expiry">
+            Продлится до: <span style="font-family: 'JetBrains Mono', monospace; color: var(--text-secondary);"><%= @current_subscription.current_period_end.strftime("%d.%m.%Y") %></span>
           </div>
         <% end %>
       </div>
 
       <!-- Usage Stats -->
-      <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
-          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">AI генерации</div>
-          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            <%= @current_subscription.usage_for(:ai_generations_per_month) %> /
-            <span class="text-lg text-zinc-500 dark:text-zinc-400">
-              <%= @current_subscription.limit_for(:ai_generations_per_month) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:ai_generations_per_month) %>
-            </span>
+      <div class="usage-grid">
+        <div class="usage-card">
+          <div class="usage-label">AI генерации</div>
+          <div class="usage-value">
+            <%= @current_subscription.usage_for(:ai_generations_per_month) %>
+            <span class="usage-limit">/ <%= @current_subscription.limit_for(:ai_generations_per_month) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:ai_generations_per_month) %></span>
           </div>
         </div>
-        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
-          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Проекты</div>
-          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            <%= current_user.projects.count %> /
-            <span class="text-lg text-zinc-500 dark:text-zinc-400">
-              <%= @current_subscription.limit_for(:projects) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:projects) %>
-            </span>
+        <div class="usage-card">
+          <div class="usage-label">Проекты</div>
+          <div class="usage-value">
+            <%= current_user.projects.count %>
+            <span class="usage-limit">/ <%= @current_subscription.limit_for(:projects) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:projects) %></span>
           </div>
         </div>
-        <div class="bg-zinc-50 dark:bg-zinc-800 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
-          <div class="text-sm text-zinc-500 dark:text-zinc-400 mb-1">Боты</div>
-          <div class="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            <%= current_user.projects.joins(:telegram_bots).count %> /
-            <span class="text-lg text-zinc-500 dark:text-zinc-400">
-              <%= @current_subscription.limit_for(:bots) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:bots) %>
-            </span>
+        <div class="usage-card">
+          <div class="usage-label">Боты</div>
+          <div class="usage-value">
+            <%= current_user.projects.joins(:telegram_bots).count %>
+            <span class="usage-limit">/ <%= @current_subscription.limit_for(:bots) == Float::INFINITY ? '∞' : @current_subscription.limit_for(:bots) %></span>
           </div>
         </div>
       </div>
@@ -66,112 +509,90 @@
   <% end %>
 
   <!-- Pricing Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+  <div class="plans-grid">
     <% @plans.each do |plan| %>
       <% is_current = @current_subscription&.plan == plan.slug %>
 
-      <div class="relative bg-white dark:bg-zinc-900 border <%= is_current ? 'border-primary-500 ring-2 ring-primary-500' : 'border-zinc-200 dark:border-zinc-800' %> rounded-lg p-6 flex flex-col h-full">
+      <div class="plan-card <%= 'current' if is_current %> <%= 'popular' if plan.popular? && !is_current %>">
         <% if is_current %>
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="inline-flex items-center rounded-full bg-primary-600 px-3 py-1 text-xs font-medium text-white">
-              Текущий план
-            </span>
-          </div>
+          <span class="plan-badge current">Текущий план</span>
         <% elsif plan.popular? %>
-          <div class="absolute -top-3 left-1/2 -translate-x-1/2">
-            <span class="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-medium text-white">
-              <%= plan.badge_text || 'Популярный' %>
-            </span>
-          </div>
+          <span class="plan-badge popular"><%= plan.badge_text || 'Популярный' %></span>
         <% end %>
 
-        <!-- Plan Header -->
-        <div class="mb-6">
-          <h3 class="text-xl font-bold text-zinc-900 dark:text-zinc-50 mb-2"><%= plan.name %></h3>
-          <div class="flex items-baseline">
-            <span class="text-4xl font-extrabold text-zinc-900 dark:text-zinc-50"><%= plan.price.to_i %></span>
-            <span class="ml-2 text-zinc-500 dark:text-zinc-400">₽/мес</span>
-          </div>
-          <% if plan.tagline.present? %>
-            <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1"><%= plan.tagline %></p>
-          <% end %>
+        <h3 class="plan-name"><%= plan.name %></h3>
+        <div class="plan-price">
+          <span class="amount"><%= plan.price.to_i %></span>
+          <span class="period">₽/мес</span>
         </div>
+        <% if plan.tagline.present? %>
+          <p class="plan-tagline"><%= plan.tagline %></p>
+        <% end %>
 
-        <!-- Features List -->
-        <ul class="space-y-3 mb-8 flex-grow">
-          <li class="flex items-start gap-2">
-            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        <div class="plan-features">
+          <div class="feature-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+            <span>
               <%= plan.unlimited?(:projects) ? 'Безлимит' : plan.formatted_limit(:projects) %>
               <%= plan.limit_for(:projects) == 1 ? 'проект' : 'проектов' %>
             </span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </div>
+          <div class="feature-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300">
+            <span>
               <%= plan.unlimited?(:bots) ? 'Безлимит' : plan.formatted_limit(:bots) %>
               <%= plan.limit_for(:bots) == 1 ? 'бот' : 'ботов' %>
             </span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </div>
+          <div class="feature-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan.unlimited?(:posts_per_month) ? 'Безлимит' : plan.formatted_limit(:posts_per_month) %>
-              постов в месяц
+            <span>
+              <%= plan.unlimited?(:posts_per_month) ? 'Безлимит' : plan.formatted_limit(:posts_per_month) %> постов/мес
             </span>
-          </li>
-          <li class="flex items-start gap-2">
-            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </div>
+          <div class="feature-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              <%= plan.unlimited?(:ai_generations_per_month) ? 'Безлимит' : plan.formatted_limit(:ai_generations_per_month) %>
-              AI генераций в месяц
+            <span>
+              <%= plan.unlimited?(:ai_generations_per_month) ? 'Безлимит' : plan.formatted_limit(:ai_generations_per_month) %> AI генераций
             </span>
-          </li>
+          </div>
           <% if plan.limit_for(:ai_image_generations_per_month) > 0 %>
-            <li class="flex items-start gap-2">
-              <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+            <div class="feature-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
-              <span class="text-sm text-zinc-700 dark:text-zinc-300">
-                <%= plan.formatted_limit(:ai_image_generations_per_month) %> изображений AI в месяц
-              </span>
-            </li>
+              <span><%= plan.formatted_limit(:ai_image_generations_per_month) %> изображений AI</span>
+            </div>
           <% end %>
-          <li class="flex items-start gap-2">
-            <svg class="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          <div class="feature-item">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
             </svg>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300">
-              Аналитика: <%= plan.analytics_level_name %>
-            </span>
-          </li>
-        </ul>
+            <span>Аналитика: <%= plan.analytics_level_name %></span>
+          </div>
+        </div>
 
-        <!-- Action Button -->
         <% if is_current %>
           <% unless plan.free? %>
             <%= button_to 'Отменить подписку', cancel_subscriptions_path, method: :post,
-                class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors",
+                class: "plan-btn secondary",
                 data: { turbo_confirm: 'Вы уверены? Подписка будет отменена.' } %>
           <% else %>
-            <button disabled class="w-full inline-flex justify-center items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-400 dark:text-zinc-500 cursor-not-allowed">
-              Текущий план
-            </button>
+            <button disabled class="plan-btn disabled">Текущий план</button>
           <% end %>
         <% elsif plan.free? %>
-          <%= button_to 'Перейти на Free', downgrade_subscriptions_path, method: :post,
-              class: "w-full inline-flex justify-center items-center rounded-md border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors" %>
+          <%= button_to 'Перейти на Free', downgrade_subscriptions_path, method: :post, class: "plan-btn secondary" %>
         <% else %>
-          <%= button_to 'Перейти на этот план', upgrade_subscriptions_path(plan: plan.slug), method: :post,
-              class: "w-full inline-flex justify-center items-center rounded-md bg-primary-600 hover:bg-primary-700 px-4 py-2 text-sm font-semibold text-white transition-colors",
+          <%= button_to 'Выбрать план', upgrade_subscriptions_path(plan: plan.slug), method: :post,
+              class: "plan-btn primary",
               data: { turbo: false } %>
         <% end %>
       </div>
@@ -180,48 +601,43 @@
 
   <!-- Payment History -->
   <% if current_user.payments.any? %>
-    <div class="mt-12">
-      <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50 mb-6">История платежей</h2>
-      <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg overflow-hidden">
-        <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
-          <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+    <div class="history-section">
+      <h2 class="history-title">
+        <svg class="w-5 h-5" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+        История платежей
+      </h2>
+      <div class="history-table">
+        <table>
+          <thead>
             <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Дата</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">План</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Сумма</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Статус</th>
+              <th>Дата</th>
+              <th>План</th>
+              <th>Сумма</th>
+              <th>Статус</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tbody>
             <% current_user.payments.recent.limit(10).each do |payment| %>
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+                <td style="font-family: 'JetBrains Mono', monospace; font-size: 13px;">
                   <%= payment.created_at.strftime("%d.%m.%Y %H:%M") %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
-                  <%= payment.metadata['plan']&.titleize || 'N/A' %>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap text-sm text-zinc-900 dark:text-zinc-50">
+                <td><%= payment.metadata['plan']&.titleize || 'N/A' %></td>
+                <td style="font-family: 'JetBrains Mono', monospace;">
                   <%= number_to_currency(payment.amount, unit: '₽', separator: ',', delimiter: ' ', format: '%n %u') %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td>
                   <% case payment.status %>
                   <% when 'completed' %>
-                    <span class="inline-flex items-center rounded-md bg-green-100 dark:bg-green-900/30 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:text-green-300">
-                      Завершен
-                    </span>
+                    <span class="payment-status completed">Завершен</span>
                   <% when 'pending', 'processing' %>
-                    <span class="inline-flex items-center rounded-md bg-yellow-100 dark:bg-yellow-900/30 px-2.5 py-0.5 text-xs font-medium text-yellow-700 dark:text-yellow-300">
-                      В обработке
-                    </span>
+                    <span class="payment-status pending">В обработке</span>
                   <% when 'failed' %>
-                    <span class="inline-flex items-center rounded-md bg-red-100 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
-                      Ошибка
-                    </span>
+                    <span class="payment-status failed">Ошибка</span>
                   <% else %>
-                    <span class="inline-flex items-center rounded-md bg-zinc-100 dark:bg-zinc-800 px-2.5 py-0.5 text-xs font-medium text-zinc-700 dark:text-zinc-300">
-                      <%= payment.status.titleize %>
-                    </span>
+                    <span class="payment-status"><%= payment.status.titleize %></span>
                   <% end %>
                 </td>
               </tr>

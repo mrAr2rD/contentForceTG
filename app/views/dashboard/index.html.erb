@@ -1,26 +1,455 @@
-<div class="dashboard-page">
+<% content_for :title, "Панель управления" %>
+
+<style>
+  .dashboard-tech {
+    --accent: #00D4AA;
+    --accent-glow: rgba(0, 212, 170, 0.5);
+    --accent-dim: rgba(0, 212, 170, 0.15);
+    --bg-card: rgba(17, 17, 19, 0.8);
+    --border-color: rgba(255, 255, 255, 0.06);
+    --text-primary: #FAFAFA;
+    --text-secondary: #A1A1AA;
+    --text-muted: #71717A;
+  }
+
+  /* Stats Card */
+  .stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .stat-card:hover::before {
+    opacity: 1;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(0, 212, 170, 0.2);
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.05);
+    transform: translateY(-2px);
+  }
+
+  .stat-card .stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .stat-card .stat-value {
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-card .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* Action Buttons */
+  .action-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--accent), #00B894);
+    color: #0A0A0B;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border: none;
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+  }
+
+  .action-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 30px rgba(0, 212, 170, 0.5);
+  }
+
+  .action-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: transparent;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .action-btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  /* Section Card */
+  .section-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .section-card-header h2 {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header .view-all {
+    font-size: 12px;
+    color: var(--accent);
+    transition: all 0.2s ease;
+  }
+
+  .section-card-header .view-all:hover {
+    text-shadow: 0 0 10px var(--accent-glow);
+  }
+
+  /* List Item */
+  .list-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-color);
+    transition: all 0.2s ease;
+  }
+
+  .list-item:last-child {
+    border-bottom: none;
+  }
+
+  .list-item:hover {
+    background: rgba(0, 212, 170, 0.03);
+  }
+
+  .list-item .item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .list-item .item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .list-item .item-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+  }
+
+  .list-item:hover .item-title {
+    color: var(--accent);
+  }
+
+  .list-item .item-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .list-item .item-arrow {
+    width: 16px;
+    height: 16px;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .list-item:hover .item-arrow {
+    color: var(--accent);
+    transform: translateX(4px);
+  }
+
+  /* Status Badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .status-badge.published {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22C55E;
+  }
+
+  .status-badge.scheduled {
+    background: rgba(234, 179, 8, 0.15);
+    color: #EAB308;
+  }
+
+  .status-badge.draft {
+    background: rgba(161, 161, 170, 0.15);
+    color: #A1A1AA;
+  }
+
+  .status-badge.failed {
+    background: rgba(239, 68, 68, 0.15);
+    color: #EF4444;
+  }
+
+  /* Alert Card */
+  .alert-card {
+    background: rgba(234, 179, 8, 0.05);
+    border: 1px solid rgba(234, 179, 8, 0.2);
+    border-radius: 12px;
+    padding: 16px 20px;
+  }
+
+  .alert-card .alert-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .alert-card .alert-icon {
+    width: 32px;
+    height: 32px;
+    background: rgba(234, 179, 8, 0.15);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .alert-card .alert-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #EAB308;
+  }
+
+  .alert-card .alert-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    margin: 4px 0;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+  }
+
+  .alert-card .alert-item:hover {
+    background: rgba(234, 179, 8, 0.1);
+  }
+
+  .alert-card .alert-item-title {
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+
+  .alert-card .alert-item-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: #EAB308;
+  }
+
+  /* Empty State */
+  .empty-state {
+    padding: 48px 24px;
+    text-align: center;
+  }
+
+  .empty-state .empty-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+  }
+
+  .empty-state .empty-text {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+
+  /* Welcome Banner */
+  .welcome-banner {
+    background: linear-gradient(135deg, rgba(0, 212, 170, 0.1), rgba(0, 184, 148, 0.05));
+    border: 1px solid rgba(0, 212, 170, 0.2);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .welcome-banner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(0, 212, 170, 0.1), transparent 70%);
+    pointer-events: none;
+  }
+
+  .welcome-banner .welcome-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    position: relative;
+  }
+
+  .welcome-banner .welcome-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    position: relative;
+  }
+
+  /* Getting Started */
+  .getting-started {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .getting-started::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+  }
+
+  .getting-started .gs-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-dim);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+  }
+
+  .getting-started .gs-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .getting-started .gs-text {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  /* Glow animation for icon */
+  @keyframes iconPulse {
+    0%, 100% { box-shadow: 0 0 0 rgba(0, 212, 170, 0); }
+    50% { box-shadow: 0 0 20px rgba(0, 212, 170, 0.3); }
+  }
+
+  .icon-glow {
+    animation: iconPulse 3s ease-in-out infinite;
+  }
+</style>
+
+<div class="dashboard-tech">
   <!-- Welcome Section -->
-  <%= render 'shared/page_header',
-      title: "Добро пожаловать, #{@user.email.split('@').first.capitalize}!",
-      subtitle: "Вот что происходит с вашим контентом сегодня" %>
+  <div class="welcome-banner mb-8">
+    <div class="flex items-start justify-between">
+      <div>
+        <h1 class="welcome-title">
+          Добро пожаловать, <%= @user.email.split('@').first.capitalize %>
+        </h1>
+        <p class="welcome-subtitle">Статус системы: все сервисы работают нормально</p>
+      </div>
+      <div class="flex items-center gap-2 text-xs" style="color: var(--accent);">
+        <span class="inline-block w-2 h-2 rounded-full bg-current animate-pulse"></span>
+        СИСТЕМА АКТИВНА
+      </div>
+    </div>
+  </div>
 
   <!-- Quick Actions -->
   <div class="mb-8 flex flex-wrap gap-3">
-    <%= link_to editor_posts_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors shadow-sm" do %>
+    <%= link_to editor_posts_path, class: "action-btn-primary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
       </svg>
       AI Редактор
     <% end %>
 
-    <%= link_to new_post_path, class: "inline-flex items-center gap-2 px-4 py-2 border border-zinc-200 bg-white hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 rounded-md text-sm font-medium text-zinc-900 dark:text-zinc-50 transition-colors" do %>
+    <%= link_to new_post_path, class: "action-btn-secondary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
       </svg>
       Новый пост
     <% end %>
 
-    <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 border border-zinc-200 bg-white hover:bg-zinc-100 dark:border-zinc-800 dark:bg-zinc-950 dark:hover:bg-zinc-800 rounded-md text-sm font-medium text-zinc-900 dark:text-zinc-50 transition-colors" do %>
+    <%= link_to new_project_path, class: "action-btn-secondary" do %>
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
       </svg>
@@ -31,106 +460,90 @@
   <!-- Stats Grid -->
   <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
     <!-- Projects -->
-    <%= link_to projects_path, class: "rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all" do %>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
-          </svg>
-        </div>
+    <%= link_to projects_path, class: "stat-card block" do %>
+      <div class="stat-icon" style="background: rgba(59, 130, 246, 0.15);">
+        <svg class="w-5 h-5" style="color: #3B82F6;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+        </svg>
       </div>
-      <h3 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @projects_count %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">Проектов</p>
+      <div class="stat-value"><%= @projects_count %></div>
+      <div class="stat-label">Проектов</div>
     <% end %>
 
     <!-- Total Posts -->
-    <%= link_to posts_path, class: "rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all" do %>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-zinc-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-zinc-600 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-          </svg>
-        </div>
+    <%= link_to posts_path, class: "stat-card block" do %>
+      <div class="stat-icon" style="background: rgba(161, 161, 170, 0.15);">
+        <svg class="w-5 h-5" style="color: #A1A1AA;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+        </svg>
       </div>
-      <h3 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @posts_count %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">Всего постов</p>
+      <div class="stat-value"><%= @posts_count %></div>
+      <div class="stat-label">Всего постов</div>
     <% end %>
 
     <!-- Published -->
-    <%= link_to posts_path(status: :published), class: "rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all" do %>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-          </svg>
-        </div>
+    <%= link_to posts_path(status: :published), class: "stat-card block" do %>
+      <div class="stat-icon" style="background: rgba(34, 197, 94, 0.15);">
+        <svg class="w-5 h-5" style="color: #22C55E;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+        </svg>
       </div>
-      <h3 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @published_posts_count %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">Опубликовано</p>
+      <div class="stat-value"><%= @published_posts_count %></div>
+      <div class="stat-label">Опубликовано</div>
     <% end %>
 
     <!-- Scheduled -->
-    <%= link_to posts_path(status: :scheduled), class: "rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all" do %>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
+    <%= link_to posts_path(status: :scheduled), class: "stat-card block" do %>
+      <div class="stat-icon" style="background: rgba(234, 179, 8, 0.15);">
+        <svg class="w-5 h-5" style="color: #EAB308;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
       </div>
-      <h3 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= @scheduled_posts_count %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">Запланировано</p>
+      <div class="stat-value"><%= @scheduled_posts_count %></div>
+      <div class="stat-label">Запланировано</div>
     <% end %>
 
     <!-- AI Requests -->
-    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4">
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-        </div>
+    <div class="stat-card">
+      <div class="stat-icon icon-glow" style="background: rgba(0, 212, 170, 0.15);">
+        <svg class="w-5 h-5" style="color: #00D4AA;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
       </div>
-      <h3 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@ai_requests_count) %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">AI запросов / 30д</p>
+      <div class="stat-value"><%= number_with_delimiter(@ai_requests_count) %></div>
+      <div class="stat-label">AI запросов</div>
     </div>
 
     <!-- Current Plan -->
-    <%= link_to subscriptions_path, class: "rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 hover:shadow-md hover:border-zinc-300 dark:hover:border-zinc-700 transition-all" do %>
-      <div class="flex items-center gap-3 mb-3">
-        <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
-          </svg>
-        </div>
+    <%= link_to subscriptions_path, class: "stat-card block" do %>
+      <div class="stat-icon" style="background: linear-gradient(135deg, rgba(0, 212, 170, 0.2), rgba(0, 184, 148, 0.1));">
+        <svg class="w-5 h-5" style="color: #00D4AA;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+        </svg>
       </div>
-      <h3 class="text-lg font-bold text-zinc-900 dark:text-zinc-50 truncate"><%= @current_plan %></h3>
-      <p class="text-xs text-zinc-500 dark:text-zinc-400">Текущий план</p>
+      <div class="stat-value text-lg"><%= @current_plan %></div>
+      <div class="stat-label">Тариф</div>
     <% end %>
   </div>
 
   <!-- Scheduled Posts Alert -->
   <% if @scheduled_posts.any? %>
-    <div class="rounded-lg border border-yellow-200 dark:border-yellow-900/50 bg-yellow-50 dark:bg-yellow-950/20 p-4 mb-8">
-      <div class="flex items-start gap-3">
-        <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg class="w-4 h-4 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+    <div class="alert-card mb-8">
+      <div class="alert-header">
+        <div class="alert-icon">
+          <svg class="w-4 h-4" style="color: #EAB308;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
-        <div class="flex-1 min-w-0">
-          <h3 class="text-sm font-semibold text-yellow-900 dark:text-yellow-100 mb-2">Запланированные публикации</h3>
-          <div class="space-y-2">
-            <% @scheduled_posts.each do |post| %>
-              <%= link_to post_path(post), class: "flex items-center justify-between text-sm hover:bg-yellow-100 dark:hover:bg-yellow-900/30 rounded px-2 py-1 -mx-2 transition-colors" do %>
-                <span class="text-yellow-800 dark:text-yellow-200 truncate"><%= post.title || post.content.truncate(40) %></span>
-                <span class="text-yellow-600 dark:text-yellow-400 text-xs flex-shrink-0 ml-2">
-                  <%= post.scheduled_at&.strftime("%d.%m %H:%M") || "—" %>
-                </span>
-              <% end %>
-            <% end %>
-          </div>
-        </div>
+        <span class="alert-title">Запланированные публикации</span>
+      </div>
+      <div>
+        <% @scheduled_posts.each do |post| %>
+          <%= link_to post_path(post), class: "alert-item" do %>
+            <span class="alert-item-title truncate"><%= post.title || post.content.truncate(40) %></span>
+            <span class="alert-item-time"><%= post.scheduled_at&.strftime("%d.%m %H:%M") || "—" %></span>
+          <% end %>
+        <% end %>
       </div>
     </div>
   <% end %>
@@ -138,45 +551,46 @@
   <!-- Recent Activity -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Recent Projects -->
-    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">Недавние проекты</h2>
+    <div class="section-card">
+      <div class="section-card-header">
+        <h2>
+          <svg class="w-4 h-4" style="color: #3B82F6;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
+          </svg>
+          Недавние проекты
+        </h2>
         <% if @projects_count > 5 %>
-          <%= link_to projects_path, class: "text-xs text-primary-600 dark:text-primary-400 hover:underline" do %>
-            Все проекты
-          <% end %>
+          <%= link_to "Все проекты →", projects_path, class: "view-all" %>
         <% end %>
       </div>
       <% if @recent_projects.any? %>
-        <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <div>
           <% @recent_projects.each do |project| %>
-            <%= link_to project_path(project), class: "flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors group" do %>
-              <div class="w-10 h-10 bg-gradient-to-br from-zinc-100 to-zinc-200 dark:from-zinc-800 dark:to-zinc-700 rounded-lg flex items-center justify-center text-zinc-700 dark:text-zinc-300 text-sm font-semibold shadow-sm">
-                <%= project.name[0].upcase %>
+            <%= link_to project_path(project), class: "list-item" do %>
+              <div class="item-icon" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));">
+                <span style="color: #3B82F6; font-weight: 600; font-size: 14px;"><%= project.name[0].upcase %></span>
               </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  <%= project.name %>
-                </h3>
-                <p class="text-xs text-zinc-500 dark:text-zinc-400">
-                  <%= project.posts.count %> постов · Обновлен <%= time_ago_in_words(project.updated_at) %> назад
-                </p>
+              <div class="item-content">
+                <div class="item-title"><%= project.name %></div>
+                <div class="item-meta">
+                  <span style="font-family: 'JetBrains Mono', monospace;"><%= project.posts.count %></span> постов · <%= time_ago_in_words(project.updated_at) %> назад
+                </div>
               </div>
-              <svg class="w-4 h-4 text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <svg class="item-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
               </svg>
             <% end %>
           <% end %>
         </div>
       <% else %>
-        <div class="px-6 py-12 text-center">
-          <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-zinc-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg class="w-6 h-6" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>
             </svg>
           </div>
-          <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Нет проектов</p>
-          <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors" do %>
+          <p class="empty-text">Нет проектов</p>
+          <%= link_to new_project_path, class: "action-btn-secondary" do %>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
             </svg>
@@ -187,32 +601,35 @@
     </div>
 
     <!-- Recent Posts -->
-    <div class="rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden">
-      <div class="px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 flex items-center justify-between">
-        <h2 class="text-base font-semibold text-zinc-900 dark:text-zinc-50">Недавние посты</h2>
+    <div class="section-card">
+      <div class="section-card-header">
+        <h2>
+          <svg class="w-4 h-4" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          Недавние посты
+        </h2>
         <% if @posts_count > 5 %>
-          <%= link_to posts_path, class: "text-xs text-primary-600 dark:text-primary-400 hover:underline" do %>
-            Все посты
-          <% end %>
+          <%= link_to "Все посты →", posts_path, class: "view-all" %>
         <% end %>
       </div>
       <% if @recent_posts.any? %>
-        <div class="divide-y divide-zinc-200 dark:divide-zinc-800">
+        <div>
           <% @recent_posts.each do |post| %>
-            <%= link_to post_path(post), class: "flex items-center gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors group" do %>
-              <div class="w-10 h-10 rounded-lg flex items-center justify-center <%=
+            <%= link_to post_path(post), class: "list-item" do %>
+              <div class="item-icon" style="<%=
                 case post.status
-                when 'published' then 'bg-green-100 dark:bg-green-900/30'
-                when 'scheduled' then 'bg-yellow-100 dark:bg-yellow-900/30'
-                when 'failed' then 'bg-red-100 dark:bg-red-900/30'
-                else 'bg-zinc-100 dark:bg-zinc-800'
+                when 'published' then 'background: rgba(34, 197, 94, 0.15);'
+                when 'scheduled' then 'background: rgba(234, 179, 8, 0.15);'
+                when 'failed' then 'background: rgba(239, 68, 68, 0.15);'
+                else 'background: rgba(161, 161, 170, 0.15);'
                 end %>">
-                <svg class="w-5 h-5 <%=
+                <svg class="w-5 h-5" style="<%=
                   case post.status
-                  when 'published' then 'text-green-600 dark:text-green-400'
-                  when 'scheduled' then 'text-yellow-600 dark:text-yellow-400'
-                  when 'failed' then 'text-red-600 dark:text-red-400'
-                  else 'text-zinc-600 dark:text-zinc-400'
+                  when 'published' then 'color: #22C55E;'
+                  when 'scheduled' then 'color: #EAB308;'
+                  when 'failed' then 'color: #EF4444;'
+                  else 'color: #A1A1AA;'
                   end %>" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                   <% if post.status == 'published' %>
                     <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
@@ -225,39 +642,35 @@
                   <% end %>
                 </svg>
               </div>
-              <div class="flex-1 min-w-0">
-                <h3 class="text-sm font-medium text-zinc-900 dark:text-zinc-50 truncate group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">
-                  <%= post.title || post.content.truncate(50) %>
-                </h3>
-                <div class="flex items-center gap-2 mt-1">
-                  <span class="text-xs text-zinc-500 dark:text-zinc-400">
+              <div class="item-content">
+                <div class="item-title"><%= post.title || post.content.truncate(50) %></div>
+                <div class="item-meta flex items-center gap-2">
+                  <span class="status-badge <%= post.status %>">
                     <%= I18n.t("activerecord.attributes.post.statuses.#{post.status}", default: post.status) %>
                   </span>
-                  <span class="text-zinc-300 dark:text-zinc-700">·</span>
-                  <span class="text-xs text-zinc-500 dark:text-zinc-400">
-                    <%= time_ago_in_words(post.created_at) %> назад
-                  </span>
+                  <span>·</span>
+                  <span><%= time_ago_in_words(post.created_at) %> назад</span>
                 </div>
               </div>
-              <svg class="w-4 h-4 text-zinc-400 dark:text-zinc-600 group-hover:text-zinc-600 dark:group-hover:text-zinc-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <svg class="item-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
               </svg>
             <% end %>
           <% end %>
         </div>
       <% else %>
-        <div class="px-6 py-12 text-center">
-          <div class="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg class="w-6 h-6 text-zinc-400 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <div class="empty-state">
+          <div class="empty-icon">
+            <svg class="w-6 h-6" style="color: var(--text-muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
           </div>
-          <p class="text-sm text-zinc-500 dark:text-zinc-400 mb-4">Нет постов</p>
-          <%= link_to editor_posts_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 rounded-md text-sm font-medium transition-colors" do %>
+          <p class="empty-text">Нет постов</p>
+          <%= link_to editor_posts_path, class: "action-btn-primary" do %>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
             </svg>
-            Открыть AI редактор
+            AI редактор
           <% end %>
         </div>
       <% end %>
@@ -266,29 +679,24 @@
 
   <!-- Getting Started -->
   <% if @projects_count == 0 && @posts_count == 0 %>
-    <div class="mt-8 rounded-lg border border-primary-200 dark:border-primary-900 bg-primary-50 dark:bg-primary-950/20 p-6">
-      <div class="flex items-start gap-4">
-        <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg class="w-5 h-5 text-primary-600 dark:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-        </div>
-        <div class="flex-1">
-          <h3 class="text-base font-semibold text-primary-900 dark:text-primary-100 mb-2">
-            Начните работу с ContentForce
-          </h3>
-          <p class="text-sm text-primary-800 dark:text-primary-200 mb-4">
-            Создайте свой первый проект и начните генерировать контент с помощью AI. Подключите Telegram бота для автоматической публикации.
-          </p>
-          <div class="flex flex-wrap gap-3">
-            <%= link_to new_project_path, class: "inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white hover:bg-primary-700 rounded-md text-sm font-medium transition-colors" do %>
-              Создать проект
-            <% end %>
-            <%= link_to editor_posts_path, class: "inline-flex items-center gap-2 px-4 py-2 border border-primary-300 dark:border-primary-800 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/30 rounded-md text-sm font-medium transition-colors" do %>
-              Попробовать AI редактор
-            <% end %>
-          </div>
-        </div>
+    <div class="getting-started mt-8">
+      <div class="gs-icon">
+        <svg class="w-6 h-6" style="color: var(--accent);" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+        </svg>
+      </div>
+      <h3 class="gs-title">Начните работу с ContentForce</h3>
+      <p class="gs-text">
+        Создайте свой первый проект и начните генерировать контент с помощью AI.
+        Подключите Telegram бота для автоматической публикации.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <%= link_to new_project_path, class: "action-btn-primary" do %>
+          Создать проект
+        <% end %>
+        <%= link_to editor_posts_path, class: "action-btn-secondary" do %>
+          Попробовать AI редактор
+        <% end %>
       </div>
     </div>
   <% end %>
