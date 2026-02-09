@@ -200,15 +200,19 @@ async def verify_code(request: VerifyCodeRequest):
     client_data = auth_clients[phone]
     client = client_data["client"]
 
+    print(f"[AUTH] Calling sign_in for {phone} with code {request.phone_code}")
+
     try:
-        await client.sign_in(
+        result = await client.sign_in(
             phone_number=phone,
             phone_code_hash=request.phone_code_hash,
             phone_code=request.phone_code
         )
+        print(f"[AUTH] sign_in result: {result}")
 
         # Успешная авторизация - получаем session_string
         session_string = await client.export_session_string()
+        print(f"[AUTH] SUCCESS! Got session_string for {phone}")
         await client.disconnect()
         del auth_clients[phone]
 
@@ -219,6 +223,7 @@ async def verify_code(request: VerifyCodeRequest):
 
     except SessionPasswordNeeded:
         # Нужна 2FA - сохраняем клиент
+        print(f"[AUTH] 2FA required for {phone}")
         auth_clients[phone]["requires_2fa"] = True
         return VerifyCodeResponse(
             success=False,
