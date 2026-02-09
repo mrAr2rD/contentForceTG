@@ -90,6 +90,77 @@ class TelegramChannelParser:
         except ChannelPrivate:
             raise ValueError(f"Канал @{username} приватный или вы не являетесь участником")
 
+    async def get_messages_stats(
+        self,
+        channel_username: str,
+        message_ids: List[int]
+    ) -> List[Dict[str, Any]]:
+        """
+        Получить статистику конкретных сообщений по их ID
+
+        Args:
+            channel_username: Username канала (без @)
+            message_ids: Список ID сообщений
+
+        Returns:
+            Список статистики сообщений
+        """
+        if not self.client:
+            raise RuntimeError("Client not started. Call start() first.")
+
+        # Очищаем username от @
+        username = channel_username.lstrip("@")
+
+        try:
+            # Получаем информацию о канале
+            chat = await self.client.get_chat(username)
+
+            results = []
+            # Получаем сообщения по ID (батчами по 100)
+            for i in range(0, len(message_ids), 100):
+                batch_ids = message_ids[i:i + 100]
+                messages = await self.client.get_messages(
+                    chat_id=chat.id,
+                    message_ids=batch_ids
+                )
+
+                for message in messages:
+                    if message and not message.empty:
+                        results.append({
+                            "message_id": int(message.id) if message.id else 0,
+                            "views": int(message.views) if message.views else 0,
+                            "forwards": int(message.forwards) if message.forwards else 0,
+                            "reactions": self._parse_reactions(message.reactions) if message.reactions else {}
+                        })
+                    else:
+                        # Сообщение не найдено или удалено
+                        msg_id = batch_ids[messages.index(message)] if message in messages else 0
+                        results.append({
+                            "message_id": msg_id,
+                            "views": 0,
+                            "forwards": 0,
+                            "reactions": {},
+                            "not_found": True
+                        })
+
+            return results
+
+        except UsernameNotOccupied:
+            raise ValueError(f"Канал @{username} не найден")
+        except ChannelPrivate:
+            raise ValueError(f"Канал @{username} приватный или вы не являетесь участником")
+
+    def _parse_reactions(self, reactions) -> Dict[str, int]:
+        """Преобразовать реакции сообщения в словарь"""
+        result = {}
+        if reactions and hasattr(reactions, 'reactions'):
+            for reaction in reactions.reactions:
+                if hasattr(reaction, 'emoji') and reaction.emoji:
+                    result[reaction.emoji] = int(reaction.count) if hasattr(reaction, 'count') else 0
+                elif hasattr(reaction, 'custom_emoji_id'):
+                    result[f"custom:{reaction.custom_emoji_id}"] = int(reaction.count) if hasattr(reaction, 'count') else 0
+        return result
+
     async def _parse_message(self, message: Message) -> Optional[Dict[str, Any]]:
         """
         Преобразовать сообщение Pyrogram в словарь

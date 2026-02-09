@@ -7,7 +7,7 @@ import os
 import asyncio
 import json
 from datetime import datetime
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import time
 
 from dotenv import load_dotenv
@@ -109,6 +109,20 @@ class Verify2FAResponse(BaseModel):
     """Ответ на проверку 2FA"""
     success: bool
     session_string: Optional[str] = None
+    error: Optional[str] = None
+
+
+class MessageStatsRequest(BaseModel):
+    """Запрос на получение статистики сообщений"""
+    channel_username: str
+    message_ids: List[int]
+    session_string: str
+
+
+class MessageStatsResponse(BaseModel):
+    """Ответ со статистикой сообщений"""
+    success: bool
+    stats: Optional[List[Dict[str, Any]]] = None
     error: Optional[str] = None
 
 
@@ -296,6 +310,64 @@ async def verify_2fa(request: Verify2FARequest):
             success=False,
             error=str(e)
         )
+
+
+@app.post("/message-stats", response_model=MessageStatsResponse)
+async def get_message_stats(request: MessageStatsRequest):
+    """
+    Получить статистику (views, forwards, reactions) для конкретных сообщений
+    """
+    print(f"[STATS] Request for channel={request.channel_username}, message_ids={request.message_ids}")
+
+    if not API_ID or not API_HASH:
+        return MessageStatsResponse(
+            success=False,
+            error="TELEGRAM_API_ID и TELEGRAM_API_HASH не настроены"
+        )
+
+    if not request.message_ids:
+        return MessageStatsResponse(
+            success=False,
+            error="message_ids не может быть пустым"
+        )
+
+    parser = None
+    try:
+        parser = TelegramChannelParser(
+            api_id=int(API_ID),
+            api_hash=API_HASH,
+            session_string=request.session_string
+        )
+
+        await parser.start()
+
+        stats = await parser.get_messages_stats(
+            channel_username=request.channel_username,
+            message_ids=request.message_ids
+        )
+
+        print(f"[STATS] Got stats for {len(stats)} messages")
+
+        return MessageStatsResponse(
+            success=True,
+            stats=stats
+        )
+
+    except ValueError as e:
+        print(f"[STATS] ValueError: {e}")
+        return MessageStatsResponse(
+            success=False,
+            error=str(e)
+        )
+    except Exception as e:
+        print(f"[STATS] Error: {type(e).__name__} - {e}")
+        return MessageStatsResponse(
+            success=False,
+            error=str(e)
+        )
+    finally:
+        if parser:
+            await parser.stop()
 
 
 @app.post("/sync", response_model=SyncResponse)

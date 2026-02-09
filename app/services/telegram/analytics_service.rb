@@ -31,61 +31,25 @@ module Telegram
             description: nil
           }
         else
-          mock_channel_statistics
+          fallback_channel_statistics
         end
       rescue StandardError => e
         Rails.logger.error("Telegram Analytics API error: #{e.message}")
-        mock_channel_statistics
+        fallback_channel_statistics
       end
     end
 
     # Get post statistics
-    # NOTE: Telegram Bot API has limitations for getting message statistics:
-    # - For channels: requires bot to be admin with "can_post_messages" permission
-    # - View counts are NOT available through regular Bot API
-    # - We rely on webhooks and periodic polling for analytics
+    # Пробует получить реальные данные через Pyrogram, fallback на webhook данные
     def fetch_post_statistics(post)
       return {} unless post.telegram_message_id.present?
 
-      begin
-        # Telegram Bot API не предоставляет метод get_message для каналов
-        # Получаем данные из последней записи аналитики или возвращаем mock
-        last_analytics = post.post_analytics.recent.first
+      # Пробуем получить реальные данные через Pyrogram
+      stats = fetch_via_pyrogram(post)
+      return stats if stats.present?
 
-        if last_analytics
-          {
-            views: last_analytics.views,
-            forwards: last_analytics.forwards,
-            reactions: last_analytics.reactions || {},
-            button_clicks: last_analytics.button_clicks || {}
-          }
-        else
-          # Для новых постов возвращаем нулевые значения
-          {
-            views: 0,
-            forwards: 0,
-            reactions: {},
-            button_clicks: {}
-          }
-        end
-      rescue Telegram::Bot::Exceptions::ResponseError => e
-        Rails.logger.error("Telegram API error for post #{post.id}: #{e.message}")
-        # Fall back to last known data
-        last_analytics = post.post_analytics.recent.first
-        if last_analytics
-          {
-            views: last_analytics.views,
-            forwards: last_analytics.forwards,
-            reactions: last_analytics.reactions || {},
-            button_clicks: last_analytics.button_clicks || {}
-          }
-        else
-          mock_post_statistics
-        end
-      rescue StandardError => e
-        Rails.logger.error("Telegram Post Analytics error: #{e.message}")
-        mock_post_statistics
-      end
+      # Fallback: возвращаем последние известные данные из БД
+      fetch_from_database(post)
     end
 
     # Schedule analytics updates for all published posts
@@ -102,25 +66,53 @@ module Telegram
 
     private
 
-    def mock_channel_statistics
+    # Получить статистику через Pyrogram (MTProto API)
+    def fetch_via_pyrogram(post)
+      stats_service = PostStatsService.new(telegram_bot)
+      stat = stats_service.fetch_single(post)
+
+      return nil unless stat.present? && !stat[:not_found]
+
       {
-        subscriber_count: rand(1000..10000),
-        title: telegram_bot.channel_name || "Channel",
-        description: "Test channel description"
+        views: stat[:views] || stat["views"] || 0,
+        forwards: stat[:forwards] || stat["forwards"] || 0,
+        reactions: stat[:reactions] || stat["reactions"] || {},
+        button_clicks: {}
       }
+    rescue StandardError => e
+      Rails.logger.error("Pyrogram stats error for post #{post.id}: #{e.message}")
+      nil
     end
 
-    def mock_post_statistics
+    # Получить последние данные из БД (webhook данные)
+    def fetch_from_database(post)
+      last_analytics = post.post_analytics.recent.first
+
+      if last_analytics
+        {
+          views: last_analytics.views,
+          forwards: last_analytics.forwards,
+          reactions: last_analytics.reactions || {},
+          button_clicks: last_analytics.button_clicks || {}
+        }
+      else
+        # Для новых постов возвращаем нулевые значения
+        {
+          views: 0,
+          forwards: 0,
+          reactions: {},
+          button_clicks: {}
+        }
+      end
+    end
+
+    def fallback_channel_statistics
+      # Возвращаем последние известные данные
+      last_metric = telegram_bot.channel_subscriber_metrics.recent.first
       {
-        views: rand(100..1000),
-        forwards: rand(5..50),
-        reactions: {
-          '👍' => rand(10..100),
-          '❤️' => rand(5..50),
-          '🔥' => rand(2..20),
-          '😍' => rand(3..30)
-        },
-        button_clicks: {}
+        subscriber_count: last_metric&.subscriber_count || 0,
+        title: telegram_bot.channel_name || "Channel",
+        description: nil
       }
     end
 
@@ -130,8 +122,8 @@ module Telegram
 
       result = {}
       reactions_data.each do |reaction|
-        emoji = reaction.dig('type', 'emoji')
-        count = reaction['total_count'] || 0
+        emoji = reaction.dig("type", "emoji")
+        count = reaction["total_count"] || 0
         result[emoji] = count if emoji.present?
       end
       result
