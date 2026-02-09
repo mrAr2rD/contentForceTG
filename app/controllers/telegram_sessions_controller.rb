@@ -138,30 +138,13 @@ class TelegramSessionsController < ApplicationController
       params[:password]
     )
 
+    Rails.logger.info "[TELEGRAM_AUTH] verify_2fa result: #{result.inspect}"
+
     if result[:success]
       @telegram_session.complete_authorization!(result[:session_string])
-
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "auth_form",
-            partial: "telegram_sessions/success",
-            locals: { telegram_session: @telegram_session }
-          )
-        end
-        format.html { redirect_to telegram_sessions_path, notice: "Telegram авторизован" }
-      end
+      redirect_to telegram_sessions_path, notice: "Telegram авторизован успешно!"
     else
-      respond_to do |format|
-        format.turbo_stream do
-          render turbo_stream: turbo_stream.replace(
-            "auth_form",
-            partial: "telegram_sessions/twofa_form",
-            locals: { telegram_session: @telegram_session, error: result[:error] || "Неверный пароль" }
-          )
-        end
-        format.html { redirect_to new_telegram_session_path, alert: result[:error] }
-      end
+      redirect_to twofa_telegram_session_path(@telegram_session), alert: result[:error] || "Неверный пароль 2FA"
     end
   end
 

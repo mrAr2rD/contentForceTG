@@ -27,10 +27,10 @@ class ImportStyleSamplesJob < ApplicationJob
       callback_url: callback_url
     )
 
-    if response[:success]
+    if response[:status] == "started"
       Rails.logger.info "Style samples import started for project #{project_id}, channel #{channel_username}"
     else
-      Rails.logger.error "Style samples import failed: #{response[:error]}"
+      Rails.logger.error "Style samples import failed: #{response[:error] || response[:detail] || response.inspect}"
     end
   end
 

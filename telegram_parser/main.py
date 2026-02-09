@@ -302,6 +302,10 @@ async def sync_channel(request: SyncRequest, background_tasks: BackgroundTasks):
     """
     Запустить синхронизацию канала в фоне
     """
+    print(f"[SYNC] Request received: channel={request.channel_username}, import_type={request.import_type}")
+    print(f"[SYNC] project_id={request.project_id}, callback_url={request.callback_url}")
+    print(f"[SYNC] session_string present: {bool(request.session_string)}")
+
     if not API_ID or not API_HASH:
         raise HTTPException(
             status_code=500,
@@ -338,6 +342,7 @@ async def process_channel_sync(
     """
     Фоновая задача: парсит канал и отправляет результаты в callback
     """
+    print(f"[SYNC] Starting channel sync: {channel_username}")
     parser = None
     try:
         parser = TelegramChannelParser(
@@ -346,10 +351,13 @@ async def process_channel_sync(
             session_string=session_string
         )
 
+        print(f"[SYNC] Parser created, starting...")
         await parser.start()
+        print(f"[SYNC] Parser started, fetching history...")
 
         # Получаем историю канала
         posts = await parser.get_channel_history(channel_username, limit=limit)
+        print(f"[SYNC] Got {len(posts)} posts from {channel_username}")
 
         # Формируем данные в зависимости от типа импорта
         if import_type == "style_samples":
@@ -369,10 +377,13 @@ async def process_channel_sync(
             }
 
         # Отправляем результаты в Rails
+        print(f"[SYNC] Sending callback to {callback_url}")
         await send_callback(callback_url, callback_data)
+        print(f"[SYNC] Callback sent successfully")
 
     except Exception as e:
         # Отправляем ошибку
+        print(f"[SYNC] ERROR: {type(e).__name__} - {e}")
         error_data = {
             "status": "error",
             "error": str(e)
