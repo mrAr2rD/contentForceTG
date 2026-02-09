@@ -11,9 +11,14 @@ module Analytics
       return unless bot.verified?
 
       begin
-        # Get current subscriber count from Telegram API using analytics service
-        analytics_service = Telegram::AnalyticsService.new(bot)
-        current_stats = analytics_service.fetch_channel_statistics
+        # Пробуем получить данные через Pyrogram (MTProto API)
+        current_stats = fetch_via_pyrogram(bot)
+
+        # Если Pyrogram недоступен — fallback на Bot API
+        current_stats ||= fetch_via_bot_api(bot)
+
+        return unless current_stats && current_stats[:subscriber_count]
+
         current_count = current_stats[:subscriber_count]
 
         # Get previous metric to calculate growth
@@ -27,7 +32,7 @@ module Analytics
         bot.channel_subscriber_metrics.create!(
           subscriber_count: current_count,
           subscriber_growth: growth,
-          churn_rate: 0.0, # Will be calculated by CalculateChurnRateJob
+          churn_rate: calculate_churn_rate(previous_metric, growth),
           measured_at: Time.current
         )
 
@@ -40,6 +45,44 @@ module Analytics
       rescue StandardError => e
         Rails.logger.error("Failed to snapshot channel metrics for bot #{bot.id}: #{e.message}")
         raise
+      end
+    end
+
+    private
+
+    def fetch_via_pyrogram(bot)
+      channel_info = Telegram::ChannelInfoService.new(bot).fetch
+      return nil unless channel_info
+
+      {
+        subscriber_count: channel_info[:members_count] || channel_info["members_count"] || 0,
+        title: channel_info[:title] || channel_info["title"]
+      }
+    rescue StandardError => e
+      Rails.logger.warn("Pyrogram fetch failed for bot #{bot.id}: #{e.message}")
+      nil
+    end
+
+    def fetch_via_bot_api(bot)
+      analytics_service = Telegram::AnalyticsService.new(bot)
+      current_stats = analytics_service.fetch_channel_statistics
+      {
+        subscriber_count: current_stats[:subscriber_count] || 0,
+        title: current_stats[:title]
+      }
+    rescue StandardError => e
+      Rails.logger.warn("Bot API fetch failed for bot #{bot.id}: #{e.message}")
+      nil
+    end
+
+    def calculate_churn_rate(previous_metric, growth)
+      return 0.0 unless previous_metric
+
+      # Если был отток (отрицательный рост), считаем churn rate
+      if growth.negative? && previous_metric.subscriber_count.positive?
+        ((growth.abs.to_f / previous_metric.subscriber_count) * 100).round(2)
+      else
+        0.0
       end
     end
   end

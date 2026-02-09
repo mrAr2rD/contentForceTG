@@ -27,8 +27,14 @@ class AnalyticsController < ApplicationController
     # Запускаем обновление статистики для всех ботов проекта
     bots = project.telegram_bots.verified
     posts_count = 0
+    bots_count = 0
 
     bots.each do |bot|
+      # Обновляем метрики канала (подписчики)
+      Analytics::SnapshotChannelMetricsJob.perform_later(bot.id)
+      bots_count += 1
+
+      # Обновляем статистику постов
       bot.posts.published.where.not(telegram_message_id: nil).find_each do |post|
         Analytics::UpdatePostViewsJob.perform_later(post.id)
         posts_count += 1
@@ -36,7 +42,7 @@ class AnalyticsController < ApplicationController
     end
 
     redirect_to analytics_path(project_id: project.id),
-                notice: "Обновление статистики запущено для #{posts_count} постов. Данные обновятся в течение нескольких минут."
+                notice: "Обновление запущено: #{bots_count} каналов, #{posts_count} постов. Данные обновятся в течение нескольких минут."
   end
 
   def index
@@ -97,19 +103,28 @@ class AnalyticsController < ApplicationController
   def calculate_average_engagement
     return 0.0 unless @selected_project
 
-    analytics = PostAnalytic
-                  .joins(post: :project)
-                  .where(posts: { project_id: @selected_project.id })
-                  .where("post_analytics.measured_at >= ?", @start_date)
+    # Получаем последние аналитики для каждого поста
+    latest_analytics = PostAnalytic
+                         .joins(post: :project)
+                         .where(posts: { project_id: @selected_project.id })
+                         .where("post_analytics.measured_at >= ?", @start_date)
 
-    return 0.0 if analytics.empty?
+    return 0.0 if latest_analytics.empty?
 
-    total_views = analytics.sum(:views)
-    total_forwards = analytics.sum(:forwards)
+    total_views = latest_analytics.sum(:views)
+    total_forwards = latest_analytics.sum(:forwards)
+
+    # Считаем реакции
+    total_reactions = 0
+    latest_analytics.find_each do |analytic|
+      total_reactions += analytic.reactions.values.sum if analytic.reactions.present?
+    end
 
     return 0.0 if total_views.zero?
 
-    ((total_forwards.to_f / total_views) * 100).round(2)
+    # Вовлечённость = (репосты + реакции) / просмотры * 100
+    engagement = ((total_forwards + total_reactions).to_f / total_views) * 100
+    engagement.round(2)
   end
 
   def prepare_views_chart_data
@@ -155,18 +170,27 @@ class AnalyticsController < ApplicationController
   def prepare_engagement_chart_data
     return [] unless @selected_project
 
-    analytics = PostAnalytic
-                  .joins(post: :project)
-                  .where(posts: { project_id: @selected_project.id })
-                  .where("post_analytics.measured_at >= ?", @start_date)
-                  .group("DATE(post_analytics.measured_at)")
-                  .select("DATE(post_analytics.measured_at) as date, SUM(forwards) as forwards, SUM(views) as views")
-                  .order("date ASC")
+    # Группируем по дате
+    analytics_by_date = PostAnalytic
+                          .joins(post: :project)
+                          .where(posts: { project_id: @selected_project.id })
+                          .where("post_analytics.measured_at >= ?", @start_date)
+                          .order("post_analytics.measured_at ASC")
 
-    analytics.map do |record|
-      rate = record.views.zero? ? 0.0 : ((record.forwards.to_f / record.views) * 100).round(2)
+    # Собираем данные по дням
+    data_by_date = {}
+    analytics_by_date.find_each do |analytic|
+      date_key = analytic.measured_at.to_date
+      data_by_date[date_key] ||= { views: 0, forwards: 0, reactions: 0 }
+      data_by_date[date_key][:views] += analytic.views || 0
+      data_by_date[date_key][:forwards] += analytic.forwards || 0
+      data_by_date[date_key][:reactions] += analytic.reactions&.values&.sum || 0
+    end
+
+    data_by_date.map do |date, data|
+      rate = data[:views].zero? ? 0.0 : (((data[:forwards] + data[:reactions]).to_f / data[:views]) * 100).round(2)
       {
-        date: record.date.strftime("%d.%m"),
+        date: date.strftime("%d.%m"),
         rate: rate
       }
     end

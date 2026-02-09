@@ -90,6 +90,46 @@ class TelegramChannelParser:
         except ChannelPrivate:
             raise ValueError(f"Канал @{username} приватный или вы не являетесь участником")
 
+    async def get_channel_info(
+        self,
+        channel_username: str
+    ) -> Dict[str, Any]:
+        """
+        Получить информацию о канале (подписчики, название и т.д.)
+
+        Args:
+            channel_username: Username канала (без @)
+
+        Returns:
+            Информация о канале
+        """
+        if not self.client:
+            raise RuntimeError("Client not started. Call start() first.")
+
+        # Очищаем username от @
+        username = channel_username.lstrip("@")
+
+        try:
+            # Получаем информацию о канале
+            chat = await self.client.get_chat(username)
+
+            # Получаем количество участников
+            members_count = chat.members_count or 0
+
+            return {
+                "id": chat.id,
+                "title": chat.title,
+                "username": chat.username,
+                "members_count": members_count,
+                "description": chat.description,
+                "type": str(chat.type) if chat.type else "channel"
+            }
+
+        except UsernameNotOccupied:
+            raise ValueError(f"Канал @{username} не найден")
+        except ChannelPrivate:
+            raise ValueError(f"Канал @{username} приватный или вы не являетесь участником")
+
     async def get_messages_stats(
         self,
         channel_username: str,

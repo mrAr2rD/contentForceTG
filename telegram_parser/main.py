@@ -126,6 +126,19 @@ class MessageStatsResponse(BaseModel):
     error: Optional[str] = None
 
 
+class ChannelInfoRequest(BaseModel):
+    """Запрос на получение информации о канале"""
+    channel_username: str
+    session_string: str
+
+
+class ChannelInfoResponse(BaseModel):
+    """Ответ с информацией о канале"""
+    success: bool
+    channel: Optional[Dict[str, Any]] = None
+    error: Optional[str] = None
+
+
 @app.get("/health")
 async def health_check():
     """Health check endpoint"""
@@ -310,6 +323,57 @@ async def verify_2fa(request: Verify2FARequest):
             success=False,
             error=str(e)
         )
+
+
+@app.post("/channel-info", response_model=ChannelInfoResponse)
+async def get_channel_info(request: ChannelInfoRequest):
+    """
+    Получить информацию о канале (подписчики, название)
+    """
+    print(f"[CHANNEL] Request for channel={request.channel_username}")
+
+    if not API_ID or not API_HASH:
+        return ChannelInfoResponse(
+            success=False,
+            error="TELEGRAM_API_ID и TELEGRAM_API_HASH не настроены"
+        )
+
+    parser = None
+    try:
+        parser = TelegramChannelParser(
+            api_id=int(API_ID),
+            api_hash=API_HASH,
+            session_string=request.session_string
+        )
+
+        await parser.start()
+
+        channel_info = await parser.get_channel_info(
+            channel_username=request.channel_username
+        )
+
+        print(f"[CHANNEL] Got info: {channel_info.get('title')} - {channel_info.get('members_count')} members")
+
+        return ChannelInfoResponse(
+            success=True,
+            channel=channel_info
+        )
+
+    except ValueError as e:
+        print(f"[CHANNEL] ValueError: {e}")
+        return ChannelInfoResponse(
+            success=False,
+            error=str(e)
+        )
+    except Exception as e:
+        print(f"[CHANNEL] Error: {type(e).__name__} - {e}")
+        return ChannelInfoResponse(
+            success=False,
+            error=str(e)
+        )
+    finally:
+        if parser:
+            await parser.stop()
 
 
 @app.post("/message-stats", response_model=MessageStatsResponse)
