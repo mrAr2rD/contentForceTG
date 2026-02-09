@@ -109,17 +109,8 @@ class TelegramSessionsController < ApplicationController
       Rails.logger.info "[TELEGRAM_AUTH] 2FA required, updating session and rendering twofa_form"
       @telegram_session.require_2fa!
 
-      respond_to do |format|
-        format.turbo_stream do
-          Rails.logger.info "[TELEGRAM_AUTH] Rendering turbo_stream replace for auth_form"
-          render turbo_stream: turbo_stream.replace(
-            "auth_form",
-            partial: "telegram_sessions/twofa_form",
-            locals: { telegram_session: @telegram_session }
-          )
-        end
-        format.html { render :new }
-      end
+      # Редирект на страницу 2FA вместо Turbo Stream
+      redirect_to twofa_telegram_session_path(@telegram_session)
     else
       respond_to do |format|
         format.turbo_stream do
@@ -132,6 +123,11 @@ class TelegramSessionsController < ApplicationController
         format.html { redirect_to new_telegram_session_path, alert: result[:error] }
       end
     end
+  end
+
+  def twofa
+    @telegram_session = current_user.telegram_sessions.find(params[:id])
+    render :twofa
   end
 
   def verify_2fa

@@ -64,6 +64,7 @@ Rails.application.routes.draw do
     end
     member do
       post :verify_code
+      get :twofa
       post :verify_2fa
     end
   end
