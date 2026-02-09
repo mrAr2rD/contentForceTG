@@ -42,6 +42,9 @@ class Post < ApplicationRecord
       telegram_message_id: result.message_id
     )
 
+    # Создаём ChannelPost для мини-сайта если есть channel_site
+    create_channel_post_if_needed(result.message_id)
+
     # Schedule periodic analytics updates for this post
     schedule_analytics_updates
 
@@ -90,6 +93,22 @@ class Post < ApplicationRecord
   end
 
   private
+
+  def create_channel_post_if_needed(message_id)
+    return unless telegram_bot&.channel_site&.enabled?
+
+    channel_site = telegram_bot.channel_site
+    channel_site.channel_posts.find_or_create_by!(telegram_message_id: message_id) do |cp|
+      cp.original_text = content
+      cp.content = content
+      cp.title = title
+      cp.telegram_date = Time.current
+      cp.visibility = :visible
+    end
+  rescue StandardError => e
+    Rails.logger.error("Failed to create ChannelPost for Post #{id}: #{e.message}")
+    # Не прерываем публикацию если не удалось создать ChannelPost
+  end
 
   def purge_image_attachment
     image.purge if image.attached?

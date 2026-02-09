@@ -72,8 +72,13 @@ module ChannelSites
     end
 
     def channel_username
-      @channel_site.telegram_bot.channel_username ||
-        @channel_site.telegram_bot.bot_username
+      bot = @channel_site.telegram_bot
+      # channel_id может быть в формате @username или -100123456789
+      if bot.channel_id.present? && bot.channel_id.start_with?("@")
+        bot.channel_id.delete("@")
+      else
+        bot.channel_name || bot.bot_username
+      end
     end
 
     def callback_url

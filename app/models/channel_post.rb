@@ -76,10 +76,12 @@ class ChannelPost < ApplicationRecord
 
   # Ссылка на оригинальный пост в Telegram
   def telegram_url
-    username = channel_site.telegram_bot.channel_username
-    return nil unless username.present?
-
-    "https://t.me/#{username}/#{telegram_message_id}"
+    bot = channel_site.telegram_bot
+    # channel_id может быть в формате @username или -100123456789
+    if bot.channel_id.present? && bot.channel_id.start_with?("@")
+      username = bot.channel_id.delete("@")
+      "https://t.me/#{username}/#{telegram_message_id}"
+    end
   end
 
   # Показывать ли пост
