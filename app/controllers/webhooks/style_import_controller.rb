@@ -5,6 +5,9 @@ module Webhooks
     skip_before_action :verify_authenticity_token
 
     def receive
+      Rails.logger.info "[STYLE_IMPORT] Webhook received: #{params.except(:posts).inspect}"
+      Rails.logger.info "[STYLE_IMPORT] Posts count: #{params[:posts]&.size || 0}"
+
       project_id = params[:project_id]
       posts = params[:posts] || []
       channel_username = params[:channel_username]
