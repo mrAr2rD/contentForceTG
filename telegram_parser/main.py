@@ -5,6 +5,7 @@ Telegram Channel Parser Microservice
 
 import os
 import asyncio
+import json
 from datetime import datetime
 from typing import Optional, Dict, Any
 import time
@@ -399,18 +400,57 @@ async def process_channel_sync(
             await parser.stop()
 
 
+def make_json_serializable(obj):
+    """Рекурсивно преобразовать объект в JSON-сериализуемый формат"""
+    if obj is None:
+        return None
+    if isinstance(obj, (str, int, float, bool)):
+        return obj
+    if isinstance(obj, (datetime,)):
+        return obj.isoformat()
+    if isinstance(obj, dict):
+        return {str(k): make_json_serializable(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [make_json_serializable(item) for item in obj]
+    if hasattr(obj, 'value'):
+        # Enum
+        return make_json_serializable(obj.value)
+    if hasattr(obj, 'name') and hasattr(obj, '__class__'):
+        # Enum by name
+        return obj.name
+    # Fallback - конвертируем в строку
+    return str(obj)
+
+
 async def send_callback(url: str, data: dict):
     """Отправить результаты в callback URL"""
+    # Предварительно преобразуем данные в JSON-сериализуемый формат
+    safe_data = make_json_serializable(data)
+
+    # Проверяем сериализуемость перед отправкой
+    try:
+        json.dumps(safe_data)
+    except (TypeError, ValueError) as e:
+        print(f"[CALLBACK] JSON serialization test failed: {e}")
+        print(f"[CALLBACK] Problematic data keys: {list(data.keys()) if isinstance(data, dict) else type(data)}")
+        # Пробуем отправить без posts если проблема в них
+        if isinstance(safe_data, dict) and 'posts' in safe_data:
+            safe_data['posts'] = []
+            safe_data['error'] = f"JSON serialization failed: {e}"
+
     async with httpx.AsyncClient() as client:
         try:
+            print(f"[CALLBACK] Sending to {url}, posts count: {len(safe_data.get('posts', []))}")
             response = await client.post(
                 url,
-                json=data,
+                json=safe_data,
                 timeout=30.0
             )
             response.raise_for_status()
+            print(f"[CALLBACK] Success, status: {response.status_code}")
         except Exception as e:
-            print(f"Failed to send callback: {e}")
+            print(f"[CALLBACK] Failed to send callback: {e}")
+            print(f"[CALLBACK] callback_url={url}")
 
 
 if __name__ == "__main__":

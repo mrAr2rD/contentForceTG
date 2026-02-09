@@ -136,13 +136,13 @@ class TelegramChannelParser:
             })
 
         return {
-            "message_id": message.id,
+            "message_id": int(message.id) if message.id is not None else 0,
             "date": int(message.date.timestamp()) if message.date else None,
-            "text": text,
-            "views": message.views or 0,
-            "forwards": message.forwards or 0,
+            "text": str(text) if text else "",
+            "views": int(message.views) if message.views else 0,
+            "forwards": int(message.forwards) if message.forwards else 0,
             "media": media,
-            "has_media_spoiler": message.has_media_spoiler if hasattr(message, "has_media_spoiler") else False,
+            "has_media_spoiler": bool(message.has_media_spoiler) if hasattr(message, "has_media_spoiler") else False,
             "entities": self._parse_entities(message.entities or message.caption_entities or [])
         }
 
@@ -150,11 +150,22 @@ class TelegramChannelParser:
         """Преобразовать entities сообщения"""
         result = []
         for entity in entities:
+            try:
+                # Pyrogram's MessageEntityType - получаем строковое значение
+                if hasattr(entity.type, 'name'):
+                    entity_type = entity.type.name.lower()
+                elif hasattr(entity.type, 'value') and isinstance(entity.type.value, str):
+                    entity_type = entity.type.value
+                else:
+                    entity_type = str(entity.type)
+            except Exception:
+                entity_type = "unknown"
+
             result.append({
-                "type": entity.type.value if hasattr(entity.type, "value") else str(entity.type),
-                "offset": entity.offset,
-                "length": entity.length,
-                "url": entity.url if hasattr(entity, "url") else None
+                "type": entity_type,
+                "offset": int(entity.offset) if entity.offset is not None else 0,
+                "length": int(entity.length) if entity.length is not None else 0,
+                "url": str(entity.url) if hasattr(entity, "url") and entity.url else None
             })
         return result
 
