@@ -2,13 +2,13 @@
 
 class PostsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_post, only: [:show, :edit, :update, :destroy, :publish, :schedule, :remove_image]
-  before_action :set_project, only: [:new, :create]
-  layout "dashboard", except: [:editor]
+  before_action :set_post, only: [ :show, :edit, :update, :destroy, :publish, :schedule, :remove_image, :refresh_stats ]
+  before_action :set_project, only: [ :new, :create ]
+  layout "dashboard", except: [ :editor ]
 
   def index
     @posts = policy_scope(Post).includes(:project, :telegram_bot).order(created_at: :desc)
-    
+
     # Filtering
     @posts = @posts.where(status: params[:status]) if params[:status].present?
     @posts = @posts.where(project_id: params[:project_id]) if params[:project_id].present?
@@ -29,7 +29,7 @@ class PostsController < ApplicationController
     authorize @post
 
     if @post.save
-      redirect_to editor_posts_path(post_id: @post.id), notice: 'Пост успешно создан!'
+      redirect_to editor_posts_path(post_id: @post.id), notice: "Пост успешно создан!"
     else
       render :new, status: :unprocessable_entity
     end
@@ -44,7 +44,7 @@ class PostsController < ApplicationController
     authorize @post
 
     if @post.update(post_params)
-      redirect_to @post, notice: 'Пост обновлен!'
+      redirect_to @post, notice: "Пост обновлен!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -54,9 +54,9 @@ class PostsController < ApplicationController
     authorize @post
     project = @post.project
     @post.destroy
-    
+
     redirect_path = project ? project_path(project) : posts_path
-    redirect_to redirect_path, notice: 'Пост удален!', status: :see_other
+    redirect_to redirect_path, notice: "Пост удален!", status: :see_other
   end
 
   def publish
@@ -65,12 +65,12 @@ class PostsController < ApplicationController
     if @post.telegram_bot.present?
       begin
         result = @post.publish!
-        redirect_to @post, notice: 'Пост опубликован!'
+        redirect_to @post, notice: "Пост опубликован!"
       rescue StandardError => e
         redirect_to @post, alert: "Ошибка публикации: #{e.message}"
       end
     else
-      redirect_to @post, alert: 'Выберите Telegram бота для публикации'
+      redirect_to @post, alert: "Выберите Telegram бота для публикации"
     end
   end
 
@@ -82,7 +82,7 @@ class PostsController < ApplicationController
       @post.schedule!(Time.zone.parse(scheduled_at))
       redirect_to @post, notice: "Пост запланирован на #{scheduled_at}"
     else
-      redirect_to @post, alert: 'Укажите дату и время публикации'
+      redirect_to @post, alert: "Укажите дату и время публикации"
     end
   rescue StandardError => e
     redirect_to @post, alert: "Ошибка планирования: #{e.message}"
@@ -98,9 +98,28 @@ class PostsController < ApplicationController
     end
 
     respond_to do |format|
-      format.html { redirect_back fallback_location: @post, notice: 'Изображение удалено' }
+      format.html { redirect_back fallback_location: @post, notice: "Изображение удалено" }
       format.json { render json: { success: true } }
     end
+  end
+
+  def refresh_stats
+    authorize @post, :show?
+
+    unless @post.published? && @post.telegram_message_id.present?
+      redirect_to @post, alert: "Статистика доступна только для опубликованных постов"
+      return
+    end
+
+    unless current_user.telegram_sessions.active.authorized.exists?
+      redirect_to @post, alert: "Для обновления статистики требуется авторизация Telegram"
+      return
+    end
+
+    # Запускаем обновление статистики
+    Analytics::UpdatePostViewsJob.perform_later(@post.id)
+
+    redirect_to @post, notice: "Обновление статистики запущено. Данные обновятся в течение минуты."
   end
 
   # Editor view - трехпанельный интерфейс

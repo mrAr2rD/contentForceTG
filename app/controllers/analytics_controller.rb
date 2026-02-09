@@ -4,6 +4,41 @@ class AnalyticsController < ApplicationController
   before_action :authenticate_user!
   layout "dashboard"
 
+  # POST /analytics/refresh_stats
+  def refresh_stats
+    project = if params[:project_id].present?
+                current_user.projects.find(params[:project_id])
+    else
+                current_user.projects.active.first
+    end
+
+    unless project
+      redirect_to analytics_path, alert: "Проект не найден"
+      return
+    end
+
+    # Проверяем есть ли Telegram сессия
+    unless current_user.telegram_sessions.active.authorized.exists?
+      redirect_to analytics_path(project_id: project.id),
+                  alert: "Для обновления статистики требуется авторизация Telegram"
+      return
+    end
+
+    # Запускаем обновление статистики для всех ботов проекта
+    bots = project.telegram_bots.verified
+    posts_count = 0
+
+    bots.each do |bot|
+      bot.posts.published.where.not(telegram_message_id: nil).find_each do |post|
+        Analytics::UpdatePostViewsJob.perform_later(post.id)
+        posts_count += 1
+      end
+    end
+
+    redirect_to analytics_path(project_id: project.id),
+                notice: "Обновление статистики запущено для #{posts_count} постов. Данные обновятся в течение нескольких минут."
+  end
+
   def index
     @projects = current_user.projects.active
     @selected_project = if params[:project_id].present?
@@ -13,6 +48,9 @@ class AnalyticsController < ApplicationController
     end
 
     return unless @selected_project
+
+    # Проверяем есть ли активная Telegram сессия для кнопки обновления
+    @has_telegram_session = current_user.telegram_sessions.active.authorized.exists?
 
     # Date range for analytics (last 30 days by default)
     @date_range = params[:range] || "30"

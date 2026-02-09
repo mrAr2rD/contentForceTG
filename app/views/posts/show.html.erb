@@ -228,6 +228,53 @@
         </div>
       <% end %>
 
+      <!-- Analytics (for published posts) -->
+      <% if @post.published? && @post.telegram_message_id.present? %>
+        <div class="bg-card border border-border rounded-lg">
+          <div class="p-4 border-b border-border flex items-center justify-between">
+            <h3 class="text-xs font-semibold text-foreground">Статистика</h3>
+            <%= button_to refresh_stats_post_path(@post),
+                          method: :post,
+                          class: "inline-flex items-center gap-1 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-accent rounded transition-colors",
+                          title: "Обновить статистику" do %>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+              </svg>
+              Обновить
+            <% end %>
+          </div>
+          <div class="p-4 space-y-3 text-xs">
+            <% last_analytics = @post.post_analytics.recent.first %>
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Просмотры</span>
+              <span class="text-foreground font-medium"><%= number_with_delimiter(last_analytics&.views || 0) %></span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-muted-foreground">Репосты</span>
+              <span class="text-foreground font-medium"><%= number_with_delimiter(last_analytics&.forwards || 0) %></span>
+            </div>
+            <% if last_analytics&.reactions.present? && last_analytics.reactions.any? %>
+              <div class="flex items-center justify-between">
+                <span class="text-muted-foreground">Реакции</span>
+                <span class="text-foreground font-medium"><%= number_with_delimiter(last_analytics.reactions.values.sum) %></span>
+              </div>
+              <div class="flex flex-wrap gap-1 pt-1">
+                <% last_analytics.reactions.each do |emoji, count| %>
+                  <span class="inline-flex items-center gap-1 px-1.5 py-0.5 bg-muted rounded text-xs">
+                    <%= emoji %> <%= count %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+            <% if last_analytics&.measured_at %>
+              <div class="pt-2 border-t border-border">
+                <span class="text-muted-foreground">Обновлено: <%= time_ago_in_words(last_analytics.measured_at) %> назад</span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+
       <!-- Actions -->
       <div class="bg-card border border-border rounded-lg">
         <div class="p-4 border-b border-border">

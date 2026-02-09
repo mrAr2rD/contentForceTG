@@ -48,7 +48,10 @@ Rails.application.routes.draw do
   end
 
   # Analytics
-  get 'analytics', to: 'analytics#index', as: :analytics  # Posts (must be defined before projects for correct route priority)
+  get 'analytics', to: 'analytics#index', as: :analytics
+  post 'analytics/refresh_stats', to: 'analytics#refresh_stats', as: :refresh_analytics_stats
+
+  # Posts (must be defined before projects for correct route priority)
   resources :posts do
     collection do
       get :editor
@@ -57,6 +60,7 @@ Rails.application.routes.draw do
     member do
       post :publish
       post :schedule
+      post :refresh_stats
       delete :remove_image
     end
   end
