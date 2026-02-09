@@ -123,6 +123,9 @@ async def send_code(request: SendCodeRequest):
     """
     Отправить код авторизации на номер телефона
     """
+    print(f"[AUTH] send_code called for phone: {request.phone_number}")
+    print(f"[AUTH] API_ID: {API_ID}, API_HASH: {'set' if API_HASH else 'not set'}")
+
     if not API_ID or not API_HASH:
         return SendCodeResponse(
             success=False,
@@ -151,6 +154,9 @@ async def send_code(request: SendCodeRequest):
             "expires_at": time.time() + AUTH_TTL
         }
 
+        print(f"[AUTH] Code sent successfully, phone_code_hash: {sent_code.phone_code_hash[:10]}...")
+        print(f"[AUTH] Active clients: {list(auth_clients.keys())}")
+
         return SendCodeResponse(
             success=True,
             phone_code_hash=sent_code.phone_code_hash
@@ -175,10 +181,17 @@ async def verify_code(request: VerifyCodeRequest):
     """
     Проверить код авторизации
     """
+    print(f"[AUTH] verify_code called for phone: {request.phone_number}")
+    print(f"[AUTH] Active clients before cleanup: {list(auth_clients.keys())}")
+
     cleanup_expired_clients()
     phone = request.phone_number.strip()
 
+    print(f"[AUTH] Active clients after cleanup: {list(auth_clients.keys())}")
+    print(f"[AUTH] Looking for phone: {phone}")
+
     if phone not in auth_clients:
+        print(f"[AUTH] ERROR: Phone {phone} not found in auth_clients!")
         return VerifyCodeResponse(
             success=False,
             error="Сессия авторизации истекла. Запросите код заново"
@@ -213,12 +226,14 @@ async def verify_code(request: VerifyCodeRequest):
         )
 
     except PhoneCodeInvalid:
+        print(f"[AUTH] ERROR: PhoneCodeInvalid for {phone}")
         return VerifyCodeResponse(
             success=False,
             error="Неверный код. Попробуйте ещё раз"
         )
 
     except PhoneCodeExpired:
+        print(f"[AUTH] ERROR: PhoneCodeExpired for {phone}")
         await client.disconnect()
         del auth_clients[phone]
         return VerifyCodeResponse(
@@ -227,6 +242,7 @@ async def verify_code(request: VerifyCodeRequest):
         )
 
     except Exception as e:
+        print(f"[AUTH] ERROR: Exception for {phone}: {type(e).__name__} - {e}")
         return VerifyCodeResponse(
             success=False,
             error=str(e)
