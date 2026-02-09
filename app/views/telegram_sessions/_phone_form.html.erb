@@ -1,6 +1,6 @@
 <% error ||= nil %>
 
-<%= form_with url: send_code_telegram_sessions_path, method: :post, data: { controller: "telegram-auth", turbo_frame: "_top" } do |f| %>
+<%= form_with url: send_code_telegram_sessions_path, method: :post, data: { controller: "telegram-auth" } do |f| %>
   <div class="space-y-5">
     <% if error %>
       <div class="p-4 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900/50 rounded-xl">
