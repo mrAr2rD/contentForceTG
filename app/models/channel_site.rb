@@ -99,8 +99,16 @@ class ChannelSite < ApplicationRecord
 
   # Telegram ссылка
   def telegram_url
-    username = telegram_bot.channel_username || telegram_bot.bot_username
-    "https://t.me/#{username}" if username.present?
+    # channel_id может быть в формате @username или -100123456789
+    channel_id = telegram_bot.channel_id
+    if channel_id.present?
+      if channel_id.start_with?("@")
+        "https://t.me/#{channel_id.delete('@')}"
+      elsif telegram_bot.channel_name.present?
+        # Если channel_id числовой, используем channel_name как fallback
+        nil
+      end
+    end
   end
 
   # Включить сайт
