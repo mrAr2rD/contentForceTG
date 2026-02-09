@@ -90,6 +90,8 @@ class TelegramSessionsController < ApplicationController
       params[:phone_code]
     )
 
+    Rails.logger.info "[TELEGRAM_AUTH] verify_code result: #{result.inspect}"
+
     if result[:success]
       @telegram_session.complete_authorization!(result[:session_string])
 
@@ -104,10 +106,12 @@ class TelegramSessionsController < ApplicationController
         format.html { redirect_to telegram_sessions_path, notice: "Telegram авторизован" }
       end
     elsif result[:requires_2fa]
+      Rails.logger.info "[TELEGRAM_AUTH] 2FA required, updating session and rendering twofa_form"
       @telegram_session.require_2fa!
 
       respond_to do |format|
         format.turbo_stream do
+          Rails.logger.info "[TELEGRAM_AUTH] Rendering turbo_stream replace for auth_form"
           render turbo_stream: turbo_stream.replace(
             "auth_form",
             partial: "telegram_sessions/twofa_form",
