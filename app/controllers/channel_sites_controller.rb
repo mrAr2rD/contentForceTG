@@ -15,7 +15,12 @@ class ChannelSitesController < ApplicationController
 
   # GET /posts - Список всех постов
   def posts
-    @posts = @channel_site.channel_posts.published.recent.limit(50)
+    @posts = @channel_site.channel_posts.published.recent.page(params[:page]).per(12)
+
+    respond_to do |format|
+      format.html
+      format.turbo_stream
+    end
   end
 
   # GET /post/:slug - Отдельный пост
@@ -24,11 +29,22 @@ class ChannelSitesController < ApplicationController
 
     # Следующий и предыдущий посты для навигации
     @next_post = @channel_site.channel_posts.published
-                              .where("telegram_date > ?", @channel_post.telegram_date)
-                              .order(telegram_date: :asc).first
-    @prev_post = @channel_site.channel_posts.published
                               .where("telegram_date < ?", @channel_post.telegram_date)
                               .order(telegram_date: :desc).first
+    @prev_post = @channel_site.channel_posts.published
+                              .where("telegram_date > ?", @channel_post.telegram_date)
+                              .order(telegram_date: :asc).first
+
+    # Если запрос на partial (для infinite scroll)
+    if params[:partial] == "true"
+      render partial: "channel_sites/post_scroll_item",
+             locals: {
+               channel_post: @channel_post,
+               channel_site: @channel_site,
+               next_post: @next_post
+             },
+             layout: false
+    end
   end
 
   # GET /sitemap.xml - Sitemap для SEO

@@ -40,9 +40,9 @@
     </div>
 
     <% if @recent_posts.any? %>
-      <div class="space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <% @recent_posts.each do |post| %>
-          <%= render 'channel_sites/post_card', post: post %>
+          <%= render 'channel_sites/post_card', post: post, featured: true %>
         <% end %>
       </div>
     <% else %>

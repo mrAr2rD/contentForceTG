@@ -8,7 +8,37 @@ module Dashboard
 
     # GET /dashboard/channel_sites/:channel_site_id/channel_posts
     def index
-      @channel_posts = @channel_site.channel_posts.recent.limit(100)
+      @channel_posts = @channel_site.channel_posts.recent.page(params[:page]).per(50)
+    end
+
+    # PATCH /dashboard/channel_sites/:channel_site_id/channel_posts/bulk_update
+    def bulk_update
+      ids = params[:ids] || []
+      action_type = params[:action_type]
+
+      @channel_posts = @channel_site.channel_posts.where(id: ids)
+
+      case action_type
+      when "show"
+        @channel_posts.update_all(visibility: "visible")
+      when "hide"
+        @channel_posts.update_all(visibility: "hidden")
+      when "feature"
+        @channel_posts.update_all(featured: true)
+      when "unfeature"
+        @channel_posts.update_all(featured: false)
+      end
+
+      respond_to do |format|
+        format.turbo_stream do
+          render turbo_stream: turbo_stream.replace(
+            "channel-posts-table",
+            partial: "channel_posts_table",
+            locals: { channel_posts: @channel_site.channel_posts.recent.page(params[:page]).per(50) }
+          )
+        end
+        format.html { redirect_to dashboard_channel_site_channel_posts_path(@channel_site), notice: "Посты обновлены" }
+      end
     end
 
     # GET /dashboard/channel_sites/:channel_site_id/channel_posts/:id

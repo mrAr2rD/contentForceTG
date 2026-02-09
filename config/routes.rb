@@ -39,7 +39,11 @@ Rails.application.routes.draw do
         post :sync
         post :verify_domain
       end
-      resources :channel_posts, only: [:index, :show, :edit, :update]
+      resources :channel_posts, only: [:index, :show, :edit, :update] do
+        collection do
+          patch :bulk_update
+        end
+      end
     end
   end
 

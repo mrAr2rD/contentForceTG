@@ -1,6 +1,6 @@
 <% content_for :title, 'Посты мини-сайта' %>
 
-<div class="max-w-6xl mx-auto px-4 py-8">
+<div class="max-w-6xl mx-auto px-4 py-8" data-controller="bulk-select" data-bulk-select-url-value="<%= bulk_update_dashboard_channel_site_channel_posts_path(@channel_site) %>">
   <div class="flex items-center gap-2 text-sm text-zinc-500 mb-6">
     <%= link_to 'Мини-сайты', dashboard_channel_sites_path, class: 'hover:text-zinc-700 dark:hover:text-zinc-300' %>
     <span>/</span>
@@ -22,71 +22,16 @@
   </div>
 
   <% if @channel_posts.any? %>
-    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
-      <table class="w-full">
-        <thead class="bg-zinc-50 dark:bg-zinc-800/50">
-          <tr>
-            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Заголовок</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Дата</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Просмотры</th>
-            <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Статус</th>
-            <th class="text-right px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Действия</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
-          <% @channel_posts.each do |post| %>
-            <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <% if post.first_image.present? %>
-                    <img src="<%= post.first_image %>" alt="" class="w-12 h-12 rounded object-cover">
-                  <% end %>
-                  <div>
-                    <div class="font-medium"><%= post.display_title&.truncate(50) %></div>
-                    <div class="text-sm text-zinc-500"><%= post.slug %></div>
-                  </div>
-                </div>
-              </td>
-              <td class="px-6 py-4 text-sm text-zinc-500">
-                <%= post.telegram_date.strftime('%d.%m.%Y %H:%M') %>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm">
-                  <div><%= post.views_count %> в TG</div>
-                  <div class="text-zinc-500"><%= post.site_views_count %> на сайте</div>
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <% if post.featured? %>
-                  <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs">Избранное</span>
-                <% end %>
-                <% case post.visibility %>
-                <% when 'visible' %>
-                  <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-xs">Виден</span>
-                <% when 'hidden' %>
-                  <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 text-xs">Скрыт</span>
-                <% else %>
-                  <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400 text-xs">Авто</span>
-                <% end %>
-              </td>
-              <td class="px-6 py-4 text-right">
-                <%= link_to edit_dashboard_channel_site_channel_post_path(@channel_site, post),
-                            class: 'text-emerald-500 hover:underline text-sm' do %>
-                  Редактировать
-                <% end %>
-              </td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </div>
+    <%= render 'channel_posts_table', channel_posts: @channel_posts %>
 
     <!-- Pagination -->
     <% if @channel_posts.respond_to?(:total_pages) && @channel_posts.total_pages > 1 %>
       <nav class="flex items-center justify-center gap-2 mt-8">
         <% if @channel_posts.prev_page %>
-          <%= link_to '← Назад', dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.prev_page),
-                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' %>
+          <%= link_to dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.prev_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' do %>
+            ← Назад
+          <% end %>
         <% end %>
 
         <span class="px-4 py-2 text-zinc-500">
@@ -94,11 +39,47 @@
         </span>
 
         <% if @channel_posts.next_page %>
-          <%= link_to 'Вперёд →', dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.next_page),
-                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' %>
+          <%= link_to dashboard_channel_site_channel_posts_path(@channel_site, page: @channel_posts.next_page),
+                      class: 'px-4 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors' do %>
+            Вперёд →
+          <% end %>
         <% end %>
       </nav>
     <% end %>
+
+    <!-- Bulk Action Bar (fixed at bottom) -->
+    <div data-bulk-select-target="actionBar"
+         class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-zinc-900 dark:bg-zinc-800 border border-zinc-700 rounded-xl shadow-2xl px-6 py-3 flex items-center gap-4 transition-all duration-200 translate-y-full opacity-0 z-50">
+      <span class="text-sm text-zinc-400">
+        Выбрано: <span data-bulk-select-target="selectedCount" class="font-medium text-white">0</span>
+      </span>
+
+      <div class="h-6 w-px bg-zinc-700"></div>
+
+      <button type="button"
+              data-action="bulk-select#show"
+              class="px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors text-sm font-medium">
+        Показать
+      </button>
+
+      <button type="button"
+              data-action="bulk-select#hide"
+              class="px-3 py-1.5 rounded-lg bg-zinc-500/20 text-zinc-400 hover:bg-zinc-500/30 transition-colors text-sm font-medium">
+        Скрыть
+      </button>
+
+      <button type="button"
+              data-action="bulk-select#feature"
+              class="px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 transition-colors text-sm font-medium">
+        ★ В избранное
+      </button>
+
+      <button type="button"
+              data-action="bulk-select#unfeature"
+              class="px-3 py-1.5 rounded-lg bg-amber-500/20 text-amber-400 hover:bg-amber-500/30 transition-colors text-sm font-medium">
+        Убрать из избранного
+      </button>
+    </div>
   <% else %>
     <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-12 text-center">
       <p class="text-zinc-500">Постов пока нет. Запустите синхронизацию для загрузки контента.</p>

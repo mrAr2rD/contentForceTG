@@ -1,0 +1,73 @@
+<%# locals: (channel_posts:) %>
+<div id="channel-posts-table" class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl overflow-hidden">
+  <table class="w-full">
+    <thead class="bg-zinc-50 dark:bg-zinc-800/50">
+      <tr>
+        <th class="w-10 px-6 py-3">
+          <input type="checkbox"
+                 data-bulk-select-target="selectAll"
+                 data-action="bulk-select#toggleAll"
+                 class="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 text-emerald-500 focus:ring-emerald-500">
+        </th>
+        <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Заголовок</th>
+        <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Дата</th>
+        <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Просмотры</th>
+        <th class="text-left px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Статус</th>
+        <th class="text-right px-6 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Действия</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+      <% channel_posts.each do |post| %>
+        <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors">
+          <td class="px-6 py-4">
+            <input type="checkbox"
+                   value="<%= post.id %>"
+                   data-bulk-select-target="checkbox"
+                   data-action="bulk-select#toggle"
+                   class="w-4 h-4 rounded border-zinc-300 dark:border-zinc-600 text-emerald-500 focus:ring-emerald-500">
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <% if post.first_image.present? %>
+                <img src="<%= post.first_image %>" alt="" class="w-12 h-12 rounded object-cover">
+              <% end %>
+              <div>
+                <div class="font-medium"><%= post.display_title&.truncate(50) %></div>
+                <div class="text-sm text-zinc-500"><%= post.slug %></div>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-zinc-500">
+            <%= post.telegram_date.strftime('%d.%m.%Y %H:%M') %>
+          </td>
+          <td class="px-6 py-4">
+            <div class="text-sm">
+              <div><%= post.views_count %> в TG</div>
+              <div class="text-zinc-500"><%= post.site_views_count %> на сайте</div>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex flex-wrap gap-1">
+              <% if post.featured? %>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 text-xs">★ Избранное</span>
+              <% end %>
+              <% if post.visibility == 'visible' %>
+                <span class="px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-xs">Виден</span>
+              <% elsif post.visibility == 'hidden' %>
+                <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-500 text-xs">Скрыт</span>
+              <% else %>
+                <span class="px-2 py-0.5 rounded-full bg-zinc-500/10 text-zinc-400 text-xs">Авто</span>
+              <% end %>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-right">
+            <%= link_to edit_dashboard_channel_site_channel_post_path(@channel_site, post),
+                        class: 'text-emerald-500 hover:underline text-sm' do %>
+              Редактировать
+            <% end %>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

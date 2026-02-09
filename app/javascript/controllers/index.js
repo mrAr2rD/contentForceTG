@@ -33,3 +33,12 @@ application.register("image-generator", ImageGeneratorController)
 
 import ArticleGeneratorController from "./article_generator_controller"
 application.register("article-generator", ArticleGeneratorController)
+
+import BulkSelectController from "./bulk_select_controller"
+application.register("bulk-select", BulkSelectController)
+
+import InfiniteScrollController from "./infinite_scroll_controller"
+application.register("infinite-scroll", InfiniteScrollController)
+
+import PostScrollController from "./post_scroll_controller"
+application.register("post-scroll", PostScrollController)
