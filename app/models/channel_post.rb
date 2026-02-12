@@ -13,6 +13,9 @@ class ChannelPost < ApplicationRecord
   # Associations
   belongs_to :channel_site, counter_cache: :posts_count
 
+  # Active Storage для скачанных изображений из Telegram
+  has_many_attached :images
+
   # Enums
   enum :visibility, { auto: 0, visible: 1, hidden: 2 }, default: :auto
 
@@ -68,7 +71,12 @@ class ChannelPost < ApplicationRecord
   end
 
   # Первое изображение из медиа
+  # Приоритет: скачанные картинки (Active Storage) > URL из media
   def first_image
+    # Если есть скачанные картинки - используем первую
+    return images.first if images.attached?
+
+    # Иначе возвращаем URL из media
     return nil unless has_media?
 
     media.find { |m| m["type"] == "photo" }&.dig("url")

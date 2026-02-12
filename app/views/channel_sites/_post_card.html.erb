@@ -3,7 +3,7 @@
   <a href="/post/<%= post.to_param %>" class="block flex-1 flex flex-col">
     <% if post.first_image.present? && featured %>
       <div class="aspect-video -mx-0 -mt-0">
-        <img src="<%= post.first_image %>"
+        <img src="<%= channel_post_image_url(post) %>"
              alt="<%= post.display_title %>"
              class="w-full h-full object-cover"
              loading="lazy">
@@ -38,7 +38,7 @@
     <% if post.first_image.present? && !featured %>
       <!-- Fallback layout for non-featured cards without image at top -->
       <div class="hidden">
-        <img src="<%= post.first_image %>" alt="" class="w-16 h-16 object-cover rounded-lg">
+        <img src="<%= channel_post_image_url(post) %>" alt="" class="w-16 h-16 object-cover rounded-lg">
       </div>
     <% end %>
   </a>

@@ -36,7 +36,7 @@
   <!-- Media -->
   <% if channel_post.first_image.present? %>
     <figure class="mb-6">
-      <img src="<%= channel_post.first_image %>"
+      <img src="<%= channel_post_image_url(channel_post) %>"
            alt="<%= channel_post.display_title %>"
            class="w-full rounded-lg"
            itemprop="image"
