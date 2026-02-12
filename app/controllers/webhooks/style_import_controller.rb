@@ -32,11 +32,11 @@ module Webhooks
           content: post_data[:text],
           source_type: "telegram_import",
           source_channel: channel_username,
-          original_date: post_data[:date] ? Time.zone.parse(post_data[:date]) : nil,
+          original_date: post_data[:date] ? Time.zone.at(post_data[:date]) : nil,
           metadata: {
             views: post_data[:views],
             forwards: post_data[:forwards],
-            media_type: post_data[:media_type]
+            media_type: extract_media_type(post_data[:media])
           }
         )
 
@@ -78,6 +78,22 @@ module Webhooks
         imported_count: imported_count,
         total_posts: posts.size
       }
+    end
+
+    private
+
+    def extract_media_type(media_array)
+      return nil if media_array.blank?
+
+      # Берём первый элемент медиа и извлекаем тип
+      first_media = media_array.first
+      return nil unless first_media.is_a?(Hash)
+
+      # Конвертируем MessageMediaPhoto -> photo, MessageMediaDocument -> document и т.д.
+      media_type = first_media[:type] || first_media["type"]
+      return nil if media_type.blank?
+
+      media_type.to_s.gsub("MessageMedia", "").underscore
     end
   end
 end
