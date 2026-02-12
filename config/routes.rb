@@ -153,7 +153,8 @@ Rails.application.routes.draw do
   # Webhooks
   namespace :webhooks do
     post 'telegram/:bot_token', to: 'telegram#receive', as: :telegram
-    post 'robokassa/result', to: 'robokassa#result', as: :robokassa_result
+    # Robokassa может вызывать Result URL как через GET, так и через POST
+    match 'robokassa/result', to: 'robokassa#result', as: :robokassa_result, via: [:get, :post]
     get 'robokassa/success', to: 'robokassa#success', as: :robokassa_success
     get 'robokassa/fail', to: 'robokassa#fail', as: :robokassa_fail
     post 'channel_sync', to: 'channel_sync#receive', as: :channel_sync
