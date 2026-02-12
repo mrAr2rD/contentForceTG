@@ -1,14 +1,16 @@
 <div class="max-w-4xl mx-auto px-6 py-8">
-  <!-- Hero Section -->
-  <section class="mb-12">
+  <!-- Главный заголовок (H1) для SEO -->
+  <header class="mb-8">
+    <h1 class="text-4xl md:text-5xl font-bold tracking-tight mb-4 bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+      <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
+    </h1>
+
     <% if @channel_site.site_description.present? %>
-      <div class="card p-6 mb-8">
-        <p class="text-lg text-zinc-300 leading-relaxed">
-          <%= @channel_site.site_description %>
-        </p>
-      </div>
+      <p class="text-lg text-zinc-300 leading-relaxed">
+        <%= @channel_site.site_description %>
+      </p>
     <% end %>
-  </section>
+  </header>
 
   <!-- Featured Posts -->
   <% if @featured_posts.any? %>

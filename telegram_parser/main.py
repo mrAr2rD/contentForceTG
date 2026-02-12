@@ -61,6 +61,7 @@ class SyncRequest(BaseModel):
     project_id: Optional[str] = None
     channel_username: str
     session_string: str
+    bot_token: str  # Telegram Bot API токен для получения файлов
     callback_url: str
     limit: Optional[int] = 1000
     import_type: Optional[str] = "channel_site"  # channel_site или style_samples
@@ -456,6 +457,7 @@ async def sync_channel(request: SyncRequest, background_tasks: BackgroundTasks):
         request.project_id,
         request.channel_username,
         request.session_string,
+        request.bot_token,
         request.callback_url,
         request.limit,
         request.import_type
@@ -472,6 +474,7 @@ async def process_channel_sync(
     project_id: Optional[str],
     channel_username: str,
     session_string: str,
+    bot_token: str,
     callback_url: str,
     limit: int,
     import_type: str
@@ -485,7 +488,8 @@ async def process_channel_sync(
         parser = TelegramChannelParser(
             api_id=int(API_ID),
             api_hash=API_HASH,
-            session_string=session_string
+            session_string=session_string,
+            bot_token=bot_token
         )
 
         print(f"[SYNC] Parser created, starting...")

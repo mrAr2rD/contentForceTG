@@ -273,15 +273,136 @@
                            placeholder: 'Краткое описание канала для посетителей',
                            class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none' %>
       </div>
-
-      <div>
-        <%= form.label :theme, 'Тема оформления', class: 'block text-sm font-medium mb-2' %>
-        <%= form.select :theme,
-                        [['Тёмная (по умолчанию)', 'default'], ['Светлая', 'light'], ['Минимальная', 'minimal']],
-                        {},
-                        class: 'w-full px-4 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500 focus:border-transparent' %>
-      </div>
     </div>
+  </div>
+
+  <!-- Design Settings -->
+  <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+    <h3 class="font-semibold mb-4">Дизайн мини-сайта</h3>
+
+    <%= form.fields_for :settings, OpenStruct.new(channel_site.settings || {}) do |settings_form| %>
+      <div class="space-y-6">
+        <!-- Theme Preset Selector -->
+        <div>
+          <label class="block text-sm font-medium mb-3">Выберите дизайн</label>
+
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Default Theme -->
+            <label class="relative cursor-pointer group">
+              <%= settings_form.radio_button :theme_preset, 'default',
+                    checked: (channel_site.settings&.dig('theme_preset') || 'default') == 'default',
+                    class: 'peer sr-only' %>
+              <div class="border-2 border-zinc-300 dark:border-zinc-700 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/20 rounded-lg p-4 transition-all hover:border-emerald-400">
+                <div class="flex flex-col gap-2 mb-3">
+                  <div class="h-8 rounded" style="background: #0A0A0B;"></div>
+                  <div class="h-4 rounded" style="background: #00D4AA;"></div>
+                </div>
+                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Тёмная</p>
+                <p class="text-xs text-zinc-500 mt-1">По умолчанию</p>
+              </div>
+            </label>
+
+            <!-- Light Theme -->
+            <label class="relative cursor-pointer group">
+              <%= settings_form.radio_button :theme_preset, 'light',
+                    checked: channel_site.settings&.dig('theme_preset') == 'light',
+                    class: 'peer sr-only' %>
+              <div class="border-2 border-zinc-300 dark:border-zinc-700 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/20 rounded-lg p-4 transition-all hover:border-emerald-400">
+                <div class="flex flex-col gap-2 mb-3">
+                  <div class="h-8 rounded border border-zinc-200" style="background: #FFFFFF;"></div>
+                  <div class="h-4 rounded" style="background: #10B981;"></div>
+                </div>
+                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Светлая</p>
+                <p class="text-xs text-zinc-500 mt-1">Минималистичная</p>
+              </div>
+            </label>
+
+            <!-- Tech Theme -->
+            <label class="relative cursor-pointer group">
+              <%= settings_form.radio_button :theme_preset, 'tech',
+                    checked: channel_site.settings&.dig('theme_preset') == 'tech',
+                    class: 'peer sr-only' %>
+              <div class="border-2 border-zinc-300 dark:border-zinc-700 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/20 rounded-lg p-4 transition-all hover:border-emerald-400">
+                <div class="flex flex-col gap-2 mb-3">
+                  <div class="h-8 rounded" style="background: #0F172A;"></div>
+                  <div class="h-4 rounded" style="background: #3B82F6;"></div>
+                </div>
+                <p class="text-sm font-medium text-zinc-900 dark:text-zinc-100">Технологичная</p>
+                <p class="text-xs text-zinc-500 mt-1">Синий акцент</p>
+              </div>
+            </label>
+
+            <!-- Telegraph Theme -->
+            <label class="relative cursor-pointer group">
+              <%= settings_form.radio_button :theme_preset, 'telegraph',
+                    checked: channel_site.settings&.dig('theme_preset') == 'telegraph',
+                    class: 'peer sr-only' %>
+              <div class="border-2 border-zinc-300 dark:border-zinc-700 peer-checked:border-emerald-500 peer-checked:ring-2 peer-checked:ring-emerald-500/20 rounded-lg p-4 transition-all hover:border-emerald-400">
+                <div class="flex flex-col gap-2 mb-3">
+                  <div class="h-8 rounded border border-zinc-200" style="background: #FAFAF5;"></div>
+                  <div class="h-4 rounded" style="background: #5A98C3;"></div>
+                </div>
+                <p class="text-sm font-medium font-serif text-zinc-900 dark:text-zinc-100">Telegraph</p>
+                <p class="text-xs text-zinc-500 mt-1">Как Telegraph</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Custom CSS Section (Premium Feature) -->
+        <div class="border-t border-zinc-200 dark:border-zinc-800 pt-6">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-sm font-medium">Кастомный CSS</label>
+            <% if channel_site.settings&.dig('custom_css_enabled') %>
+              <span class="px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 text-xs rounded font-medium">Активно</span>
+            <% else %>
+              <span class="px-2 py-1 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-xs rounded">Недоступно</span>
+            <% end %>
+          </div>
+
+          <% if channel_site.settings&.dig('custom_css_enabled') %>
+            <details class="border border-zinc-200 dark:border-zinc-800 rounded-lg">
+              <summary class="px-4 py-3 cursor-pointer hover:bg-zinc-50 dark:hover:bg-zinc-800/50 font-medium text-sm">
+                Расширенные настройки
+              </summary>
+
+              <div class="p-4 space-y-4 border-t border-zinc-200 dark:border-zinc-800">
+                <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded p-3 text-sm text-amber-800 dark:text-amber-200">
+                  ⚠️ <strong>Безопасность:</strong> Запрещены конструкции: <code class="text-xs bg-amber-100 dark:bg-amber-900/50 px-1 rounded">@import</code>, <code class="text-xs bg-amber-100 dark:bg-amber-900/50 px-1 rounded">url()</code>, <code class="text-xs bg-amber-100 dark:bg-amber-900/50 px-1 rounded">javascript:</code>
+                </div>
+
+                <%= settings_form.fields_for :custom_css, OpenStruct.new(channel_site.settings&.dig('custom_css') || {}) do |css_form| %>
+                  <div>
+                    <%= css_form.label :header, 'Header CSS', class: 'block text-sm font-medium mb-2' %>
+                    <%= css_form.text_area :header, rows: 3,
+                          placeholder: 'header { background: red; }',
+                          class: 'w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg font-mono text-sm bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500' %>
+                  </div>
+
+                  <div>
+                    <%= css_form.label :body, 'Body CSS', class: 'block text-sm font-medium mb-2' %>
+                    <%= css_form.text_area :body, rows: 3,
+                          placeholder: '.card { border-radius: 20px; }',
+                          class: 'w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg font-mono text-sm bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500' %>
+                  </div>
+
+                  <div>
+                    <%= css_form.label :footer, 'Footer CSS', class: 'block text-sm font-medium mb-2' %>
+                    <%= css_form.text_area :footer, rows: 3,
+                          placeholder: 'footer { padding: 2rem; }',
+                          class: 'w-full px-3 py-2 border border-zinc-300 dark:border-zinc-700 rounded-lg font-mono text-sm bg-white dark:bg-zinc-900 focus:ring-2 focus:ring-emerald-500' %>
+                  </div>
+                <% end %>
+              </div>
+            </details>
+          <% else %>
+            <p class="text-sm text-zinc-500 dark:text-zinc-400">
+              Добавьте свои стили для полной кастомизации дизайна. Доступно в платных тарифах.
+            </p>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   </div>
 
   <!-- SEO Settings -->

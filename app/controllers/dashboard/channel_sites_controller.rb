@@ -149,7 +149,13 @@ module Dashboard
       params.require(:channel_site).permit(
         :telegram_bot_id, :project_id, :subdomain, :custom_domain,
         :site_title, :site_description, :theme,
-        :meta_title, :meta_description, :enabled
+        :meta_title, :meta_description, :enabled,
+        settings: [
+          :theme_preset,
+          :custom_css_enabled,
+          custom_css: [ :header, :body, :footer ],
+          custom_colors: [ :accent_color, :bg_primary, :bg_secondary, :text_primary, :text_secondary, :border_color ]
+        ]
       )
     end
   end

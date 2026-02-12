@@ -5,6 +5,42 @@ class ChannelSite < ApplicationRecord
   THEMES = %w[default dark light minimal].freeze
   RESERVED_SUBDOMAINS = %w[www app api admin blog help support docs status].freeze
 
+  # Предустановленные темы дизайна
+  THEME_PRESETS = {
+    "default" => {
+      accent_color: "#00D4AA",
+      bg_primary: "#0A0A0B",
+      bg_secondary: "#111113",
+      text_primary: "#FAFAFA",
+      text_secondary: "#A1A1AA",
+      border_color: "#27272A"
+    },
+    "light" => {
+      accent_color: "#10B981",
+      bg_primary: "#FFFFFF",
+      bg_secondary: "#F9FAFB",
+      text_primary: "#111827",
+      text_secondary: "#6B7280",
+      border_color: "#E5E7EB"
+    },
+    "tech" => {
+      accent_color: "#3B82F6",
+      bg_primary: "#0F172A",
+      bg_secondary: "#1E293B",
+      text_primary: "#F1F5F9",
+      text_secondary: "#94A3B8",
+      border_color: "#334155"
+    },
+    "telegraph" => {
+      accent_color: "#5A98C3",
+      bg_primary: "#FAFAF5",
+      bg_secondary: "#FFFFFF",
+      text_primary: "#1F1F1F",
+      text_secondary: "#707579",
+      border_color: "#E0E0DC"
+    }
+  }.freeze
+
   # Associations
   belongs_to :telegram_bot
   belongs_to :project
@@ -30,6 +66,7 @@ class ChannelSite < ApplicationRecord
   validate :must_have_domain
   validate :bot_must_be_verified
   validate :bot_must_be_channel_admin
+  validate :validate_custom_css_safety
 
   # Scopes
   scope :enabled, -> { where(enabled: true) }
@@ -131,6 +168,33 @@ class ChannelSite < ApplicationRecord
     update_column(:posts_count, channel_posts.published.count)
   end
 
+  # Методы для работы с темами дизайна
+  def theme_preset
+    settings&.dig("theme_preset") || "default"
+  end
+
+  def theme_css_variables
+    # Получаем кастомные цвета из settings
+    custom = settings&.dig("custom_colors") || {}
+    # Получаем базовый preset
+    preset = THEME_PRESETS[theme_preset] || THEME_PRESETS["default"]
+    # Объединяем: кастомные цвета переопределяют preset
+    preset.merge(custom.symbolize_keys)
+  end
+
+  def custom_css_enabled?
+    settings&.dig("custom_css_enabled") == true
+  end
+
+  def custom_css
+    return {} unless custom_css_enabled?
+    settings&.dig("custom_css") || {}
+  end
+
+  def telegraph_theme?
+    theme_preset == "telegraph"
+  end
+
   private
 
   def must_have_domain
@@ -169,5 +233,31 @@ class ChannelSite < ApplicationRecord
 
   def generate_verification_token
     self.domain_verification_token ||= SecureRandom.hex(16)
+  end
+
+  def validate_custom_css_safety
+    # Проверка наличия кастомного CSS
+    return unless settings&.dig("custom_css").present?
+
+    # Опасные паттерны для блокировки
+    dangerous = [
+      /@import/i,
+      /url\s*\(/i,
+      /javascript:/i,
+      /expression\s*\(/i,
+      /<script/i
+    ]
+
+    # Проверяем каждую секцию CSS (header, body, footer)
+    settings["custom_css"].each do |section, css|
+      next if css.blank?
+
+      dangerous.each do |pattern|
+        if css.match?(pattern)
+          errors.add(:settings, "Кастомный CSS содержит небезопасные конструкции")
+          return
+        end
+      end
+    end
   end
 end

@@ -25,20 +25,37 @@
 
     <style>
       :root {
-        --accent-color: #00D4AA;
-        --bg-primary: #0A0A0B;
-        --bg-secondary: #111113;
+        <% css_vars = @channel_site.theme_css_variables %>
+        --accent-color: <%= css_vars[:accent_color] %>;
+        --bg-primary: <%= css_vars[:bg_primary] %>;
+        --bg-secondary: <%= css_vars[:bg_secondary] %>;
         --bg-tertiary: #18181B;
-        --text-primary: #FAFAFA;
-        --text-secondary: #A1A1AA;
+        --text-primary: <%= css_vars[:text_primary] %>;
+        --text-secondary: <%= css_vars[:text_secondary] %>;
         --text-muted: #71717A;
-        --border-color: #27272A;
+        --border-color: <%= css_vars[:border_color] %>;
       }
+
       body {
         background-color: var(--bg-primary);
         color: var(--text-primary);
+        <% if @channel_site.telegraph_theme? %>
+        font-family: Georgia, 'Times New Roman', serif;
+        <% else %>
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        <% end %>
       }
+
+      <% if @channel_site.custom_css_enabled? %>
+        /* Кастомный CSS: Header */
+        <%= sanitize_custom_css(@channel_site.custom_css["header"]) %>
+
+        /* Кастомный CSS: Body */
+        <%= sanitize_custom_css(@channel_site.custom_css["body"]) %>
+
+        /* Кастомный CSS: Footer */
+        <%= sanitize_custom_css(@channel_site.custom_css["footer"]) %>
+      <% end %>
       .accent { color: var(--accent-color); }
       .accent-bg { background-color: var(--accent-color); }
       .accent-border { border-color: var(--accent-color); }

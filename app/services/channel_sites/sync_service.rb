@@ -54,6 +54,7 @@ module ChannelSites
         channel_site_id: @channel_site.id,
         channel_username: channel_username,
         session_string: telegram_session.session_string,
+        bot_token: @channel_site.telegram_bot.bot_token,
         callback_url: callback_url
       }.to_json
 

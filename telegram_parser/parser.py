@@ -7,6 +7,7 @@ import asyncio
 from datetime import datetime
 from typing import List, Dict, Any, Optional
 
+import httpx
 from pyrogram import Client
 from pyrogram.types import Message
 from pyrogram.errors import (
@@ -26,11 +27,13 @@ class TelegramChannelParser:
         self,
         api_id: int,
         api_hash: str,
-        session_string: str
+        session_string: str,
+        bot_token: Optional[str] = None
     ):
         self.api_id = api_id
         self.api_hash = api_hash
         self.session_string = session_string
+        self.bot_token = bot_token
         self.client: Optional[Client] = None
 
     async def start(self):
@@ -201,6 +204,42 @@ class TelegramChannelParser:
                     result[f"custom:{reaction.custom_emoji_id}"] = int(reaction.count) if hasattr(reaction, 'count') else 0
         return result
 
+    async def _get_file_url_via_bot_api(self, file_id: str) -> Optional[str]:
+        """
+        Получить прямой URL файла через Telegram Bot API
+
+        Args:
+            file_id: Telegram file_id из сообщения
+
+        Returns:
+            Прямой URL для скачивания файла или None в случае ошибки
+        """
+        if not self.bot_token:
+            return None
+
+        try:
+            async with httpx.AsyncClient() as client:
+                # Получаем file_path через getFile API метод
+                response = await client.get(
+                    f"https://api.telegram.org/bot{self.bot_token}/getFile",
+                    params={"file_id": file_id},
+                    timeout=10.0
+                )
+                data = response.json()
+
+                if not data.get("ok"):
+                    return None
+
+                file_path = data["result"]["file_path"]
+
+                # Формируем прямой URL для скачивания
+                return f"https://api.telegram.org/file/bot{self.bot_token}/{file_path}"
+
+        except Exception as e:
+            # Логируем ошибку, но не прерываем парсинг
+            print(f"Warning: Failed to get file URL via Bot API for {file_id}: {e}")
+            return None
+
     async def _parse_message(self, message: Message) -> Optional[Dict[str, Any]]:
         """
         Преобразовать сообщение Pyrogram в словарь
@@ -219,31 +258,38 @@ class TelegramChannelParser:
         # Собираем медиа
         media = []
         if message.photo:
+            # Получаем URL через Bot API если доступен bot_token
+            file_url = await self._get_file_url_via_bot_api(message.photo.file_id)
             media.append({
                 "type": "photo",
                 "file_id": message.photo.file_id,
-                "url": None  # URL нужно получать отдельно через get_file
+                "url": file_url,
+                "width": message.photo.width if hasattr(message.photo, 'width') else None,
+                "height": message.photo.height if hasattr(message.photo, 'height') else None
             })
         elif message.video:
+            file_url = await self._get_file_url_via_bot_api(message.video.file_id)
             media.append({
                 "type": "video",
                 "file_id": message.video.file_id,
                 "duration": message.video.duration,
-                "url": None
+                "url": file_url
             })
         elif message.document:
+            file_url = await self._get_file_url_via_bot_api(message.document.file_id)
             media.append({
                 "type": "document",
                 "file_id": message.document.file_id,
                 "file_name": message.document.file_name,
-                "url": None
+                "url": file_url
             })
         elif message.audio:
+            file_url = await self._get_file_url_via_bot_api(message.audio.file_id)
             media.append({
                 "type": "audio",
                 "file_id": message.audio.file_id,
                 "duration": message.audio.duration,
-                "url": None
+                "url": file_url
             })
 
         return {
