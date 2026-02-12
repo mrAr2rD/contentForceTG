@@ -2,6 +2,9 @@ class SponsorBanner < ApplicationRecord
   # Active Storage для иконки/логотипа
   has_one_attached :icon
 
+  # Явное объявление типа атрибута для enum (требование Rails 8.1)
+  attribute :display_on, :integer
+
   # Enum для выбора места отображения
   # public_pages: 0 - Публичные страницы (home, about, pricing и т.д.)
   # dashboard: 1 - Личный кабинет (dashboard)
