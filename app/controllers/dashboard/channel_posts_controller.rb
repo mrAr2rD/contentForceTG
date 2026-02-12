@@ -73,7 +73,8 @@ module Dashboard
     end
 
     def set_channel_post
-      @channel_post = @channel_site.channel_posts.find(params[:id])
+      @channel_post = @channel_site.channel_posts.find_by(slug: params[:id]) ||
+                      @channel_site.channel_posts.find(params[:id])
     end
 
     def authorize_channel_site!
