@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
 class Article < ApplicationRecord
+  # Concerns
+  include ImageValidatable
+
   # Таблица транслитерации кириллицы
   TRANSLIT_MAP = {
     'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
@@ -28,6 +31,7 @@ class Article < ApplicationRecord
   validates :excerpt, length: { maximum: 500 }, allow_blank: true
   validates :meta_title, length: { maximum: 70 }, allow_blank: true
   validates :meta_description, length: { maximum: 160 }, allow_blank: true
+  validate :validate_cover_image, if: -> { cover_image.attached? }
 
   # Callbacks
   before_validation :generate_slug, if: -> { slug.blank? && title.present? }
@@ -79,6 +83,16 @@ class Article < ApplicationRecord
   end
 
   private
+
+  # Валидация обложки с проверкой magic bytes
+  def validate_cover_image
+    validate_image_attachment(
+      cover_image,
+      field_name: :cover_image,
+      allowed_types: %w[image/jpeg image/png image/webp],
+      max_size: 5.megabytes
+    )
+  end
 
   def set_published_at
     self.published_at = Time.current

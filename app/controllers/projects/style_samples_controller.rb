@@ -4,7 +4,7 @@ module Projects
   class StyleSamplesController < ApplicationController
     before_action :authenticate_user!
     before_action :set_project
-    before_action :set_style_sample, only: [:destroy, :toggle]
+    before_action :set_style_sample, only: [ :destroy, :toggle ]
 
     def index
       @style_samples = @project.style_samples.order(created_at: :desc)
@@ -46,8 +46,11 @@ module Projects
 
     def import_from_telegram
       telegram_session = current_user.telegram_sessions.authorized.find(params[:telegram_session_id])
-      channel_username = params[:channel_username]
+      raw_username = params[:channel_username]
       limit = (params[:limit] || 100).to_i.clamp(10, 1000)
+
+      # Нормализация username: удаляем t.me/, https://, @
+      channel_username = normalize_telegram_username(raw_username)
 
       ImportStyleSamplesJob.perform_later(
         project_id: @project.id,
@@ -108,6 +111,36 @@ module Projects
 
     def style_sample_params
       params.require(:style_sample).permit(:content)
+    end
+
+    # Нормализация Telegram username из различных форматов
+    # Входные форматы:
+    #   - t.me/channel_name
+    #   - https://t.me/channel_name
+    #   - @channel_name
+    #   - channel_name
+    # Выход: channel_name
+    def normalize_telegram_username(username)
+      return "" if username.blank?
+
+      normalized = username.to_s.strip
+
+      # Удаляем https:// или http://
+      normalized = normalized.gsub(%r{^https?://}, "")
+
+      # Удаляем t.me/
+      normalized = normalized.gsub(%r{^t\.me/}, "")
+
+      # Удаляем @
+      normalized = normalized.delete_prefix("@")
+
+      # Удаляем trailing slash
+      normalized = normalized.chomp("/")
+
+      # Извлекаем только username (до первого / если есть)
+      normalized = normalized.split("/").first
+
+      normalized.strip
     end
   end
 end

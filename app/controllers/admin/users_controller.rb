@@ -17,6 +17,13 @@ module Admin
     def update
       @user = User.find(params[:id])
 
+      # SECURITY: Запрещаем админу изменять собственную роль
+      # Это предотвращает самоповышение прав или случайное лишение прав
+      if @user == current_user && params[:user][:role].present?
+        redirect_to admin_user_path(@user), alert: 'Вы не можете изменить собственную роль'
+        return
+      end
+
       if @user.update(user_params)
         redirect_to admin_user_path(@user), notice: 'Пользователь обновлен'
       else
@@ -38,6 +45,8 @@ module Admin
     private
 
     def user_params
+      # SECURITY: Только админы могут изменять role
+      # Проверка прав происходит в Admin::ApplicationController
       params.require(:user).permit(:email, :role)
     end
   end

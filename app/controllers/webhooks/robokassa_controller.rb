@@ -14,7 +14,7 @@ module Webhooks
       # Проверка подписи
       unless config.valid_result_signature?(params[:OutSum], params[:InvId], params[:SignatureValue])
         Rails.logger.error("Robokassa signature validation failed. OutSum: #{params[:OutSum]}, InvId: #{params[:InvId]}, Signature: #{params[:SignatureValue]}")
-        render json: { error: 'Invalid signature' }, status: :forbidden
+        render json: { error: "Invalid signature" }, status: :forbidden
         return
       end
 
@@ -23,43 +23,66 @@ module Webhooks
 
       unless payment
         Rails.logger.error("Payment not found for InvId: #{payment_id}")
-        render json: { error: 'Payment not found' }, status: :not_found
+        render json: { error: "Payment not found" }, status: :not_found
         return
       end
 
-      # Обновляем платёж и подписку в транзакции для целостности данных
+      # SECURITY: Pessimistic locking для предотвращения race condition
+      # Защищает от дублирующих webhook'ов от Robokassa
       begin
-        ActiveRecord::Base.transaction do
-          # Update payment status
-          payment.mark_as_completed!
-          payment.update!(provider_payment_id: "robokassa_#{params[:InvId]}_#{Time.current.to_i}")
+        payment.with_lock do
+          # Проверяем, не был ли платёж уже обработан (idempotency)
+          if payment.completed?
+            Rails.logger.info("Payment #{payment_id} already completed, returning success (idempotent)")
+            render plain: "OK#{payment_id}", status: :ok
+            return
+          end
 
-          # Upgrade user subscription
-          plan_slug = payment.metadata['plan']
-          plan_record = Plan.cached_find_by_slug(plan_slug) || Plan.find_by_slug(plan_slug)
-          subscription = payment.subscription
+          # Проверка, что платёж в валидном статусе для завершения
+          unless payment.pending? || payment.processing?
+            Rails.logger.error("Payment #{payment_id} in invalid status: #{payment.status}")
+            render json: { error: "Invalid payment status" }, status: :unprocessable_entity
+            return
+          end
 
-          Rails.logger.info("Activating subscription for user #{subscription.user.email}: plan=#{plan_slug}")
+          ActiveRecord::Base.transaction do
+            # Update payment status
+            payment.mark_as_completed!
+            payment.update!(provider_payment_id: "robokassa_#{params[:InvId]}_#{Time.current.to_i}")
 
-          subscription.update!(
-            plan: plan_slug,
-            plan_record: plan_record,
-            status: :active,
-            current_period_start: Time.current,
-            current_period_end: 1.month.from_now
-          )
+            # Upgrade user subscription с pessimistic lock
+            plan_slug = payment.metadata["plan"]
+            plan_record = Plan.cached_find_by_slug(plan_slug) || Plan.find_by_slug(plan_slug)
+            subscription = payment.subscription
 
-          # Reset usage counters
-          subscription.reset_usage!
+            Rails.logger.info("Activating subscription for user #{subscription.user.email}: plan=#{plan_slug}")
 
-          Rails.logger.info("Payment #{payment_id} processed successfully")
+            # Блокируем подписку для предотвращения одновременного изменения
+            subscription.with_lock do
+              subscription.update!(
+                plan: plan_slug,
+                plan_record: plan_record,
+                status: :active,
+                current_period_start: Time.current,
+                current_period_end: 1.month.from_now
+              )
+
+              # Reset usage counters
+              subscription.reset_usage!
+            end
+
+            Rails.logger.info("Payment #{payment_id} processed successfully")
+          end
         end
 
         render plain: "OK#{payment_id}", status: :ok
+      rescue ActiveRecord::RecordNotFound => e
+        Rails.logger.error("Payment or Subscription not found: #{e.message}")
+        render json: { error: "Resource not found" }, status: :not_found
       rescue StandardError => e
         Rails.logger.error("Robokassa payment processing failed: #{e.message}")
         Rails.logger.error(e.backtrace.first(10).join("\n"))
-        render json: { error: 'Payment processing failed' }, status: :internal_server_error
+        render json: { error: "Payment processing failed" }, status: :internal_server_error
       end
     end
 
@@ -68,19 +91,25 @@ module Webhooks
       @payment = Payment.find_by(invoice_number: params[:InvId])
 
       if @payment&.completed?
-        redirect_to subscriptions_path, notice: 'Оплата прошла успешно! Ваша подписка активирована.'
+        redirect_to subscriptions_path, notice: "Оплата прошла успешно! Ваша подписка активирована."
       else
-        redirect_to subscriptions_path, alert: 'Ошибка при обработке платежа. Обратитесь в поддержку.'
+        redirect_to subscriptions_path, alert: "Ошибка при обработке платежа. Обратитесь в поддержку."
       end
     end
 
     # Fail URL - redirect user here if payment failed
     def fail
       payment = Payment.find_by(invoice_number: params[:InvId])
-      payment&.mark_as_failed!
 
-      redirect_to subscriptions_path, alert: 'Оплата не прошла. Попробуйте еще раз.'
+      # SECURITY: Lock payment для предотвращения race condition
+      if payment
+        payment.with_lock do
+          # Только если ещё не завершён
+          payment.mark_as_failed! unless payment.completed?
+        end
+      end
+
+      redirect_to subscriptions_path, alert: "Оплата не прошла. Попробуйте еще раз."
     end
-
   end
 end

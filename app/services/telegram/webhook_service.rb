@@ -13,8 +13,12 @@ module Telegram
     def setup!
       webhook_url = "#{ENV.fetch('TELEGRAM_WEBHOOK_URL', 'http://localhost:3000')}/webhooks/telegram/#{@bot.bot_token}"
 
+      # Генерируем секрет для аутентификации webhook
+      secret_token = SecureRandom.hex(32)
+
       params = {
         url: webhook_url,
+        secret_token: secret_token,
         allowed_updates: [
           'message',
           'channel_post',
@@ -32,7 +36,11 @@ module Telegram
         raise "Failed to set webhook: #{result['description']}"
       end
 
-      @bot.update!(last_sync_at: Time.current)
+      # Сохраняем секрет в базе данных
+      @bot.update!(
+        webhook_secret: secret_token,
+        last_sync_at: Time.current
+      )
 
       Rails.logger.info("Webhook configured for bot #{@bot.id} at #{webhook_url}")
       result

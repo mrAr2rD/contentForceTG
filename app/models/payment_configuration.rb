@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class PaymentConfiguration < ApplicationRecord
-  # Примечание: шифрование отключено пока не настроен RAILS_MASTER_KEY в production
-  # encrypts :password_1
-  # encrypts :password_2
+  # Шифрование паролей (требуется настройка encryption keys в ENV)
+  encrypts :password_1
+  encrypts :password_2
 
   # Валидации
   validates :merchant_login, presence: true, if: :enabled?
@@ -24,6 +24,11 @@ class PaymentConfiguration < ApplicationRecord
     enabled? && merchant_login.present? && password_1.present? && password_2.present?
   end
 
+  # Алгоритм хеширования для Robokassa
+  def hash_algorithm
+    'sha256' # Robokassa поддерживает md5, sha1, sha256, sha512
+  end
+
   # URL для оплаты (тестовый или боевой)
   def payment_base_url
     if test_mode?
@@ -41,9 +46,9 @@ class PaymentConfiguration < ApplicationRecord
     inv_id = payment.invoice_number
     description = "Подписка ContentForce - #{payment.metadata['plan']&.titleize}"
 
-    # Генерация подписи: MD5(MerchantLogin:OutSum:InvId:Password#1)
+    # Генерация подписи: SHA256(MerchantLogin:OutSum:InvId:Password#1)
     signature_string = "#{merchant_login}:#{amount}:#{inv_id}:#{password_1}"
-    signature = Digest::MD5.hexdigest(signature_string)
+    signature = Digest::SHA256.hexdigest(signature_string)
 
     params = {
       MerchantLogin: merchant_login,
@@ -51,6 +56,7 @@ class PaymentConfiguration < ApplicationRecord
       InvId: inv_id,
       Description: description,
       SignatureValue: signature,
+      SignatureType: hash_algorithm,
       IsTest: test_mode? ? 1 : 0
     }
 
@@ -61,7 +67,14 @@ class PaymentConfiguration < ApplicationRecord
   def valid_result_signature?(out_sum, inv_id, signature_value)
     return false unless configured?
 
-    expected = Digest::MD5.hexdigest("#{out_sum}:#{inv_id}:#{password_2}").upcase
-    signature_value&.upcase == expected
+    # Генерация ожидаемой подписи: SHA256(OutSum:InvId:Password#2)
+    signature_string = "#{out_sum}:#{inv_id}:#{password_2}"
+    expected = Digest::SHA256.hexdigest(signature_string)
+
+    # Защита от timing attacks через secure_compare
+    ActiveSupport::SecurityUtils.secure_compare(
+      signature_value.to_s.upcase,
+      expected.upcase
+    )
   end
 end

@@ -160,11 +160,62 @@ ROBOKASSA_PASSWORD_1=<password>
 ROBOKASSA_PASSWORD_2=<password>
 ```
 
+## Security
+
+**ВАЖНО:** Проект имеет комплексную систему безопасности. См. `SECURITY.md` для деталей.
+
+### Ключевые меры безопасности:
+
+1. **Аутентификация**:
+   - Telegram webhook signature validation (HMAC-SHA256)
+   - Robokassa signature validation (SHA-256)
+   - Telegram OAuth validation (HMAC-SHA256)
+   - Devise lockable - brute force protection (5 попыток, блокировка 1 час)
+
+2. **Rate Limiting** (`Rack::Attack`):
+   - 300 req/min общий лимит по IP
+   - 5 попыток входа в 20 секунд
+   - 20 AI запросов в минуту на проект
+   - 100 Telegram webhooks в минуту на бота
+
+3. **File Upload Security**:
+   - Magic bytes валидация через `Marcel::MimeType`
+   - Защита от PHP shells, executables, XSS
+   - Concern: `ImageValidatable`
+
+4. **Mass Assignment Protection**:
+   - `Post#status` - запрещено (только через `publish!`, `schedule!`)
+   - `User#role` - только для админов
+   - Защита от self-role escalation
+
+5. **Race Condition Protection**:
+   - Pessimistic locking для платежей (`payment.with_lock`)
+   - Idempotency checks
+   - Atomic transactions
+
+### Security Testing
+
+```bash
+rspec spec/requests/*security*     # Все security тесты
+bundle exec brakeman                # Static security analysis
+bundle audit check --update         # Проверка CVE в зависимостях
+```
+
+### Security Concerns
+
+При работе с чувствительными операциями:
+- Всегда используйте `with_lock` для критичных данных
+- Проверяйте типы файлов по magic bytes, не только content_type
+- Не разрешайте изменение критичных полей через mass assignment
+- Используйте `secure_compare` для сравнения токенов/подписей
+- Логируйте все security события
+
 ## Code Style
 
 - **Linter**: rubocop-rails-omakase (Rails defaults)
 - **Комментарии**: на русском языке
 - Запускать `rubocop -a` перед коммитом
+- Security комментарии: помечать как `# SECURITY:`
 
 ## Key Business Logic
 

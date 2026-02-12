@@ -1,4 +1,7 @@
 class Post < ApplicationRecord
+  # Concerns
+  include ImageValidatable
+
   # Associations
   belongs_to :user
   belongs_to :project, optional: true
@@ -18,8 +21,7 @@ class Post < ApplicationRecord
   validates :button_url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }, if: :image_button?
   validate :telegram_caption_length, unless: :draft?
   validate :image_required_for_image_posts, unless: :draft?
-  validate :validate_image_size, if: -> { image.attached? }
-  validate :validate_image_format, if: -> { image.attached? }
+  validate :validate_image_with_magic_bytes, if: -> { image.attached? }
 
   # Callbacks
   before_destroy :purge_image_attachment
@@ -131,17 +133,14 @@ class Post < ApplicationRecord
     errors.add(:image, "обязательно для постов с изображением")
   end
 
-  def validate_image_size
-    return unless image.blob.byte_size > 10.megabytes
-
-    errors.add(:image, "должно быть не больше 10MB (текущий размер: #{(image.blob.byte_size / 1024.0 / 1024).round(2)}MB)")
-  end
-
-  def validate_image_format
-    allowed_types = %w[image/jpeg image/png image/webp image/gif]
-    return if allowed_types.include?(image.content_type)
-
-    errors.add(:image, "должно быть JPEG, PNG, WebP или GIF (получено: #{image.content_type})")
+  # Валидация изображения с проверкой magic bytes
+  def validate_image_with_magic_bytes
+    validate_image_attachment(
+      image,
+      field_name: :image,
+      allowed_types: %w[image/jpeg image/png image/webp image/gif],
+      max_size: 10.megabytes
+    )
   end
 
   def schedule_analytics_updates

@@ -38,6 +38,8 @@ module Admin
     private
 
     def subscription_params
+      # Админ может изменять критичные поля подписки
+      # но только если это действительно админ (проверяется в Admin::ApplicationController)
       params.require(:subscription).permit(:plan, :status, :current_period_end)
     end
   end

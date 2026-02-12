@@ -1,10 +1,11 @@
 class User < ApplicationRecord
   # Include default devise modules. Others available are:
-  # :lockable, :timeoutable and :omniauthable
+  # :timeoutable and :omniauthable
   # Note: :confirmable is disabled for easier development
+  # SECURITY: :lockable включён для защиты от brute force атак
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable,
-         :trackable,
+         :trackable, :lockable,
          :omniauthable, omniauth_providers: [ :telegram ]
 
   # Enums
@@ -36,6 +37,12 @@ class User < ApplicationRecord
 
   # Class methods
   def self.from_telegram_auth(auth_data)
+    # Проверяем подлинность данных от Telegram
+    unless verify_telegram_auth_data(auth_data)
+      Rails.logger.error("Telegram OAuth: Invalid signature for user ID #{auth_data['id']}")
+      raise SecurityError, "Invalid Telegram authentication data"
+    end
+
     user = find_or_initialize_by(telegram_id: auth_data["id"])
     user.assign_attributes(
       telegram_username: auth_data["username"],
@@ -54,6 +61,40 @@ class User < ApplicationRecord
 
     user.save!
     user
+  end
+
+  # Проверка подлинности данных Telegram OAuth через HMAC-SHA256
+  def self.verify_telegram_auth_data(auth_data)
+    received_hash = auth_data["hash"]
+    return false if received_hash.blank?
+
+    # Проверяем свежесть данных (максимум 24 часа)
+    auth_date = auth_data["auth_date"].to_i
+    if auth_date < 24.hours.ago.to_i
+      Rails.logger.warn("Telegram OAuth: Auth data too old (#{Time.at(auth_date)})")
+      return false
+    end
+
+    # Строим data_check_string (параметры в алфавитном порядке, кроме hash)
+    data_check_arr = auth_data.except("hash").map { |k, v| "#{k}=#{v}" }.sort
+    data_check_string = data_check_arr.join("\n")
+
+    # Вычисляем secret key из bot token
+    bot_token = ENV.fetch("TELEGRAM_BOT_TOKEN")
+    secret_key = Digest::SHA256.digest(bot_token)
+
+    # Вычисляем HMAC-SHA256
+    calculated_hash = OpenSSL::HMAC.hexdigest(
+      OpenSSL::Digest.new("sha256"),
+      secret_key,
+      data_check_string
+    )
+
+    # Безопасное сравнение для защиты от timing attacks
+    ActiveSupport::SecurityUtils.secure_compare(
+      received_hash.to_s.downcase,
+      calculated_hash.downcase
+    )
   end
 
   private

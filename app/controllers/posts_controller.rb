@@ -150,10 +150,12 @@ class PostsController < ApplicationController
   end
 
   def post_params
+    # SECURITY: Не разрешаем изменение :status напрямую через mass assignment
+    # Статус должен изменяться только через методы: publish!, schedule!, reset_to_draft!
+    # Это предотвращает bypass бизнес-логики и публикацию невалидных постов
     permitted = params.require(:post).permit(
-      :title, :content, :status, :project_id, :telegram_bot_id,
-      :published_at, :telegram_message_id, :image,
-      :post_type, :button_text, :button_url
+      :title, :content, :project_id, :telegram_bot_id,
+      :image, :post_type, :button_text, :button_url
     )
 
     # Convert empty strings to nil for optional foreign keys

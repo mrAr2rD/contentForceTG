@@ -37,6 +37,9 @@ gem "faraday-retry"
 # Redis
 gem "redis", "~> 5.0"
 
+# Rate limiting & DDoS protection
+gem "rack-attack"
+
 # Admin Panel
 gem "administrate"
 

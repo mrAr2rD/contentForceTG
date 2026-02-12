@@ -4,6 +4,7 @@ module Webhooks
   class TelegramController < ApplicationController
     skip_before_action :verify_authenticity_token
     skip_before_action :authenticate_user!, raise: false
+    before_action :verify_webhook_signature
 
     def receive
       bot_token = params[:bot_token]
@@ -255,6 +256,32 @@ module Webhooks
       non_member_statuses = %w[left kicked]
 
       member_statuses.include?(old_status) && non_member_statuses.include?(new_status)
+    end
+
+    # Helper: Проверка подписи webhook от Telegram
+    def verify_webhook_signature
+      bot_token = params[:bot_token]
+      telegram_bot = TelegramBot.find_by(bot_token: bot_token)
+
+      unless telegram_bot
+        Rails.logger.warn("Webhook: Bot not found for token #{bot_token[0..10]}... IP: #{request.remote_ip}")
+        head :not_found
+        return
+      end
+
+      provided_token = request.headers['X-Telegram-Bot-Api-Secret-Token']
+      expected_token = telegram_bot.webhook_secret
+
+      # Legacy mode: allow bots without secret during migration
+      unless expected_token.present?
+        Rails.logger.warn("Webhook: Bot #{telegram_bot.id} has no webhook secret (migration mode)")
+        return
+      end
+
+      unless ActiveSupport::SecurityUtils.secure_compare(provided_token.to_s, expected_token.to_s)
+        Rails.logger.error("Webhook: Invalid secret for bot #{telegram_bot.id}. IP: #{request.remote_ip}")
+        head :unauthorized
+      end
     end
 
     # Helper: Сохранить пост канала для мини-сайта

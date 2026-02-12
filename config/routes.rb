@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   # Health check
   get '/health', to: 'health#index'
 
+  # Security endpoints
+  post '/csp-violation-report-endpoint', to: 'security#csp_report'
+
   # Devise routes with custom controllers
   devise_for :users, controllers: {
     omniauth_callbacks: 'users/omniauth_callbacks',

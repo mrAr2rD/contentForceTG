@@ -29,5 +29,8 @@ module Contentforce
       g.orm :active_record, primary_key_type: :uuid
     end
 
+    # Rack::Attack middleware для rate limiting
+    config.middleware.use Rack::Attack
+
   end
 end

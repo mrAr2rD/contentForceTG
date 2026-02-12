@@ -29,7 +29,12 @@ class Payment < ApplicationRecord
   scope :recent, -> { order(created_at: :desc) }
 
   # Instance methods
+  # SECURITY: Эти методы должны вызываться внутри with_lock блока
+  # для предотвращения race conditions
   def mark_as_completed!
+    # Idempotency check
+    return true if completed?
+
     update!(
       status: :completed,
       paid_at: Time.current
@@ -37,6 +42,9 @@ class Payment < ApplicationRecord
   end
 
   def mark_as_failed!
+    # Не переводим в failed, если уже completed
+    return false if completed?
+
     update!(status: :failed)
   end
 

@@ -174,7 +174,11 @@ Devise.setup do |config|
 
   # Options to be passed to the created cookie. For instance, you can set
   # secure: true in order to force SSL only cookies.
-  # config.rememberable_options = {}
+  config.rememberable_options = {
+    secure: Rails.env.production?,
+    httponly: true,
+    same_site: :lax
+  }
 
   # ==> Configuration for :validatable
   # Range for password length.
@@ -191,30 +195,29 @@ Devise.setup do |config|
   # config.timeout_in = 30.minutes
 
   # ==> Configuration for :lockable
-  # Defines which strategy will be used to lock an account.
-  # :failed_attempts = Locks an account after a number of failed attempts to sign in.
-  # :none            = No lock strategy. You should handle locking by yourself.
-  # config.lock_strategy = :failed_attempts
+  # SECURITY: Защита от brute force атак
+  # Блокируем аккаунт после нескольких неудачных попыток входа
+  config.lock_strategy = :failed_attempts
 
   # Defines which key will be used when locking and unlocking an account
-  # config.unlock_keys = [:email]
+  config.unlock_keys = [:email]
 
-  # Defines which strategy will be used to unlock an account.
-  # :email = Sends an unlock link to the user email
-  # :time  = Re-enables login after a certain amount of time (see :unlock_in below)
-  # :both  = Enables both strategies
-  # :none  = No unlock strategy. You should handle unlocking by yourself.
-  # config.unlock_strategy = :both
+  # SECURITY: Используем оба метода разблокировки для гибкости
+  # :email = Отправляем ссылку для разблокировки на email
+  # :time  = Автоматическая разблокировка через определённое время
+  # :both  = Оба метода доступны
+  config.unlock_strategy = :both
 
-  # Number of authentication tries before locking an account if lock_strategy
-  # is failed attempts.
-  # config.maximum_attempts = 20
+  # SECURITY: Блокировка после 5 неудачных попыток (best practice)
+  # Рекомендация из OWASP: 3-5 попыток для критичных систем
+  config.maximum_attempts = 5
 
-  # Time interval to unlock the account if :time is enabled as unlock_strategy.
-  # config.unlock_in = 1.hour
+  # SECURITY: Автоматическая разблокировка через 1 час
+  # Баланс между безопасностью и user experience
+  config.unlock_in = 1.hour
 
-  # Warn on the last attempt before the account is locked.
-  # config.last_attempt_warning = true
+  # Предупреждение на последней попытке перед блокировкой
+  config.last_attempt_warning = true
 
   # ==> Configuration for :recoverable
   #
