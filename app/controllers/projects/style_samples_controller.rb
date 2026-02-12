@@ -46,7 +46,9 @@ module Projects
 
     def import_from_telegram
       telegram_session = current_user.telegram_sessions.authorized.find(params[:telegram_session_id])
-      raw_username = params[:channel_username]
+
+      # Если выбран "custom", используем custom_channel_username, иначе channel_username
+      raw_username = params[:channel_username] == "custom" ? params[:custom_channel_username] : params[:channel_username]
       limit = (params[:limit] || 100).to_i.clamp(10, 1000)
 
       # Нормализация username: удаляем t.me/, https://, @
