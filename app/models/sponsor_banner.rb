@@ -12,10 +12,24 @@ class SponsorBanner < ApplicationRecord
   validates :description, length: { maximum: 200 }
   validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }
   validates :display_on, presence: true
-  validates :icon, content_type: { in: %w[image/png image/jpg image/jpeg image/webp image/svg+xml],
-                                   message: "должна быть изображением" },
-                   size: { less_than: 1.megabyte, message: "должна быть меньше 1MB" },
-                   if: -> { icon.attached? }
+
+  # Валидация иконки через callback (content_type и size валидаторы не поддерживаются в Rails 8.1)
+  validate :validate_icon_attachment, if: -> { icon.attached? }
+
+  def validate_icon_attachment
+    return unless icon.attached?
+
+    # Проверка content_type
+    allowed_types = %w[image/png image/jpg image/jpeg image/webp image/svg+xml]
+    unless allowed_types.include?(icon.content_type)
+      errors.add(:icon, "должна быть изображением (PNG, JPG, WEBP или SVG)")
+    end
+
+    # Проверка размера
+    if icon.byte_size > 1.megabyte
+      errors.add(:icon, "должна быть меньше 1MB")
+    end
+  end
 
   # Scopes
   scope :enabled, -> { where(enabled: true) }
