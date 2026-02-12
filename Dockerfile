@@ -1,4 +1,5 @@
 # syntax=docker/dockerfile:1
+# Updated: 2026-02-12 to force rebuild for migration
 
 # This Dockerfile is designed for production, not development. Use with Kamal or build'n'run by hand:
 # docker build -t contentforce .
