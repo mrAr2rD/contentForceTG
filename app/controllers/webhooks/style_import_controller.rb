@@ -45,6 +45,34 @@ module Webhooks
         end
       end
 
+      # Отправляем Turbo Stream обновление пользователю
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "project_#{project.id}",
+        target: "import_status",
+        partial: "projects/style_samples/import_status",
+        locals: {
+          status: :success,
+          imported_count: imported_count,
+          channel: channel_username
+        }
+      )
+
+      # Обновляем статистику
+      Turbo::StreamsChannel.broadcast_replace_to(
+        "project_#{project.id}",
+        target: "style_stats",
+        partial: "projects/style_settings/stats",
+        locals: { project: project.reload }
+      )
+
+      # Обновляем список образцов
+      Turbo::StreamsChannel.broadcast_prepend_to(
+        "project_#{project.id}",
+        target: "style_samples_list",
+        partial: "projects/style_samples/sample_list",
+        locals: { samples: project.style_samples.order(created_at: :desc).limit(imported_count) }
+      )
+
       render json: {
         success: true,
         imported_count: imported_count,

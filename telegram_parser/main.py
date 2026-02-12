@@ -61,7 +61,7 @@ class SyncRequest(BaseModel):
     project_id: Optional[str] = None
     channel_username: str
     session_string: str
-    bot_token: str  # Telegram Bot API токен для получения файлов
+    bot_token: Optional[str] = None  # Telegram Bot API токен для получения файлов (опционально, нужен для изображений)
     callback_url: str
     limit: Optional[int] = 1000
     import_type: Optional[str] = "channel_site"  # channel_site или style_samples

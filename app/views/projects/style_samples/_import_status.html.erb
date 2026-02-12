@@ -10,13 +10,45 @@
           </svg>
         </div>
       </div>
-      <div>
+      <div class="flex-1">
         <p class="text-sm font-medium text-sky-700 dark:text-sky-300">
           Импортируем посты из Telegram
         </p>
         <p class="text-xs text-sky-600/70 dark:text-sky-400/70 mt-0.5">
           До <%= limit %> постов из <span class="font-mono"><%= channel %></span>
         </p>
+        <p class="text-xs text-sky-500 dark:text-sky-400 mt-2 flex items-center gap-1.5">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          Посты используются для анализа вашего стиля написания AI
+        </p>
+      </div>
+    </div>
+  </div>
+<% elsif local_assigns[:status] == :success %>
+  <div class="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50 rounded-xl">
+    <div class="flex items-start gap-3">
+      <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/50 flex items-center justify-center flex-shrink-0">
+        <svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+      <div class="flex-1">
+        <p class="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+          Импорт завершён успешно
+        </p>
+        <p class="text-xs text-emerald-600/70 dark:text-emerald-400/70 mt-0.5">
+          Импортировано <%= imported_count %> <%= 'пост'.pluralize(imported_count, 'поста', 'постов') %> из <span class="font-mono"><%= channel %></span>
+        </p>
+        <div class="mt-3 p-2 bg-emerald-100/50 dark:bg-emerald-900/30 rounded-lg">
+          <p class="text-xs text-emerald-700 dark:text-emerald-300 flex items-start gap-1.5">
+            <svg class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+            </svg>
+            <span>Эти тексты будут использованы AI для анализа и копирования вашего уникального стиля написания при генерации новых постов</span>
+          </p>
+        </div>
       </div>
     </div>
   </div>
