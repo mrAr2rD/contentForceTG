@@ -78,9 +78,9 @@
               <%= (@channel_site.site_title || @channel_site.telegram_bot.channel_name).to_s[0]&.upcase %>
             </div>
             <div class="flex-1 min-w-0">
-              <h1 class="font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
+              <div class="font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
                 <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
-              </h1>
+              </div>
               <p class="text-xs text-zinc-500">Telegram канал</p>
             </div>
           </a>

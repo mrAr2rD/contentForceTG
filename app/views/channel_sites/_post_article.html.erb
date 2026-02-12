@@ -1,12 +1,18 @@
 <%# locals: (channel_post:, channel_site:, prev_post: nil, next_post: nil, show_nav: true) %>
+<%
+  # Извлекаем h1 из markdown, если он есть
+  markdown_h1 = extract_h1_from_markdown(channel_post.display_content)
+  # Используем h1 из markdown или стандартный заголовок
+  article_title = markdown_h1.presence || channel_post.display_title
+%>
 <article class="max-w-4xl mx-auto px-6 py-8"
          itemscope itemtype="https://schema.org/Article"
          data-post-slug="<%= channel_post.to_param %>"
-         data-post-title="<%= channel_post.display_title %> | <%= channel_site.site_title %>">
+         data-post-title="<%= article_title %> | <%= channel_site.site_title %>">
   <!-- Header -->
   <header class="mb-6">
     <h1 class="text-2xl md:text-3xl font-bold mb-3" itemprop="headline">
-      <%= channel_post.display_title %>
+      <%= article_title %>
     </h1>
 
     <div class="flex flex-wrap items-center gap-3 text-zinc-500 text-sm">
@@ -40,7 +46,7 @@
 
   <!-- Content -->
   <div class="prose prose-invert prose-base max-w-none mb-8" itemprop="articleBody">
-    <%= simple_format(channel_post.display_content) %>
+    <%= render_markdown_without_h1(channel_post.display_content) %>
   </div>
 
   <!-- Telegram Link -->
