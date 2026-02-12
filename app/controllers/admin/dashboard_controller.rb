@@ -55,8 +55,8 @@ module Admin
 
       @channel_metrics = {
         total_subscribers: ChannelSubscriberMetric.latest_for_each_bot.sum(:subscriber_count),
-        total_growth: ChannelSubscriberMetric.where('measured_at > ?', 30.days.ago).sum(:subscriber_growth),
-        average_churn: ChannelSubscriberMetric.where('measured_at > ?', 30.days.ago).average(:churn_rate)&.round(2) || 0,
+        total_growth: ChannelSubscriberMetric.where("measured_at > ?", 30.days.ago).sum(:subscriber_growth),
+        average_churn: ChannelSubscriberMetric.where("measured_at > ?", 30.days.ago).average(:churn_rate)&.round(2) || 0,
         active_bots: TelegramBot.verified.count
       }
     rescue StandardError => e
@@ -69,7 +69,7 @@ module Admin
 
       @ai_usage = {
         total_requests: AiUsageLog.count,
-        requests_today: AiUsageLog.where('created_at > ?', 1.day.ago).count,
+        requests_today: AiUsageLog.where("created_at > ?", 1.day.ago).count,
         total_tokens: AiUsageLog.sum(:tokens_used),
         total_cost: AiUsageLog.sum(:cost)
       }

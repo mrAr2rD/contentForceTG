@@ -13,7 +13,7 @@ class CreateNotificationTemplates < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :notification_templates, [:event_type, :channel], unique: true
+    add_index :notification_templates, [ :event_type, :channel ], unique: true
     add_index :notification_templates, :active
   end
 end

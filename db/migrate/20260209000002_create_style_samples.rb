@@ -18,7 +18,7 @@ class CreateStyleSamples < ActiveRecord::Migration[8.1]
 
     add_index :style_samples, :source_type
     add_index :style_samples, :used_for_analysis
-    add_index :style_samples, [:project_id, :telegram_message_id],
+    add_index :style_samples, [ :project_id, :telegram_message_id ],
               unique: true,
               where: "telegram_message_id IS NOT NULL",
               name: "idx_style_samples_project_message_unique"

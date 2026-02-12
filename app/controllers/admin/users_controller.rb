@@ -20,12 +20,12 @@ module Admin
       # SECURITY: Запрещаем админу изменять собственную роль
       # Это предотвращает самоповышение прав или случайное лишение прав
       if @user == current_user && params[:user][:role].present?
-        redirect_to admin_user_path(@user), alert: 'Вы не можете изменить собственную роль'
+        redirect_to admin_user_path(@user), alert: "Вы не можете изменить собственную роль"
         return
       end
 
       if @user.update(user_params)
-        redirect_to admin_user_path(@user), notice: 'Пользователь обновлен'
+        redirect_to admin_user_path(@user), notice: "Пользователь обновлен"
       else
         render :edit
       end
@@ -35,10 +35,10 @@ module Admin
       @user = User.find(params[:id])
 
       if @user == current_user
-        redirect_to admin_users_path, alert: 'Вы не можете удалить себя'
+        redirect_to admin_users_path, alert: "Вы не можете удалить себя"
       else
         @user.destroy
-        redirect_to admin_users_path, notice: 'Пользователь удален'
+        redirect_to admin_users_path, notice: "Пользователь удален"
       end
     end
 

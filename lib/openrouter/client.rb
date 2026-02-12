@@ -1,21 +1,21 @@
 # frozen_string_literal: true
 
-require 'net/http'
-require 'json'
+require "net/http"
+require "json"
 
 module Openrouter
   class Client
-    BASE_URL = 'https://openrouter.ai/api/v1'
+    BASE_URL = "https://openrouter.ai/api/v1"
 
     def initialize(api_key: nil)
       # Используем API ключ из параметра, админки или ENV
       @api_key = api_key || AiConfiguration.current.api_key
-      @site_url = ENV['OPENROUTER_SITE_URL'] || 'https://contentforce.ru'
-      @site_name = ENV['OPENROUTER_SITE_NAME'] || 'ContentForce'
+      @site_url = ENV["OPENROUTER_SITE_URL"] || "https://contentforce.ru"
+      @site_name = ENV["OPENROUTER_SITE_NAME"] || "ContentForce"
     end
 
     def chat(model:, messages:, temperature: 0.7, max_tokens: 2000, **options)
-      raise ConfigurationError, 'OpenRouter API key not configured' unless @api_key.present?
+      raise ConfigurationError, "OpenRouter API key not configured" unless @api_key.present?
 
       uri = URI("#{BASE_URL}/chat/completions")
       request = build_request(uri, {
@@ -34,8 +34,8 @@ module Openrouter
 
     # Генерация изображений через OpenRouter API
     # Использует modalities: ["image"] для моделей с поддержкой генерации изображений
-    def generate_image(model:, prompt:, aspect_ratio: '1:1')
-      raise ConfigurationError, 'OpenRouter API key not configured' unless @api_key.present?
+    def generate_image(model:, prompt:, aspect_ratio: "1:1")
+      raise ConfigurationError, "OpenRouter API key not configured" unless @api_key.present?
 
       uri = URI("#{BASE_URL}/chat/completions")
 
@@ -43,16 +43,16 @@ module Openrouter
       body = {
         model: model,
         messages: [
-          { role: 'user', content: prompt }
+          { role: "user", content: prompt }
         ],
-        modalities: [ 'image' ],
+        modalities: [ "image" ],
         response_format: {
-          type: 'image'
+          type: "image"
         }
       }
 
       # Добавляем параметры генерации в зависимости от модели
-      if model.include?('flux')
+      if model.include?("flux")
         # Flux модели поддерживают aspect_ratio напрямую
         body[:extra_body] = { aspect_ratio: aspect_ratio }
       end
@@ -70,10 +70,10 @@ module Openrouter
 
     def build_request(uri, body)
       request = Net::HTTP::Post.new(uri)
-      request['Authorization'] = "Bearer #{@api_key}"
-      request['HTTP-Referer'] = @site_url
-      request['X-Title'] = @site_name
-      request['Content-Type'] = 'application/json'
+      request["Authorization"] = "Bearer #{@api_key}"
+      request["HTTP-Referer"] = @site_url
+      request["X-Title"] = @site_name
+      request["Content-Type"] = "application/json"
       request.body = body.to_json
       request
     end
@@ -90,19 +90,19 @@ module Openrouter
       body = JSON.parse(response.body)
 
       unless response.is_a?(Net::HTTPSuccess)
-        error_message = body.dig('error', 'message') || 'Unknown error'
+        error_message = body.dig("error", "message") || "Unknown error"
         raise APIError, "OpenRouter API error: #{error_message}"
       end
 
       {
-        content: body.dig('choices', 0, 'message', 'content'),
-        model: body['model'],
+        content: body.dig("choices", 0, "message", "content"),
+        model: body["model"],
         usage: {
-          prompt_tokens: body.dig('usage', 'prompt_tokens') || 0,
-          completion_tokens: body.dig('usage', 'completion_tokens') || 0,
-          total_tokens: body.dig('usage', 'total_tokens') || 0
+          prompt_tokens: body.dig("usage", "prompt_tokens") || 0,
+          completion_tokens: body.dig("usage", "completion_tokens") || 0,
+          total_tokens: body.dig("usage", "total_tokens") || 0
         },
-        finish_reason: body.dig('choices', 0, 'finish_reason')
+        finish_reason: body.dig("choices", 0, "finish_reason")
       }
     end
 
@@ -116,30 +116,30 @@ module Openrouter
       Rails.logger.info "OpenRouter image response: #{body.to_json[0..500]}..."
 
       unless response.is_a?(Net::HTTPSuccess)
-        error_message = body.dig('error', 'message') || 'Unknown error'
+        error_message = body.dig("error", "message") || "Unknown error"
         raise APIError, "OpenRouter API error: #{error_message}"
       end
 
-      message = body.dig('choices', 0, 'message')
-      raise APIError, 'No message in response' unless message
+      message = body.dig("choices", 0, "message")
+      raise APIError, "No message in response" unless message
 
       # Проверяем причину завершения — модель могла отказать в генерации
-      finish_reason = body.dig('choices', 0, 'native_finish_reason') || body.dig('choices', 0, 'finish_reason')
-      if finish_reason == 'IMAGE_PROHIBITED_CONTENT'
-        raise APIError, 'Запрос отклонён: изображение содержит защищённый контент (персонажи, бренды). Попробуйте переформулировать без упоминания известных персонажей.'
-      elsif finish_reason == 'SAFETY' || finish_reason == 'RECITATION'
-        raise APIError, 'Запрос отклонён из-за ограничений безопасности. Попробуйте переформулировать запрос.'
+      finish_reason = body.dig("choices", 0, "native_finish_reason") || body.dig("choices", 0, "finish_reason")
+      if finish_reason == "IMAGE_PROHIBITED_CONTENT"
+        raise APIError, "Запрос отклонён: изображение содержит защищённый контент (персонажи, бренды). Попробуйте переформулировать без упоминания известных персонажей."
+      elsif finish_reason == "SAFETY" || finish_reason == "RECITATION"
+        raise APIError, "Запрос отклонён из-за ограничений безопасности. Попробуйте переформулировать запрос."
       end
 
       image_data = nil
-      content_type = 'image/png'
+      content_type = "image/png"
 
       # Способ 1: Изображения в отдельном поле images (основной формат OpenRouter)
-      images = message['images']
+      images = message["images"]
       if images.is_a?(Array) && images.any?
         image_item = images.first
-        url = image_item.dig('image_url', 'url') || image_item['url']
-        if url&.start_with?('data:')
+        url = image_item.dig("image_url", "url") || image_item["url"]
+        if url&.start_with?("data:")
           image_data, content_type = extract_base64_from_data_uri(url)
         elsif url&.match?(/^[A-Za-z0-9+\/=]+$/)
           image_data = url
@@ -147,19 +147,19 @@ module Openrouter
       end
 
       # Способ 2: Изображение в content как массив (альтернативный формат)
-      content = message['content']
+      content = message["content"]
       if image_data.nil? && content.is_a?(Array)
-        image_item = content.find { |item| item['type'] == 'image_url' }
+        image_item = content.find { |item| item["type"] == "image_url" }
         if image_item
-          url = image_item.dig('image_url', 'url')
-          if url&.start_with?('data:')
+          url = image_item.dig("image_url", "url")
+          if url&.start_with?("data:")
             image_data, content_type = extract_base64_from_data_uri(url)
           end
         end
       end
 
       # Способ 3: Content напрямую содержит data URI
-      if image_data.nil? && content.is_a?(String) && content.start_with?('data:')
+      if image_data.nil? && content.is_a?(String) && content.start_with?("data:")
         image_data, content_type = extract_base64_from_data_uri(content)
       end
 
@@ -168,16 +168,16 @@ module Openrouter
         image_data = content
       end
 
-      raise APIError, 'No image data in response' unless image_data
+      raise APIError, "No image data in response" unless image_data
 
       {
         image_data: image_data,
         content_type: content_type,
-        model: body['model'],
+        model: body["model"],
         usage: {
-          prompt_tokens: body.dig('usage', 'prompt_tokens') || 0,
-          completion_tokens: body.dig('usage', 'completion_tokens') || 0,
-          total_tokens: body.dig('usage', 'total_tokens') || 0
+          prompt_tokens: body.dig("usage", "prompt_tokens") || 0,
+          completion_tokens: body.dig("usage", "completion_tokens") || 0,
+          total_tokens: body.dig("usage", "total_tokens") || 0
         }
       }
     end
@@ -185,7 +185,7 @@ module Openrouter
     # Извлечение base64 данных из data URI
     def extract_base64_from_data_uri(uri)
       match = uri.match(/^data:([^;]+);base64,(.+)$/m)
-      return nil, 'image/png' unless match
+      return nil, "image/png" unless match
 
       [ match[2], match[1] ]
     end
@@ -193,11 +193,11 @@ module Openrouter
     def handle_error(error)
       case error
       when JSON::ParserError
-        raise APIError, 'Invalid JSON response from OpenRouter'
+        raise APIError, "Invalid JSON response from OpenRouter"
       when Net::HTTPError
         raise APIError, "HTTP error: #{error.message}"
       when Timeout::Error
-        raise APIError, 'Request timeout'
+        raise APIError, "Request timeout"
       else
         raise APIError, error.message
       end

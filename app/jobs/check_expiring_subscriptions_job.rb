@@ -6,7 +6,7 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
   queue_as :default
 
   # Предупреждаем за 7 дней, 3 дня и 1 день до истечения
-  NOTIFICATION_DAYS = [7, 3, 1].freeze
+  NOTIFICATION_DAYS = [ 7, 3, 1 ].freeze
 
   def perform
     NOTIFICATION_DAYS.each do |days|
@@ -32,7 +32,7 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
   def check_expired
     Subscription.active
                 .where.not(plan: :free)
-                .where('current_period_end < ?', Time.current)
+                .where("current_period_end < ?", Time.current)
                 .find_each do |subscription|
       handle_expired_subscription(subscription)
     end
@@ -40,14 +40,14 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
 
   def send_expiring_notification(subscription, days_remaining)
     # Проверяем, не отправляли ли уже уведомление
-    return if already_notified?(subscription.user, 'subscription_expiring', days_remaining)
+    return if already_notified?(subscription.user, "subscription_expiring", days_remaining)
 
     Notifications::DispatcherService.dispatch!(
       user: subscription.user,
-      event_type: 'subscription_expiring',
+      event_type: "subscription_expiring",
       context: {
         plan_name: subscription.plan_name,
-        expires_at: subscription.current_period_end.strftime('%d.%m.%Y'),
+        expires_at: subscription.current_period_end.strftime("%d.%m.%Y"),
         days_remaining: days_remaining
       }
     )
@@ -56,12 +56,12 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
   end
 
   def handle_expired_subscription(subscription)
-    return if already_notified?(subscription.user, 'subscription_expired', 0)
+    return if already_notified?(subscription.user, "subscription_expired", 0)
 
     # Отправляем уведомление об истечении
     Notifications::DispatcherService.dispatch!(
       user: subscription.user,
-      event_type: 'subscription_expired',
+      event_type: "subscription_expired",
       context: {
         plan_name: subscription.plan_name
       }
@@ -76,7 +76,7 @@ class CheckExpiringSubscriptionsJob < ApplicationJob
   def already_notified?(user, event_type, days)
     # Проверяем, было ли уведомление сегодня
     Notification.where(user: user, notification_type: event_type)
-                .where('created_at >= ?', Time.current.beginning_of_day)
+                .where("created_at >= ?", Time.current.beginning_of_day)
                 .where("metadata->>'days_remaining' = ?", days.to_s)
                 .exists?
   end

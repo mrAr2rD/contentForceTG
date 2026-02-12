@@ -25,7 +25,7 @@ class TelegramSession < ApplicationRecord
   scope :active, -> { where(active: true) }
   scope :inactive, -> { where(active: false) }
   scope :authorized, -> { where(auth_status: :auth_active) }
-  scope :pending, -> { where(auth_status: [:pending_code, :pending_2fa]) }
+  scope :pending, -> { where(auth_status: [ :pending_code, :pending_2fa ]) }
 
   # Callbacks
   before_create :set_auth_expiration

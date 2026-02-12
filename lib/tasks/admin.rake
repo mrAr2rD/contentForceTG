@@ -1,8 +1,8 @@
 namespace :admin do
   desc "Create admin user"
   task create: :environment do
-    email = ENV['EMAIL'] || 'admin@contentforce.io'
-    password = ENV['PASSWORD'] || 'password123'
+    email = ENV["EMAIL"] || "admin@contentforce.io"
+    password = ENV["PASSWORD"] || "password123"
 
     user = User.find_or_initialize_by(email: email)
 

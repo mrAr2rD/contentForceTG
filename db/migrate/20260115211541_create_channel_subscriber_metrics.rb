@@ -11,6 +11,6 @@ class CreateChannelSubscriberMetrics < ActiveRecord::Migration[8.1]
     end
 
     add_index :channel_subscriber_metrics, :measured_at
-    add_index :channel_subscriber_metrics, [:telegram_bot_id, :measured_at]
+    add_index :channel_subscriber_metrics, [ :telegram_bot_id, :measured_at ]
   end
 end

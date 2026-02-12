@@ -28,9 +28,9 @@ module Analytics
         average_subscribers = (start_count + end_count) / 2.0
         churn_rate = if average_subscribers > 0
                        (negative_growth / average_subscribers * 100).round(2)
-                     else
+        else
                        0.0
-                     end
+        end
 
         # Update latest metric with calculated churn rate
         latest_metric = metrics.last

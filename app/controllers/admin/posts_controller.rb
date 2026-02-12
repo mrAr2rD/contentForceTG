@@ -18,7 +18,7 @@ module Admin
     def destroy
       @post = Post.find(params[:id])
       @post.destroy
-      redirect_to admin_posts_path, notice: 'Пост удален', status: :see_other
+      redirect_to admin_posts_path, notice: "Пост удален", status: :see_other
     end
   end
 end

@@ -23,7 +23,7 @@ module Admin
       @subscription = Subscription.find(params[:id])
 
       if @subscription.update(subscription_params)
-        redirect_to admin_subscription_path(@subscription), notice: 'Подписка обновлена'
+        redirect_to admin_subscription_path(@subscription), notice: "Подписка обновлена"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -32,7 +32,7 @@ module Admin
     def destroy
       @subscription = Subscription.find(params[:id])
       @subscription.destroy
-      redirect_to admin_subscriptions_path, notice: 'Подписка удалена', status: :see_other
+      redirect_to admin_subscriptions_path, notice: "Подписка удалена", status: :see_other
     end
 
     private

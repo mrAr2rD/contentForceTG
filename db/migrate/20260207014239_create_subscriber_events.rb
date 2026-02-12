@@ -16,9 +16,9 @@ class CreateSubscriberEvents < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :subscriber_events, [:telegram_bot_id, :event_at]
+    add_index :subscriber_events, [ :telegram_bot_id, :event_at ]
     add_index :subscriber_events, :event_type
     add_index :subscriber_events, :telegram_user_id
-    add_index :subscriber_events, [:telegram_bot_id, :event_type]
+    add_index :subscriber_events, [ :telegram_bot_id, :event_type ]
   end
 end

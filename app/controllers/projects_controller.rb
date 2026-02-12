@@ -2,7 +2,7 @@
 
 class ProjectsController < ApplicationController
   before_action :authenticate_user!
-  before_action :set_project, only: [:show, :edit, :update, :destroy, :archive, :activate]
+  before_action :set_project, only: [ :show, :edit, :update, :destroy, :archive, :activate ]
   layout "dashboard"
 
   def index
@@ -25,7 +25,7 @@ class ProjectsController < ApplicationController
     authorize @project
 
     if @project.save
-      redirect_to @project, notice: 'Проект успешно создан!'
+      redirect_to @project, notice: "Проект успешно создан!"
     else
       render :new, status: :unprocessable_entity
     end
@@ -39,7 +39,7 @@ class ProjectsController < ApplicationController
     authorize @project
 
     if @project.update(project_params)
-      redirect_to @project, notice: 'Проект обновлен!'
+      redirect_to @project, notice: "Проект обновлен!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -48,19 +48,19 @@ class ProjectsController < ApplicationController
   def destroy
     authorize @project
     @project.destroy
-    redirect_to projects_path, notice: 'Проект удален!', status: :see_other
+    redirect_to projects_path, notice: "Проект удален!", status: :see_other
   end
 
   def archive
     authorize @project
     @project.archive!
-    redirect_to projects_path, notice: 'Проект архивирован!'
+    redirect_to projects_path, notice: "Проект архивирован!"
   end
 
   def activate
     authorize @project
     @project.activate!
-    redirect_to projects_path, notice: 'Проект активирован!'
+    redirect_to projects_path, notice: "Проект активирован!"
   end
 
   private

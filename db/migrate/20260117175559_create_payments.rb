@@ -15,6 +15,6 @@ class CreatePayments < ActiveRecord::Migration[8.1]
 
     add_index :payments, :provider_payment_id
     add_index :payments, :status
-    add_index :payments, [:user_id, :created_at]
+    add_index :payments, [ :user_id, :created_at ]
   end
 end

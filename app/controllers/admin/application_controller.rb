@@ -9,7 +9,7 @@ module Admin
 
     rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
-    layout 'admin'
+    layout "admin"
 
     private
 

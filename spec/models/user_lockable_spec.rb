@@ -128,7 +128,7 @@ RSpec.describe User, "Devise :lockable module", type: :model do
     it "has unique index on unlock_token" do
       # Проверяем наличие индекса через схему БД
       indexes = ActiveRecord::Base.connection.indexes(:users)
-      unlock_token_index = indexes.find { |idx| idx.columns == ["unlock_token"] }
+      unlock_token_index = indexes.find { |idx| idx.columns == [ "unlock_token" ] }
 
       expect(unlock_token_index).to be_present
       expect(unlock_token_index.unique).to be true

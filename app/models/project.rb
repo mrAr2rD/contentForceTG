@@ -2,61 +2,61 @@ class Project < ApplicationRecord
   # Constants
   AI_MODELS = {
     # Free tier (доступно всем)
-    'deepseek/deepseek-chat' => 'DeepSeek Chat (Бесплатно)',
-    'google/gemini-2.0-flash-exp:free' => 'Gemini 2.0 Flash (Бесплатно)',
-    'meta-llama/llama-3.2-3b-instruct:free' => 'Llama 3.2 3B (Бесплатно)',
+    "deepseek/deepseek-chat" => "DeepSeek Chat (Бесплатно)",
+    "google/gemini-2.0-flash-exp:free" => "Gemini 2.0 Flash (Бесплатно)",
+    "meta-llama/llama-3.2-3b-instruct:free" => "Llama 3.2 3B (Бесплатно)",
 
     # Budget tier (Starter план)
-    'openai/gpt-3.5-turbo' => 'GPT-3.5 Turbo',
-    'anthropic/claude-3-haiku' => 'Claude 3 Haiku',
-    'google/gemini-pro' => 'Gemini Pro',
-    'meta-llama/llama-3-8b-instruct' => 'Llama 3 8B',
+    "openai/gpt-3.5-turbo" => "GPT-3.5 Turbo",
+    "anthropic/claude-3-haiku" => "Claude 3 Haiku",
+    "google/gemini-pro" => "Gemini Pro",
+    "meta-llama/llama-3-8b-instruct" => "Llama 3 8B",
 
     # Pro tier (Pro план)
-    'anthropic/claude-3.5-sonnet' => 'Claude 3.5 Sonnet',
-    'openai/gpt-4-turbo' => 'GPT-4 Turbo',
-    'openai/gpt-4o' => 'GPT-4o',
-    'google/gemini-pro-1.5' => 'Gemini Pro 1.5',
-    'meta-llama/llama-3-70b-instruct' => 'Llama 3 70B',
+    "anthropic/claude-3.5-sonnet" => "Claude 3.5 Sonnet",
+    "openai/gpt-4-turbo" => "GPT-4 Turbo",
+    "openai/gpt-4o" => "GPT-4o",
+    "google/gemini-pro-1.5" => "Gemini Pro 1.5",
+    "meta-llama/llama-3-70b-instruct" => "Llama 3 70B",
 
     # Premium tier (Business план)
-    'anthropic/claude-3-opus' => 'Claude 3 Opus',
-    'openai/gpt-4-turbo-preview' => 'GPT-4 Turbo Preview',
-    'openai/o1-preview' => 'OpenAI o1 Preview',
-    'google/gemini-ultra' => 'Gemini Ultra',
-    'deepseek/deepseek-coder' => 'DeepSeek Coder'
+    "anthropic/claude-3-opus" => "Claude 3 Opus",
+    "openai/gpt-4-turbo-preview" => "GPT-4 Turbo Preview",
+    "openai/o1-preview" => "OpenAI o1 Preview",
+    "google/gemini-ultra" => "Gemini Ultra",
+    "deepseek/deepseek-coder" => "DeepSeek Coder"
   }.freeze
 
   # Model tiers for subscription limits
   FREE_MODELS = [
-    'deepseek/deepseek-chat',
-    'google/gemini-2.0-flash-exp:free',
-    'meta-llama/llama-3.2-3b-instruct:free'
+    "deepseek/deepseek-chat",
+    "google/gemini-2.0-flash-exp:free",
+    "meta-llama/llama-3.2-3b-instruct:free"
   ].freeze
 
   STARTER_MODELS = FREE_MODELS + [
-    'openai/gpt-3.5-turbo',
-    'anthropic/claude-3-haiku',
-    'google/gemini-pro',
-    'meta-llama/llama-3-8b-instruct'
+    "openai/gpt-3.5-turbo",
+    "anthropic/claude-3-haiku",
+    "google/gemini-pro",
+    "meta-llama/llama-3-8b-instruct"
   ].freeze
 
   PRO_MODELS = STARTER_MODELS + [
-    'anthropic/claude-3.5-sonnet',
-    'openai/gpt-4-turbo',
-    'openai/gpt-4o',
-    'google/gemini-pro-1.5',
-    'meta-llama/llama-3-70b-instruct'
+    "anthropic/claude-3.5-sonnet",
+    "openai/gpt-4-turbo",
+    "openai/gpt-4o",
+    "google/gemini-pro-1.5",
+    "meta-llama/llama-3-70b-instruct"
   ].freeze
 
   BUSINESS_MODELS = AI_MODELS.keys.freeze
 
   WRITING_STYLES = {
-    'professional' => 'Профессиональный',
-    'casual' => 'Свободный',
-    'friendly' => 'Дружелюбный',
-    'formal' => 'Деловой',
-    'creative' => 'Креативный'
+    "professional" => "Профессиональный",
+    "casual" => "Свободный",
+    "friendly" => "Дружелюбный",
+    "formal" => "Деловой",
+    "creative" => "Креативный"
   }.freeze
 
   # Associations
@@ -123,14 +123,14 @@ class Project < ApplicationRecord
 
     # Default system prompt based on writing style
     style_prompts = {
-      'professional' => 'Ты профессиональный копирайтер. Пиши в деловом стиле, структурированно и информативно.',
-      'casual' => 'Ты креативный автор. Пиши в свободном стиле, используй простой язык и будь естественным.',
-      'friendly' => 'Ты дружелюбный автор. Пиши тепло, доступно и располагающе к себе.',
-      'formal' => 'Ты официальный представитель. Пиши формально, точно и соблюдая все правила делового этикета.',
-      'creative' => 'Ты креативный писатель. Используй яркие образы, метафоры и необычные подходы.'
+      "professional" => "Ты профессиональный копирайтер. Пиши в деловом стиле, структурированно и информативно.",
+      "casual" => "Ты креативный автор. Пиши в свободном стиле, используй простой язык и будь естественным.",
+      "friendly" => "Ты дружелюбный автор. Пиши тепло, доступно и располагающе к себе.",
+      "formal" => "Ты официальный представитель. Пиши формально, точно и соблюдая все правила делового этикета.",
+      "creative" => "Ты креативный писатель. Используй яркие образы, метафоры и необычные подходы."
     }
 
-    style_prompts[writing_style] || style_prompts['professional']
+    style_prompts[writing_style] || style_prompts["professional"]
   end
 
   # Get available models for user's subscription plan
@@ -159,15 +159,15 @@ class Project < ApplicationRecord
   def self.default_model_for_plan(plan = :free)
     case plan.to_sym
     when :free
-      'deepseek/deepseek-chat'
+      "deepseek/deepseek-chat"
     when :starter
-      'anthropic/claude-3-haiku'
+      "anthropic/claude-3-haiku"
     when :pro
-      'anthropic/claude-3.5-sonnet'
+      "anthropic/claude-3.5-sonnet"
     when :business
-      'anthropic/claude-3-opus'
+      "anthropic/claude-3-opus"
     else
-      'deepseek/deepseek-chat'
+      "deepseek/deepseek-chat"
     end
   end
 

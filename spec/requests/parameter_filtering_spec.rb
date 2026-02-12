@@ -295,8 +295,8 @@ RSpec.describe 'Parameter Filtering', type: :request do
       }
 
       # Эти параметры НЕ должны фильтроваться
-      logs_text = logs.join(' ')
-      expect(logs_text).to include('search term') || expect(logs_text).not_to include('[FILTERED]')
+      logs_text = logs.join(" ")
+      expect(logs_text.include?("search term") || !logs_text.include?("[FILTERED]")).to be true
     end
   end
 
@@ -327,7 +327,7 @@ RSpec.describe 'Parameter Filtering', type: :request do
       end
 
       post root_path, params: {
-        tokens: ['token1', 'token2', 'token3']
+        tokens: [ 'token1', 'token2', 'token3' ]
       }
 
       logs.each do |log|

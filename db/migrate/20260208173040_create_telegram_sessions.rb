@@ -10,6 +10,6 @@ class CreateTelegramSessions < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :telegram_sessions, [:user_id, :active]
+    add_index :telegram_sessions, [ :user_id, :active ]
   end
 end

@@ -52,8 +52,8 @@ module Ui
         base = "flex items-center gap-3 px-3 py-2 rounded-md transition-colors"
         active_classes = "bg-zinc-200 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50"
         inactive_classes = "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50"
-        
-        [base, @active ? active_classes : inactive_classes].join(" ")
+
+        [ base, @active ? active_classes : inactive_classes ].join(" ")
       end
     end
   end

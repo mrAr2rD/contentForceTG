@@ -2,7 +2,7 @@
 
 module Admin
   class PaymentsController < Admin::ApplicationController
-    before_action :set_payment, only: [:show, :refund, :confirm, :cancel]
+    before_action :set_payment, only: [ :show, :refund, :confirm, :cancel ]
 
     def index
       @payments = Payment.includes(:user, :subscription)
@@ -26,16 +26,16 @@ module Admin
 
     def refund
       if @payment.refund!
-        redirect_to admin_payment_path(@payment), notice: 'Платёж отмечен как возвращённый'
+        redirect_to admin_payment_path(@payment), notice: "Платёж отмечен как возвращённый"
       else
-        redirect_to admin_payment_path(@payment), alert: 'Невозможно вернуть платёж (только завершённые платежи могут быть возвращены)'
+        redirect_to admin_payment_path(@payment), alert: "Невозможно вернуть платёж (только завершённые платежи могут быть возвращены)"
       end
     end
 
     # Ручное подтверждение платежа и активация подписки
     def confirm
       unless @payment.pending? || @payment.failed?
-        redirect_to admin_payment_path(@payment), alert: 'Можно подтверждать только pending или failed платежи'
+        redirect_to admin_payment_path(@payment), alert: "Можно подтверждать только pending или failed платежи"
         return
       end
 
@@ -46,7 +46,7 @@ module Admin
           @payment.update!(provider_payment_id: "manual_confirm_#{Time.current.to_i}")
 
           # Активируем подписку
-          plan_slug = @payment.metadata['plan']
+          plan_slug = @payment.metadata["plan"]
           plan_record = Plan.cached_find_by_slug(plan_slug) || Plan.find_by_slug(plan_slug)
           subscription = @payment.subscription
 
@@ -62,7 +62,7 @@ module Admin
           subscription.reset_usage!
         end
 
-        redirect_to admin_payment_path(@payment), notice: 'Платёж подтверждён, подписка активирована'
+        redirect_to admin_payment_path(@payment), notice: "Платёж подтверждён, подписка активирована"
       rescue StandardError => e
         redirect_to admin_payment_path(@payment), alert: "Ошибка при подтверждении: #{e.message}"
       end
@@ -71,12 +71,12 @@ module Admin
     # Отмена платежа
     def cancel
       if @payment.completed? || @payment.refunded?
-        redirect_to admin_payment_path(@payment), alert: 'Нельзя отменить завершённые или возвращённые платежи'
+        redirect_to admin_payment_path(@payment), alert: "Нельзя отменить завершённые или возвращённые платежи"
         return
       end
 
       @payment.update!(status: :canceled)
-      redirect_to admin_payment_path(@payment), notice: 'Платёж отменён'
+      redirect_to admin_payment_path(@payment), notice: "Платёж отменён"
     end
 
     private

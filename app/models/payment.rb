@@ -49,11 +49,11 @@ class Payment < ApplicationRecord
   end
 
   def completed?
-    status == 'completed'
+    status == "completed"
   end
 
   def pending?
-    status == 'pending'
+    status == "pending"
   end
 
   def refund!
@@ -72,8 +72,8 @@ class Payment < ApplicationRecord
   def generate_invoice_number
     # Используем timestamp + random для избежания race condition
     # Формат: YYYYMMDD + 6 случайных цифр
-    date_part = Time.current.strftime('%Y%m%d')
-    random_part = SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')
+    date_part = Time.current.strftime("%Y%m%d")
+    random_part = SecureRandom.random_number(1_000_000).to_s.rjust(6, "0")
     self.invoice_number = "#{date_part}#{random_part}".to_i
   end
 end

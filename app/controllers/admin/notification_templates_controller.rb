@@ -3,7 +3,7 @@
 module Admin
   class NotificationTemplatesController < Admin::ApplicationController
     before_action :check_table_exists
-    before_action :set_template, only: [:show, :edit, :update, :destroy]
+    before_action :set_template, only: [ :show, :edit, :update, :destroy ]
 
     def index
       @templates = NotificationTemplate.order(:event_type, :channel)
@@ -20,7 +20,7 @@ module Admin
       @template = NotificationTemplate.new(template_params)
 
       if @template.save
-        redirect_to admin_notification_templates_path, notice: 'Шаблон создан'
+        redirect_to admin_notification_templates_path, notice: "Шаблон создан"
       else
         render :new, status: :unprocessable_entity
       end
@@ -30,7 +30,7 @@ module Admin
 
     def update
       if @template.update(template_params)
-        redirect_to admin_notification_templates_path, notice: 'Шаблон обновлён'
+        redirect_to admin_notification_templates_path, notice: "Шаблон обновлён"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -38,7 +38,7 @@ module Admin
 
     def destroy
       @template.destroy
-      redirect_to admin_notification_templates_path, notice: 'Шаблон удалён'
+      redirect_to admin_notification_templates_path, notice: "Шаблон удалён"
     end
 
     # Загрузить дефолтные шаблоны
@@ -61,7 +61,7 @@ module Admin
         end
       end
 
-      redirect_to admin_notification_templates_path, notice: 'Дефолтные шаблоны загружены'
+      redirect_to admin_notification_templates_path, notice: "Дефолтные шаблоны загружены"
     end
 
     private
@@ -80,7 +80,7 @@ module Admin
       return if NotificationTemplate.table_exists?
 
       redirect_to admin_root_path,
-                  alert: 'Таблица notification_templates не существует. Выполните миграции: bin/rails db:migrate'
+                  alert: "Таблица notification_templates не существует. Выполните миграции: bin/rails db:migrate"
     end
   end
 end

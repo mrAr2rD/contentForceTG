@@ -17,7 +17,7 @@ module Admin
     def destroy
       @project = Project.find(params[:id])
       @project.destroy
-      redirect_to admin_projects_path, notice: 'Проект удален', status: :see_other
+      redirect_to admin_projects_path, notice: "Проект удален", status: :see_other
     end
   end
 end

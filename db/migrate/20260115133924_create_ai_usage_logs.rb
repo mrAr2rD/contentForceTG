@@ -14,6 +14,6 @@ class CreateAiUsageLogs < ActiveRecord::Migration[8.1]
     add_index :ai_usage_logs, :model_used
     add_index :ai_usage_logs, :purpose
     add_index :ai_usage_logs, :created_at
-    add_index :ai_usage_logs, [:user_id, :created_at]
+    add_index :ai_usage_logs, [ :user_id, :created_at ]
   end
 end

@@ -10,7 +10,7 @@ module Admin
       @config = PaymentConfiguration.current
 
       if @config.update(payment_config_params)
-        redirect_to edit_admin_payment_settings_path, notice: 'Настройки платежей сохранены'
+        redirect_to edit_admin_payment_settings_path, notice: "Настройки платежей сохранены"
       else
         render :edit, status: :unprocessable_entity
       end

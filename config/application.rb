@@ -31,6 +31,5 @@ module Contentforce
 
     # Rack::Attack middleware для rate limiting
     config.middleware.use Rack::Attack
-
   end
 end

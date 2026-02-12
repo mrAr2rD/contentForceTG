@@ -6,18 +6,18 @@ class Article < ApplicationRecord
 
   # Таблица транслитерации кириллицы
   TRANSLIT_MAP = {
-    'а' => 'a', 'б' => 'b', 'в' => 'v', 'г' => 'g', 'д' => 'd', 'е' => 'e', 'ё' => 'yo',
-    'ж' => 'zh', 'з' => 'z', 'и' => 'i', 'й' => 'y', 'к' => 'k', 'л' => 'l', 'м' => 'm',
-    'н' => 'n', 'о' => 'o', 'п' => 'p', 'р' => 'r', 'с' => 's', 'т' => 't', 'у' => 'u',
-    'ф' => 'f', 'х' => 'h', 'ц' => 'ts', 'ч' => 'ch', 'ш' => 'sh', 'щ' => 'sch', 'ъ' => '',
-    'ы' => 'y', 'ь' => '', 'э' => 'e', 'ю' => 'yu', 'я' => 'ya'
+    "а" => "a", "б" => "b", "в" => "v", "г" => "g", "д" => "d", "е" => "e", "ё" => "yo",
+    "ж" => "zh", "з" => "z", "и" => "i", "й" => "y", "к" => "k", "л" => "l", "м" => "m",
+    "н" => "n", "о" => "o", "п" => "p", "р" => "r", "с" => "s", "т" => "t", "у" => "u",
+    "ф" => "f", "х" => "h", "ц" => "ts", "ч" => "ch", "ш" => "sh", "щ" => "sch", "ъ" => "",
+    "ы" => "y", "ь" => "", "э" => "e", "ю" => "yu", "я" => "ya"
   }.freeze
 
   # Категории статей
   CATEGORIES = %w[product tutorials updates tips case-studies].freeze
 
   # Associations
-  belongs_to :author, class_name: 'User'
+  belongs_to :author, class_name: "User"
   has_one_attached :cover_image
 
   # Enums
@@ -25,7 +25,7 @@ class Article < ApplicationRecord
 
   # Validations
   validates :title, presence: true, length: { minimum: 5, maximum: 200 }
-  validates :slug, presence: true, uniqueness: true, format: { with: /\A[a-z0-9\-]+\z/, message: 'допускает только строчные буквы, цифры и дефисы' }
+  validates :slug, presence: true, uniqueness: true, format: { with: /\A[a-z0-9\-]+\z/, message: "допускает только строчные буквы, цифры и дефисы" }
   validates :content, presence: true, length: { minimum: 50 }
   validates :category, inclusion: { in: CATEGORIES }, allow_blank: true
   validates :excerpt, length: { maximum: 500 }, allow_blank: true
@@ -39,8 +39,8 @@ class Article < ApplicationRecord
   before_save :set_published_at, if: -> { published? && published_at.blank? }
 
   # Scopes
-  scope :published, -> { where(status: :published).where('published_at IS NOT NULL AND published_at <= ?', Time.current) }
-  scope :recent, -> { order(Arel.sql('COALESCE(published_at, created_at) DESC')) }
+  scope :published, -> { where(status: :published).where("published_at IS NOT NULL AND published_at <= ?", Time.current) }
+  scope :recent, -> { order(Arel.sql("COALESCE(published_at, created_at) DESC")) }
   scope :by_category, ->(category) { where(category: category) }
   scope :featured, -> { published.recent.limit(3) }
 
@@ -103,10 +103,10 @@ class Article < ApplicationRecord
     transliterated = title.downcase.chars.map { |char| TRANSLIT_MAP[char] || char }.join
     # Очистка и форматирование
     self.slug = transliterated
-                .gsub(/[^a-z0-9\s-]/, '')
-                .gsub(/[\s_]+/, '-')
-                .gsub(/-+/, '-')
-                .gsub(/^-|-$/, '')
+                .gsub(/[^a-z0-9\s-]/, "")
+                .gsub(/[\s_]+/, "-")
+                .gsub(/-+/, "-")
+                .gsub(/^-|-$/, "")
     # Если slug пустой, генерируем из timestamp
     self.slug = "article-#{Time.current.to_i}" if slug.blank?
   end

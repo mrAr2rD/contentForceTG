@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'net/http'
-require 'json'
-require 'uri'
+require "net/http"
+require "json"
+require "uri"
 
 module Telegram
   # Сервис для работы с пригласительными ссылками Telegram
@@ -22,15 +22,15 @@ module Telegram
       params[:expire_date] = expire_date.to_i if expire_date.present?
       params[:creates_join_request] = creates_join_request
 
-      result = make_request('createChatInviteLink', params)
+      result = make_request("createChatInviteLink", params)
 
-      if result['ok']
-        invite_link_data = result['result']
+      if result["ok"]
+        invite_link_data = result["result"]
 
         InviteLink.create!(
           telegram_bot: @bot,
-          invite_link: invite_link_data['invite_link'],
-          name: name || invite_link_data['name'],
+          invite_link: invite_link_data["invite_link"],
+          name: name || invite_link_data["name"],
           source: source,
           member_limit: member_limit,
           expire_date: expire_date,
@@ -43,12 +43,12 @@ module Telegram
 
     # Отозвать пригласительную ссылку
     def revoke_invite_link(invite_link)
-      result = make_request('revokeChatInviteLink', {
+      result = make_request("revokeChatInviteLink", {
         chat_id: @bot.channel_id,
         invite_link: invite_link.invite_link
       })
 
-      if result['ok']
+      if result["ok"]
         invite_link.revoke!
         true
       else
@@ -60,20 +60,20 @@ module Telegram
     def get_invite_link_info(invite_link_str)
       # Telegram не предоставляет метод для получения информации о ссылке,
       # но мы можем использовать getChatMemberCount для проверки
-      result = make_request('getChatMemberCount', {
+      result = make_request("getChatMemberCount", {
         chat_id: @bot.channel_id
       })
 
-      result['ok'] ? result['result'] : nil
+      result["ok"] ? result["result"] : nil
     end
 
     # Экспортировать ссылку на канал (основную)
     def export_chat_invite_link
-      result = make_request('exportChatInviteLink', {
+      result = make_request("exportChatInviteLink", {
         chat_id: @bot.channel_id
       })
 
-      result['ok'] ? result['result'] : nil
+      result["ok"] ? result["result"] : nil
     end
 
     # Синхронизировать статистику всех ссылок канала
@@ -103,13 +103,13 @@ module Telegram
       http.read_timeout = 30
 
       request = Net::HTTP::Post.new(uri)
-      request['Content-Type'] = 'application/json'
+      request["Content-Type"] = "application/json"
       request.body = params.to_json
 
       response = http.request(request)
       JSON.parse(response.body)
     rescue StandardError => e
-      { 'ok' => false, 'description' => e.message }
+      { "ok" => false, "description" => e.message }
     end
   end
 end

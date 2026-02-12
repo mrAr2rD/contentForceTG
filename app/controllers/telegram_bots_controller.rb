@@ -3,7 +3,7 @@
 class TelegramBotsController < ApplicationController
   before_action :authenticate_user!
   before_action :set_project
-  before_action :set_telegram_bot, only: [:show, :edit, :update, :destroy, :verify, :subscriber_analytics]
+  before_action :set_telegram_bot, only: [ :show, :edit, :update, :destroy, :verify, :subscriber_analytics ]
   layout "dashboard"
 
   def index
@@ -39,8 +39,8 @@ class TelegramBotsController < ApplicationController
     authorize @telegram_bot
 
     if @telegram_bot.update(telegram_bot_params)
-      redirect_to project_telegram_bot_path(@project, @telegram_bot), 
-                  notice: 'Бот обновлен!'
+      redirect_to project_telegram_bot_path(@project, @telegram_bot),
+                  notice: "Бот обновлен!"
     else
       render :edit, status: :unprocessable_entity
     end
@@ -49,8 +49,8 @@ class TelegramBotsController < ApplicationController
   def destroy
     authorize @telegram_bot
     @telegram_bot.destroy
-    redirect_to project_telegram_bots_path(@project), 
-                notice: 'Бот удален!', 
+    redirect_to project_telegram_bots_path(@project),
+                notice: "Бот удален!",
                 status: :see_other
   end
 
@@ -60,7 +60,7 @@ class TelegramBotsController < ApplicationController
     begin
       Telegram::VerifyService.new(@telegram_bot).verify!
       redirect_to project_telegram_bot_path(@project, @telegram_bot),
-                  notice: 'Бот успешно верифицирован!'
+                  notice: "Бот успешно верифицирован!"
     rescue StandardError => e
       redirect_to project_telegram_bot_path(@project, @telegram_bot),
                   alert: "Ошибка верификации: #{e.message}"

@@ -7,10 +7,10 @@ class NotificationMailer < ApplicationMailer
 
     mail(
       to: @user.email,
-      subject: notification.subject || 'Уведомление от ContentForce'
+      subject: notification.subject || "Уведомление от ContentForce"
     ) do |format|
       format.text { render plain: notification.body }
-      format.html { render 'notification' }
+      format.html { render "notification" }
     end
   end
 

@@ -15,7 +15,7 @@ module Admin
       params_to_update.delete(:openrouter_api_key) if api_key.blank?
 
       if @ai_config.update(params_to_update)
-        redirect_to edit_admin_ai_settings_path, notice: 'Настройки AI успешно обновлены!'
+        redirect_to edit_admin_ai_settings_path, notice: "Настройки AI успешно обновлены!"
       else
         render :edit, status: :unprocessable_entity
       end

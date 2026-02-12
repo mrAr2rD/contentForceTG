@@ -13,11 +13,11 @@ class SendTelegramNotificationJob < ApplicationJob
     return unless notification.telegram?
 
     user = notification.user
-    return notification.mark_as_failed!('User has no Telegram ID') unless user.telegram_id
+    return notification.mark_as_failed!("User has no Telegram ID") unless user.telegram_id
 
     # Отправляем через любого бота пользователя
     bot = find_user_bot(user)
-    return notification.mark_as_failed!('No verified bot found') unless bot
+    return notification.mark_as_failed!("No verified bot found") unless bot
 
     send_message(bot, user.telegram_id, notification)
   end
@@ -41,23 +41,23 @@ class SendTelegramNotificationJob < ApplicationJob
     params = {
       chat_id: chat_id,
       text: notification.body,
-      parse_mode: 'Markdown'
+      parse_mode: "Markdown"
     }
 
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
     request = Net::HTTP::Post.new(uri)
-    request['Content-Type'] = 'application/json'
+    request["Content-Type"] = "application/json"
     request.body = params.to_json
 
     response = http.request(request)
     result = JSON.parse(response.body)
 
-    if result['ok']
+    if result["ok"]
       notification.mark_as_sent!
     else
-      notification.mark_as_failed!(result['description'])
+      notification.mark_as_failed!(result["description"])
     end
   rescue StandardError => e
     notification.mark_as_failed!(e.message)

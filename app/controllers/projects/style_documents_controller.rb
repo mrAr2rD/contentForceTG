@@ -4,7 +4,7 @@ module Projects
   class StyleDocumentsController < ApplicationController
     before_action :authenticate_user!
     before_action :set_project
-    before_action :set_style_document, only: [:destroy, :toggle]
+    before_action :set_style_document, only: [ :destroy, :toggle ]
 
     def index
       @style_documents = @project.style_documents.order(created_at: :desc)

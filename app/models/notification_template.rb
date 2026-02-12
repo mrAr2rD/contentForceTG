@@ -19,7 +19,7 @@ class NotificationTemplate < ApplicationRecord
     # Payment
     payment_success: {
       email: {
-        subject: 'Оплата прошла успешно',
+        subject: "Оплата прошла успешно",
         body: "Здравствуйте, {{user_name}}!\n\nВаш платёж на сумму {{amount}} ₽ успешно обработан.\n\nТариф: {{plan_name}}\nДействует до: {{expires_at}}\n\nСпасибо, что выбрали ContentForce!"
       },
       telegram: {
@@ -28,7 +28,7 @@ class NotificationTemplate < ApplicationRecord
     },
     payment_failed: {
       email: {
-        subject: 'Ошибка оплаты',
+        subject: "Ошибка оплаты",
         body: "Здравствуйте, {{user_name}}!\n\nК сожалению, платёж не удался.\n\nПричина: {{error_message}}\n\nПожалуйста, попробуйте ещё раз или свяжитесь с поддержкой."
       },
       telegram: {
@@ -39,7 +39,7 @@ class NotificationTemplate < ApplicationRecord
     # Subscription
     subscription_expiring: {
       email: {
-        subject: 'Ваша подписка скоро истекает',
+        subject: "Ваша подписка скоро истекает",
         body: "Здравствуйте, {{user_name}}!\n\nВаша подписка на тариф {{plan_name}} истекает {{expires_at}}.\n\nПродлите подписку, чтобы не потерять доступ к функциям."
       },
       telegram: {
@@ -48,7 +48,7 @@ class NotificationTemplate < ApplicationRecord
     },
     subscription_expired: {
       email: {
-        subject: 'Ваша подписка истекла',
+        subject: "Ваша подписка истекла",
         body: "Здравствуйте, {{user_name}}!\n\nВаша подписка на тариф {{plan_name}} истекла.\n\nВы можете продлить подписку в любое время."
       },
       telegram: {
@@ -59,7 +59,7 @@ class NotificationTemplate < ApplicationRecord
     # Usage limits
     usage_limit_warning: {
       email: {
-        subject: 'Лимит использования почти исчерпан',
+        subject: "Лимит использования почти исчерпан",
         body: "Здравствуйте, {{user_name}}!\n\nВы использовали {{usage_percent}}% лимита {{feature_name}} в этом месяце.\n\nОсталось: {{remaining}} из {{limit}}"
       },
       telegram: {
@@ -68,7 +68,7 @@ class NotificationTemplate < ApplicationRecord
     },
     usage_limit_reached: {
       email: {
-        subject: 'Лимит использования исчерпан',
+        subject: "Лимит использования исчерпан",
         body: "Здравствуйте, {{user_name}}!\n\nВы достигли лимита {{feature_name}} в этом месяце.\n\nДля продолжения работы перейдите на более высокий тариф."
       },
       telegram: {
@@ -84,7 +84,7 @@ class NotificationTemplate < ApplicationRecord
     },
     post_failed: {
       email: {
-        subject: 'Ошибка публикации поста',
+        subject: "Ошибка публикации поста",
         body: "Здравствуйте, {{user_name}}!\n\nНе удалось опубликовать пост в канал {{channel_name}}.\n\nОшибка: {{error_message}}"
       },
       telegram: {

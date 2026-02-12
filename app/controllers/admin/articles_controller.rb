@@ -2,7 +2,7 @@
 
 module Admin
   class ArticlesController < Admin::ApplicationController
-    before_action :set_article, only: [:show, :edit, :update, :destroy, :preview]
+    before_action :set_article, only: [ :show, :edit, :update, :destroy, :preview ]
 
     def index
       @articles = Article.includes(:author)
@@ -25,7 +25,7 @@ module Admin
       @article.author = current_user
 
       if @article.save
-        redirect_to admin_article_path(@article), notice: 'Статья успешно создана'
+        redirect_to admin_article_path(@article), notice: "Статья успешно создана"
       else
         render :new, status: :unprocessable_entity
       end
@@ -36,7 +36,7 @@ module Admin
 
     def update
       if @article.update(article_params)
-        redirect_to admin_article_path(@article), notice: 'Статья успешно обновлена'
+        redirect_to admin_article_path(@article), notice: "Статья успешно обновлена"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -44,7 +44,7 @@ module Admin
 
     def destroy
       @article.destroy
-      redirect_to admin_articles_path, notice: 'Статья удалена', status: :see_other
+      redirect_to admin_articles_path, notice: "Статья удалена", status: :see_other
     end
 
     def preview
@@ -53,7 +53,7 @@ module Admin
 
     def generate_content
       topic = params[:topic]
-      style = params[:style] || 'informative'
+      style = params[:style] || "informative"
 
       prompt = build_article_prompt(topic, style)
       generator = Ai::ContentGenerator.new(user: current_user)
@@ -82,15 +82,15 @@ module Admin
 
     def build_article_prompt(topic, style)
       style_instructions = case style
-                           when 'casual'
-                             'Пиши в дружелюбном, разговорном тоне. Используй простые слова и короткие предложения.'
-                           when 'technical'
-                             'Пиши в техническом стиле с деталями и примерами кода. Будь точен и структурирован.'
-                           when 'promotional'
-                             'Пиши в маркетинговом стиле, подчёркивая преимущества. Используй призывы к действию.'
-                           else # informative
-                             'Пиши в информативном стиле, структурированно и понятно.'
-                           end
+      when "casual"
+                             "Пиши в дружелюбном, разговорном тоне. Используй простые слова и короткие предложения."
+      when "technical"
+                             "Пиши в техническом стиле с деталями и примерами кода. Будь точен и структурирован."
+      when "promotional"
+                             "Пиши в маркетинговом стиле, подчёркивая преимущества. Используй призывы к действию."
+      else # informative
+                             "Пиши в информативном стиле, структурированно и понятно."
+      end
 
       <<~PROMPT
         Напиши статью для блога о продукте ContentForce на тему: "#{topic}"

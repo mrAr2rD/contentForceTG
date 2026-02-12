@@ -23,7 +23,7 @@ module Admin
       @invite_link = InviteLink.find(params[:id])
       @invite_link.destroy
 
-      redirect_to admin_invite_links_path, notice: 'Пригласительная ссылка удалена'
+      redirect_to admin_invite_links_path, notice: "Пригласительная ссылка удалена"
     end
   end
 end

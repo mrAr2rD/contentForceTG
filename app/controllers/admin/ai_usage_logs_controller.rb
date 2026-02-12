@@ -13,14 +13,14 @@ module Admin
 
       if params[:period].present?
         days = params[:period].to_i
-        @logs = @logs.where('created_at > ?', days.days.ago) if days > 0
+        @logs = @logs.where("created_at > ?", days.days.ago) if days > 0
       end
 
       @logs = @logs.page(params[:page]).per(50)
 
       # Статистика
       base_scope = AiUsageLog.all
-      base_scope = base_scope.where('created_at > ?', params[:period].to_i.days.ago) if params[:period].present? && params[:period].to_i > 0
+      base_scope = base_scope.where("created_at > ?", params[:period].to_i.days.ago) if params[:period].present? && params[:period].to_i > 0
 
       @stats = {
         total_requests: base_scope.count,

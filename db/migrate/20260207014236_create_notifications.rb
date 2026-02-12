@@ -20,6 +20,6 @@ class CreateNotifications < ActiveRecord::Migration[8.1]
     add_index :notifications, :notification_type
     add_index :notifications, :channel
     add_index :notifications, :status
-    add_index :notifications, [:user_id, :created_at]
+    add_index :notifications, [ :user_id, :created_at ]
   end
 end

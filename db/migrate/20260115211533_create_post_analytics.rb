@@ -14,6 +14,6 @@ class CreatePostAnalytics < ActiveRecord::Migration[8.1]
 
     add_index :post_analytics, :telegram_message_id
     add_index :post_analytics, :measured_at
-    add_index :post_analytics, [:post_id, :measured_at]
+    add_index :post_analytics, [ :post_id, :measured_at ]
   end
 end

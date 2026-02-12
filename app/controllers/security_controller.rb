@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 class SecurityController < ApplicationController
-  skip_before_action :verify_authenticity_token, only: [:csp_report]
-  skip_before_action :authenticate_user!, only: [:csp_report], raise: false
+  skip_before_action :verify_authenticity_token, only: [ :csp_report ]
+  skip_before_action :authenticate_user!, only: [ :csp_report ], raise: false
 
   def csp_report
     begin
       report = JSON.parse(request.body.read)
-      csp_report = report['csp-report']
+      csp_report = report["csp-report"]
 
       Rails.logger.warn(
         "CSP Violation: " \
@@ -19,7 +19,7 @@ class SecurityController < ApplicationController
       # В production отправляем в Sentry для мониторинга
       if Rails.env.production? && defined?(Sentry)
         Sentry.capture_message(
-          'CSP Violation',
+          "CSP Violation",
           level: :warning,
           extra: { csp_report: csp_report }
         )

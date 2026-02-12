@@ -15,14 +15,14 @@ class SubscriberEvent < ApplicationRecord
   validates :event_at, presence: true
 
   # Scopes
-  scope :joined, -> { where(event_type: 'joined') }
-  scope :left_channel, -> { where(event_type: 'left') }
-  scope :kicked, -> { where(event_type: 'kicked') }
-  scope :banned, -> { where(event_type: 'banned') }
+  scope :joined, -> { where(event_type: "joined") }
+  scope :left_channel, -> { where(event_type: "left") }
+  scope :kicked, -> { where(event_type: "kicked") }
+  scope :banned, -> { where(event_type: "banned") }
 
-  scope :today, -> { where('event_at >= ?', Time.current.beginning_of_day) }
-  scope :this_week, -> { where('event_at >= ?', 1.week.ago) }
-  scope :this_month, -> { where('event_at >= ?', 1.month.ago) }
+  scope :today, -> { where("event_at >= ?", Time.current.beginning_of_day) }
+  scope :this_week, -> { where("event_at >= ?", 1.week.ago) }
+  scope :this_month, -> { where("event_at >= ?", 1.month.ago) }
 
   scope :by_date_range, ->(from, to) { where(event_at: from..to) }
   scope :recent, -> { order(event_at: :desc) }
@@ -43,22 +43,22 @@ class SubscriberEvent < ApplicationRecord
 
   # Это подписка?
   def join?
-    event_type == 'joined'
+    event_type == "joined"
   end
 
   # Это отписка?
   def leave?
-    event_type == 'left'
+    event_type == "left"
   end
 
   # Создать событие из webhook данных
   def self.create_from_webhook(telegram_bot:, update:)
-    chat_member = update.dig('chat_member') || update.dig('my_chat_member')
+    chat_member = update.dig("chat_member") || update.dig("my_chat_member")
     return unless chat_member
 
-    new_status = chat_member.dig('new_chat_member', 'status')
-    old_status = chat_member.dig('old_chat_member', 'status')
-    user = chat_member.dig('new_chat_member', 'user') || chat_member.dig('from')
+    new_status = chat_member.dig("new_chat_member", "status")
+    old_status = chat_member.dig("old_chat_member", "status")
+    user = chat_member.dig("new_chat_member", "user") || chat_member.dig("from")
 
     return unless user
 
@@ -66,21 +66,21 @@ class SubscriberEvent < ApplicationRecord
     return unless event_type
 
     # Попытка найти invite_link
-    invite_link_url = chat_member.dig('invite_link', 'invite_link')
+    invite_link_url = chat_member.dig("invite_link", "invite_link")
     invite_link = InviteLink.find_by(invite_link: invite_link_url) if invite_link_url
 
     create!(
       telegram_bot: telegram_bot,
       invite_link: invite_link,
-      telegram_user_id: user['id'],
-      username: user['username'],
-      first_name: user['first_name'],
+      telegram_user_id: user["id"],
+      username: user["username"],
+      first_name: user["first_name"],
       event_type: event_type,
-      event_at: Time.at(chat_member['date'] || Time.current.to_i),
+      event_at: Time.at(chat_member["date"] || Time.current.to_i),
       user_data: {
-        last_name: user['last_name'],
-        language_code: user['language_code'],
-        is_premium: user['is_premium']
+        last_name: user["last_name"],
+        language_code: user["language_code"],
+        is_premium: user["is_premium"]
       }
     )
   end
@@ -107,20 +107,20 @@ class SubscriberEvent < ApplicationRecord
   def self.determine_event_type(old_status, new_status)
     # Пользователь вступил в канал
     if %w[left kicked].include?(old_status) && %w[member administrator creator].include?(new_status)
-      return 'joined'
+      return "joined"
     end
 
     # Пользователь покинул канал
-    return 'left' if %w[member administrator].include?(old_status) && new_status == 'left'
+    return "left" if %w[member administrator].include?(old_status) && new_status == "left"
 
     # Пользователь был кикнут
-    return 'kicked' if %w[member administrator].include?(old_status) && new_status == 'kicked'
+    return "kicked" if %w[member administrator].include?(old_status) && new_status == "kicked"
 
     # Пользователь был забанен
-    return 'banned' if new_status == 'banned'
+    return "banned" if new_status == "banned"
 
     # Пользователь был ограничен
-    return 'restricted' if new_status == 'restricted'
+    return "restricted" if new_status == "restricted"
 
     nil
   end

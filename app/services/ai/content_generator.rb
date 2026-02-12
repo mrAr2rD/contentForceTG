@@ -17,7 +17,7 @@ module Ai
       unless AiConfiguration.free_model?(model) || can_generate?
         return {
           content: nil,
-          error: 'Превышен лимит AI генераций для вашего тарифа',
+          error: "Превышен лимит AI генераций для вашего тарифа",
           success: false
         }
       end
@@ -57,7 +57,7 @@ module Ai
       Rails.logger.error "OpenRouter configuration error: #{e.message}"
       {
         content: nil,
-        error: 'OpenRouter API ключ не настроен. Обратитесь к администратору.',
+        error: "OpenRouter API ключ не настроен. Обратитесь к администратору.",
         success: false
       }
     rescue Openrouter::APIError => e
@@ -79,12 +79,12 @@ module Ai
     def improve(content:, instruction:)
       prompt = <<~PROMPT
         Улучши следующий текст поста для Telegram согласно инструкции.
-        
+
         Текст:
         #{content}
-        
+
         Инструкция: #{instruction}
-        
+
         Верни только улучшенный текст без пояснений.
       PROMPT
 
@@ -93,9 +93,9 @@ module Ai
 
     def generate_hashtags(content:, count: 5)
       prompt = <<~PROMPT
-        Сгенерируй #{count} релевантных хештегов для следующего поста. 
+        Сгенерируй #{count} релевантных хештегов для следующего поста.#{' '}
         Верни только хештеги через пробел.
-        
+
         Пост:
         #{content}
       PROMPT
@@ -116,13 +116,13 @@ module Ai
       response = @client.chat(
         model: model,
         messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user_message }
+          { role: "system", content: system },
+          { role: "user", content: user_message }
         ],
         temperature: temperature.to_f,  # Ensure temperature is a Float
         max_tokens: max_tokens.to_i,    # Ensure max_tokens is an Integer
-        transforms: ['middle-out'],
-        route: 'fallback'
+        transforms: [ "middle-out" ],
+        route: "fallback"
       )
 
       response
@@ -132,9 +132,9 @@ module Ai
       # Используем системный промпт из проекта, если есть
       base_prompt = if @project&.system_prompt.present?
                       @project.system_prompt
-                    else
+      else
                       @config.custom_system_prompt || default_system_prompt
-                    end
+      end
 
       if @project
         base_prompt += "\n\nПроект: #{@project.name}"
@@ -173,7 +173,7 @@ module Ai
       <<~PROMPT
         Ты - профессиональный копирайтер и SMM-специалист для Telegram-каналов.
         Твоя задача - создавать привлекательный, вовлекающий контент для социальных сетей.
-        
+
         Правила:
         - Пиши живым, естественным языком
         - Используй эмодзи умеренно и к месту
@@ -181,7 +181,7 @@ module Ai
         - Добавляй призывы к действию там, где уместно
         - Адаптируй тон под указанный стиль проекта
         - Длина поста: оптимально 300-800 символов, максимум 4000
-        
+
         Форматирование Telegram markdown:
         - **жирный текст**
         - *курсив*
@@ -193,7 +193,7 @@ module Ai
     def handle_api_error(error, prompt, context)
       Rails.logger.error("OpenRouter API Error: #{error.message}")
 
-      fallback_models = @config.fallback_models || ['gpt-3.5-turbo']
+      fallback_models = @config.fallback_models || [ "gpt-3.5-turbo" ]
 
       fallback_models.each do |fallback_model|
         begin
@@ -209,7 +209,7 @@ module Ai
         end
       end
 
-      raise GenerationError, 'All AI models failed. Please try again later.'
+      raise GenerationError, "All AI models failed. Please try again later."
     end
 
     def track_usage(response)

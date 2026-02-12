@@ -15,7 +15,7 @@ module Admin
     def destroy
       @telegram_bot = TelegramBot.find(params[:id])
       @telegram_bot.destroy
-      redirect_to admin_telegram_bots_path, notice: 'Telegram бот удален', status: :see_other
+      redirect_to admin_telegram_bots_path, notice: "Telegram бот удален", status: :see_other
     end
   end
 end

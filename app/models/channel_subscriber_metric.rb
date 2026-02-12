@@ -13,7 +13,7 @@ class ChannelSubscriberMetric < ApplicationRecord
   scope :between, ->(start_date, end_date) { where(measured_at: start_date..end_date) }
   scope :daily, -> { where("DATE(measured_at) = DATE(measured_at)").group("DATE(measured_at)") }
   scope :latest_for_each_bot, -> {
-    where(id: select('DISTINCT ON (telegram_bot_id) id').order(:telegram_bot_id, measured_at: :desc))
+    where(id: select("DISTINCT ON (telegram_bot_id) id").order(:telegram_bot_id, measured_at: :desc))
   }
 
   # Class methods

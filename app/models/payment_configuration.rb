@@ -11,9 +11,9 @@ class PaymentConfiguration < ApplicationRecord
   # Singleton pattern - только одна конфигурация
   def self.current
     first_or_create!(
-      merchant_login: '',
-      password_1: '',
-      password_2: '',
+      merchant_login: "",
+      password_1: "",
+      password_2: "",
       test_mode: true,
       enabled: false
     )
@@ -26,15 +26,15 @@ class PaymentConfiguration < ApplicationRecord
 
   # Алгоритм хеширования для Robokassa
   def hash_algorithm
-    'sha256' # Robokassa поддерживает md5, sha1, sha256, sha512
+    "sha256" # Robokassa поддерживает md5, sha1, sha256, sha512
   end
 
   # URL для оплаты (тестовый или боевой)
   def payment_base_url
     if test_mode?
-      'https://auth.robokassa.ru/Merchant/Index.aspx'
+      "https://auth.robokassa.ru/Merchant/Index.aspx"
     else
-      'https://auth.robokassa.ru/Merchant/Index.aspx'
+      "https://auth.robokassa.ru/Merchant/Index.aspx"
     end
   end
 

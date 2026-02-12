@@ -3,7 +3,7 @@
 class TelegramSessionsController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_telegram_integration_enabled!
-  before_action :set_telegram_session, only: [:destroy]
+  before_action :set_telegram_session, only: [ :destroy ]
 
   layout "dashboard"
 

@@ -8,20 +8,20 @@ Rails.application.configure do
   config.content_security_policy do |policy|
     policy.default_src :self, :https
     policy.font_src    :self, :https, :data
-    policy.img_src     :self, :https, :data, :blob, 'https://t.me', 'https://telegram.org'
+    policy.img_src     :self, :https, :data, :blob, "https://t.me", "https://telegram.org"
     policy.object_src  :none
     policy.script_src  :self, :https
     policy.style_src   :self, :https
     # Разрешаем WebSocket подключения для Hotwire/Turbo
-    policy.connect_src :self, 'https://openrouter.ai', 'wss://*'
+    policy.connect_src :self, "https://openrouter.ai", "wss://*"
     # Разрешаем Telegram OAuth iframe
-    policy.frame_src   :self, 'https://oauth.telegram.org'
+    policy.frame_src   :self, "https://oauth.telegram.org"
     # Разрешаем отправку форм на Robokassa
-    policy.form_action :self, 'https://auth.robokassa.ru'
+    policy.form_action :self, "https://auth.robokassa.ru"
 
     # Specify URI for violation reports
     if Rails.env.production?
-      policy.report_uri '/csp-violation-report-endpoint'
+      policy.report_uri "/csp-violation-report-endpoint"
     end
   end
 

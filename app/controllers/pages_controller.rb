@@ -34,7 +34,7 @@ class PagesController < ApplicationController
 
     Rails.logger.info "Contact form submission: #{name} (#{email}): #{message}"
 
-    redirect_to contacts_path, notice: 'Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.'
+    redirect_to contacts_path, notice: "Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время."
   end
 
   def docs

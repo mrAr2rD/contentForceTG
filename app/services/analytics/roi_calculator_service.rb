@@ -101,17 +101,17 @@ module Analytics
       return [] unless @has_cost_column
 
       cost_expression = if @has_detailed_costs
-                          'SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as cost_total'
-                        else
-                          'SUM(cost) as cost_total'
-                        end
+                          "SUM(cost) + SUM(COALESCE(input_cost, 0)) + SUM(COALESCE(output_cost, 0)) as cost_total"
+      else
+                          "SUM(cost) as cost_total"
+      end
 
       ai_usage_logs
         .group(:model_used)
         .select(
-          'model_used',
-          'COUNT(*) as requests_count',
-          'SUM(tokens_used) as total_tokens',
+          "model_used",
+          "COUNT(*) as requests_count",
+          "SUM(tokens_used) as total_tokens",
           cost_expression
         )
         .map do |record|
@@ -148,13 +148,13 @@ module Analytics
       costs_by_day = if @has_cost_column
                        cost_expression = if @has_detailed_costs
                                            "cost + COALESCE(input_cost, 0) + COALESCE(output_cost, 0)"
-                                         else
+                       else
                                            "cost"
-                                         end
+                       end
                        ai_usage_logs.group("DATE(created_at)").sum(cost_expression)
-                     else
+      else
                        {}
-                     end
+      end
 
       revenue_by_day = completed_payments
         .group("DATE(created_at)")
@@ -176,13 +176,13 @@ module Analytics
     def revenue_by_plan
       completed_payments
         .joins(subscription: :plan_record)
-        .group('plans.name')
+        .group("plans.name")
         .sum(:amount)
     rescue ActiveRecord::StatementInvalid
       # Fallback если план ещё не привязан
       completed_payments
         .joins(:subscription)
-        .group('subscriptions.plan')
+        .group("subscriptions.plan")
         .sum(:amount)
     end
 
@@ -199,24 +199,24 @@ module Analytics
     end
 
     def extract_provider(model_id)
-      model_id.to_s.split('/').first&.titleize || 'Unknown'
+      model_id.to_s.split("/").first&.titleize || "Unknown"
     end
 
     # Курс USD к RUB (можно сделать настраиваемым)
     def usd_to_rub_rate
-      @usd_to_rub_rate ||= ENV.fetch('USD_TO_RUB_RATE', 90).to_f
+      @usd_to_rub_rate ||= ENV.fetch("USD_TO_RUB_RATE", 90).to_f
     end
 
     # Проверяем, есть ли базовая колонка cost
     def check_cost_column
-      AiUsageLog.table_exists? && AiUsageLog.column_names.include?('cost')
+      AiUsageLog.table_exists? && AiUsageLog.column_names.include?("cost")
     rescue StandardError
       false
     end
 
     # Проверяем, есть ли колонки для детальных расходов
     def check_detailed_costs_columns
-      AiUsageLog.column_names.include?('input_cost')
+      AiUsageLog.column_names.include?("input_cost")
     rescue StandardError
       false
     end

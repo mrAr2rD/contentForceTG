@@ -16,9 +16,9 @@ class AiUsageLog < ApplicationRecord
   validates :cost, numericality: { greater_than_or_equal_to: 0 }
 
   # Scopes для детализированных расходов
-  scope :with_costs, -> { where('cost > 0 OR input_cost > 0 OR output_cost > 0') }
-  scope :free_models, -> { where(cost: 0, input_cost: [nil, 0], output_cost: [nil, 0]) }
-  scope :paid_models, -> { where('cost > 0 OR input_cost > 0 OR output_cost > 0') }
+  scope :with_costs, -> { where("cost > 0 OR input_cost > 0 OR output_cost > 0") }
+  scope :free_models, -> { where(cost: 0, input_cost: [ nil, 0 ], output_cost: [ nil, 0 ]) }
+  scope :paid_models, -> { where("cost > 0 OR input_cost > 0 OR output_cost > 0") }
 
   # Расчёт полной стоимости запроса
   def total_cost
@@ -29,13 +29,13 @@ class AiUsageLog < ApplicationRecord
   # Статистика использования
   def self.total_cost_for_user(user, period = 30.days)
     where(user: user)
-      .where('created_at > ?', period.ago)
+      .where("created_at > ?", period.ago)
       .sum(:cost)
   end
 
   def self.popular_models(limit = 5)
     group(:model_used)
-      .order('count_all DESC')
+      .order("count_all DESC")
       .limit(limit)
       .count
   end
@@ -45,7 +45,7 @@ class AiUsageLog < ApplicationRecord
   end
 
   def self.daily_usage(days = 30)
-    where('created_at > ?', days.days.ago)
+    where("created_at > ?", days.days.ago)
       .group_by_day(:created_at)
       .sum(:tokens_used)
   end

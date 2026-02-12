@@ -8,18 +8,18 @@ class CalendarController < ApplicationController
     @projects = current_user.projects.active
     @selected_project = if params[:project_id].present?
                           current_user.projects.find(params[:project_id])
-                        else
+    else
                           @projects.first
-                        end
+    end
 
     # Get posts for calendar view
     @posts = if @selected_project
                @selected_project.posts
                                .where("scheduled_at IS NOT NULL OR published_at IS NOT NULL")
                                .order(:scheduled_at, :published_at)
-             else
+    else
                Post.none
-             end
+    end
 
     # Group posts by month for calendar view
     @posts_by_date = @posts.group_by do |post|

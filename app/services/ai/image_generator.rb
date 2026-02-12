@@ -7,28 +7,28 @@ module Ai
     # Доступные модели для генерации изображений
     # Актуальные ID: curl https://openrouter.ai/api/v1/models | jq '.data[] | select(.id | contains("image"))'
     AVAILABLE_MODELS = {
-      'google/gemini-2.5-flash-image' => {
-        name: 'Gemini Flash Image',
-        description: 'Быстрая генерация, хорошее качество',
+      "google/gemini-2.5-flash-image" => {
+        name: "Gemini Flash Image",
+        description: "Быстрая генерация, хорошее качество",
         cost_per_image: 0.04
       },
-      'google/gemini-3-pro-image-preview' => {
-        name: 'Gemini 3 Pro Image',
-        description: 'Высокое качество, продвинутая модель',
+      "google/gemini-3-pro-image-preview" => {
+        name: "Gemini 3 Pro Image",
+        description: "Высокое качество, продвинутая модель",
         cost_per_image: 0.06
       }
     }.freeze
 
     # Модель по умолчанию
-    DEFAULT_MODEL = 'google/gemini-2.5-flash-image'
+    DEFAULT_MODEL = "google/gemini-2.5-flash-image"
 
     # Доступные соотношения сторон
     ASPECT_RATIOS = {
-      '1:1' => 'Квадрат',
-      '16:9' => 'Широкое',
-      '9:16' => 'Вертикальное',
-      '4:3' => 'Стандартное',
-      '3:4' => 'Портрет'
+      "1:1" => "Квадрат",
+      "16:9" => "Широкое",
+      "9:16" => "Вертикальное",
+      "4:3" => "Стандартное",
+      "3:4" => "Портрет"
     }.freeze
 
     def initialize(project: nil, user: nil)
@@ -43,7 +43,7 @@ module Ai
     # @param aspect_ratio [String] соотношение сторон (1:1, 16:9, 9:16)
     # @param model [String] модель для генерации (опционально)
     # @return [Hash] результат с image_data, content_type или ошибкой
-    def generate(prompt:, aspect_ratio: '1:1', model: nil)
+    def generate(prompt:, aspect_ratio: "1:1", model: nil)
       model ||= DEFAULT_MODEL
 
       # Проверяем, что модель поддерживается
@@ -58,7 +58,7 @@ module Ai
       unless can_generate?
         return {
           success: false,
-          error: 'Превышен лимит AI генераций для вашего тарифа'
+          error: "Превышен лимит AI генераций для вашего тарифа"
         }
       end
 
@@ -92,7 +92,7 @@ module Ai
       Rails.logger.error "OpenRouter configuration error: #{e.message}"
       {
         success: false,
-        error: 'OpenRouter API ключ не настроен. Обратитесь к администратору.'
+        error: "OpenRouter API ключ не настроен. Обратитесь к администратору."
       }
     rescue Openrouter::APIError => e
       Rails.logger.error "OpenRouter API error: #{e.message}"
@@ -131,9 +131,9 @@ module Ai
       # Базовые улучшения для качества изображения
       enhancements = [
         prompt,
-        'high quality',
-        'detailed',
-        'professional'
+        "high quality",
+        "detailed",
+        "professional"
       ]
 
       # Добавляем контекст проекта если есть
@@ -141,7 +141,7 @@ module Ai
         enhancements << "for #{@project.name} brand"
       end
 
-      enhancements.join(', ')
+      enhancements.join(", ")
     end
 
     # Отслеживание использования AI для биллинга и аналитики

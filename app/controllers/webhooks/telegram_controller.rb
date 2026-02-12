@@ -11,7 +11,7 @@ module Webhooks
       telegram_bot = TelegramBot.find_by(bot_token: bot_token)
 
       unless telegram_bot
-        render json: { error: 'Bot not found' }, status: :not_found
+        render json: { error: "Bot not found" }, status: :not_found
         return
       end
 
@@ -22,12 +22,12 @@ module Webhooks
       Rails.logger.info("Telegram webhook received for bot #{telegram_bot.id}: #{update.keys}")
 
       # Обработка различных типов обновлений
-      process_channel_post(telegram_bot, update['channel_post']) if update['channel_post'].present?
-      process_edited_channel_post(telegram_bot, update['edited_channel_post']) if update['edited_channel_post'].present?
-      process_message_reaction(telegram_bot, update['message_reaction']) if update['message_reaction'].present?
-      process_chat_member(telegram_bot, update['my_chat_member']) if update['my_chat_member'].present?
-      process_chat_member(telegram_bot, update['chat_member']) if update['chat_member'].present?
-      process_callback_query(telegram_bot, update['callback_query']) if update['callback_query'].present?
+      process_channel_post(telegram_bot, update["channel_post"]) if update["channel_post"].present?
+      process_edited_channel_post(telegram_bot, update["edited_channel_post"]) if update["edited_channel_post"].present?
+      process_message_reaction(telegram_bot, update["message_reaction"]) if update["message_reaction"].present?
+      process_chat_member(telegram_bot, update["my_chat_member"]) if update["my_chat_member"].present?
+      process_chat_member(telegram_bot, update["chat_member"]) if update["chat_member"].present?
+      process_callback_query(telegram_bot, update["callback_query"]) if update["callback_query"].present?
 
       head :ok
     rescue StandardError => e
@@ -40,8 +40,8 @@ module Webhooks
 
     # Process channel posts (when our bot posts to channel)
     def process_channel_post(bot, post_data)
-      message_id = post_data['message_id']
-      views = post_data['views'] || 0
+      message_id = post_data["message_id"]
+      views = post_data["views"] || 0
 
       # Сохраняем пост для мини-сайта (если есть channel_site)
       save_channel_post_for_site(bot, post_data)
@@ -53,7 +53,7 @@ module Webhooks
       # Update or create analytics record
       update_post_analytics(post, {
         views: views,
-        forwards: post_data['forward_count'] || 0,
+        forwards: post_data["forward_count"] || 0,
         measured_at: Time.current
       })
 
@@ -62,8 +62,8 @@ module Webhooks
 
     # Process edited channel posts (view count updates)
     def process_edited_channel_post(bot, post_data)
-      message_id = post_data['message_id']
-      views = post_data['views'] || 0
+      message_id = post_data["message_id"]
+      views = post_data["views"] || 0
 
       post = bot.posts.find_by(telegram_message_id: message_id)
       return unless post
@@ -71,7 +71,7 @@ module Webhooks
       # This often contains updated view counts
       update_post_analytics(post, {
         views: views,
-        forwards: post_data['forward_count'] || 0,
+        forwards: post_data["forward_count"] || 0,
         measured_at: Time.current
       })
 
@@ -80,8 +80,8 @@ module Webhooks
 
     # Process message reactions (likes, hearts, etc.)
     def process_message_reaction(bot, reaction_data)
-      message_id = reaction_data['message_id']
-      chat_id = reaction_data['chat']['id']
+      message_id = reaction_data["message_id"]
+      chat_id = reaction_data["chat"]["id"]
 
       # Only process if it's our channel
       return unless chat_id.to_s == bot.channel_id
@@ -94,18 +94,18 @@ module Webhooks
       reactions_hash = last_analytics&.reactions || {}
 
       # Update reactions based on new/old reactions
-      new_reactions = reaction_data['new_reaction'] || []
-      old_reactions = reaction_data['old_reaction'] || []
+      new_reactions = reaction_data["new_reaction"] || []
+      old_reactions = reaction_data["old_reaction"] || []
 
       # Remove old reactions
       old_reactions.each do |reaction|
-        emoji = reaction.dig('type', 'emoji')
-        reactions_hash[emoji] = [reactions_hash[emoji].to_i - 1, 0].max if emoji
+        emoji = reaction.dig("type", "emoji")
+        reactions_hash[emoji] = [ reactions_hash[emoji].to_i - 1, 0 ].max if emoji
       end
 
       # Add new reactions
       new_reactions.each do |reaction|
-        emoji = reaction.dig('type', 'emoji')
+        emoji = reaction.dig("type", "emoji")
         reactions_hash[emoji] = reactions_hash[emoji].to_i + 1 if emoji
       end
 
@@ -122,12 +122,12 @@ module Webhooks
 
     # Process chat member updates (joins/leaves)
     def process_chat_member(bot, member_data)
-      chat = member_data['chat']
-      return unless chat['type'] == 'channel'
-      return unless chat['id'].to_s == bot.channel_id
+      chat = member_data["chat"]
+      return unless chat["type"] == "channel"
+      return unless chat["id"].to_s == bot.channel_id
 
-      old_status = member_data.dig('old_chat_member', 'status')
-      new_status = member_data.dig('new_chat_member', 'status')
+      old_status = member_data.dig("old_chat_member", "status")
+      new_status = member_data.dig("new_chat_member", "status")
 
       # Создаём событие подписчика для детальной аналитики
       create_subscriber_event(bot, member_data)
@@ -147,7 +147,7 @@ module Webhooks
     def create_subscriber_event(bot, member_data)
       SubscriberEvent.create_from_webhook(
         telegram_bot: bot,
-        update: { 'chat_member' => member_data }
+        update: { "chat_member" => member_data }
       )
     rescue StandardError => e
       Rails.logger.error("Failed to create subscriber event: #{e.message}")
@@ -155,7 +155,7 @@ module Webhooks
 
     # Обновить статистику invite link при вступлении
     def update_invite_link_stats(bot, member_data)
-      invite_link_url = member_data.dig('invite_link', 'invite_link')
+      invite_link_url = member_data.dig("invite_link", "invite_link")
       return unless invite_link_url
 
       invite_link = InviteLink.find_by(invite_link: invite_link_url)
@@ -169,11 +169,11 @@ module Webhooks
 
     # Process callback queries (button clicks)
     def process_callback_query(bot, query_data)
-      message = query_data['message']
+      message = query_data["message"]
       return unless message
 
-      message_id = message['message_id']
-      callback_data = query_data['data']
+      message_id = message["message_id"]
+      callback_data = query_data["data"]
 
       post = bot.posts.find_by(telegram_message_id: message_id)
       return unless post
@@ -223,7 +223,7 @@ module Webhooks
     def increment_subscriber_count(bot, delta)
       last_metric = bot.channel_subscriber_metrics.recent.first
       current_count = last_metric&.subscriber_count || 0
-      new_count = [current_count + delta, 0].max
+      new_count = [ current_count + delta, 0 ].max
 
       # If last metric was created today, update it
       # Otherwise create new metric
@@ -269,7 +269,7 @@ module Webhooks
         return
       end
 
-      provided_token = request.headers['X-Telegram-Bot-Api-Secret-Token']
+      provided_token = request.headers["X-Telegram-Bot-Api-Secret-Token"]
       expected_token = telegram_bot.webhook_secret
 
       # Legacy mode: allow bots without secret during migration
@@ -289,38 +289,38 @@ module Webhooks
       channel_site = bot.channel_site
       return unless channel_site&.enabled?
 
-      message_id = post_data['message_id']
-      text = post_data['text'] || post_data['caption'] || ''
+      message_id = post_data["message_id"]
+      text = post_data["text"] || post_data["caption"] || ""
 
       # Пропускаем пустые посты
-      return if text.blank? && post_data['photo'].blank? && post_data['video'].blank?
+      return if text.blank? && post_data["photo"].blank? && post_data["video"].blank?
 
       # Собираем медиа
       media = []
-      if post_data['photo'].present?
+      if post_data["photo"].present?
         # photo - массив размеров, берём последний (самый большой)
-        largest_photo = post_data['photo'].is_a?(Array) ? post_data['photo'].last : post_data['photo']
+        largest_photo = post_data["photo"].is_a?(Array) ? post_data["photo"].last : post_data["photo"]
         media << {
-          type: 'photo',
-          file_id: largest_photo['file_id'],
-          width: largest_photo['width'],
-          height: largest_photo['height']
+          type: "photo",
+          file_id: largest_photo["file_id"],
+          width: largest_photo["width"],
+          height: largest_photo["height"]
         }
       end
 
-      if post_data['video'].present?
+      if post_data["video"].present?
         media << {
-          type: 'video',
-          file_id: post_data['video']['file_id'],
-          duration: post_data['video']['duration']
+          type: "video",
+          file_id: post_data["video"]["file_id"],
+          duration: post_data["video"]["duration"]
         }
       end
 
-      if post_data['document'].present?
+      if post_data["document"].present?
         media << {
-          type: 'document',
-          file_id: post_data['document']['file_id'],
-          file_name: post_data['document']['file_name']
+          type: "document",
+          file_id: post_data["document"]["file_id"],
+          file_name: post_data["document"]["file_name"]
         }
       end
 
@@ -330,10 +330,10 @@ module Webhooks
       )
 
       channel_post.assign_attributes(
-        telegram_date: post_data['date'] ? Time.at(post_data['date']).utc : Time.current,
+        telegram_date: post_data["date"] ? Time.at(post_data["date"]).utc : Time.current,
         original_text: text,
         media: media,
-        views_count: post_data['views'] || 0
+        views_count: post_data["views"] || 0
       )
 
       if channel_post.save

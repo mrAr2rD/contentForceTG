@@ -68,7 +68,7 @@ module Notifications
 
     def default_context
       {
-        user_name: @user.first_name || @user.email.split('@').first,
+        user_name: @user.first_name || @user.email.split("@").first,
         user_email: @user.email
       }
     end

@@ -3,11 +3,11 @@
 module MarkdownHelper
   # Рендерит Markdown в HTML с поддержкой SEO-дружественных тегов
   def render_markdown(text)
-    return '' if text.blank?
+    return "" if text.blank?
 
     renderer = Redcarpet::Render::HTML.new(
       hard_wrap: true,
-      link_attributes: { target: '_blank', rel: 'noopener noreferrer' },
+      link_attributes: { target: "_blank", rel: "noopener noreferrer" },
       with_toc_data: true
     )
 

@@ -41,12 +41,12 @@ module Ui
 
     def classes
       base_classes = "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:ring-offset-zinc-950 dark:focus-visible:ring-zinc-300"
-      
+
       variant_classes = VARIANTS[@variant] || VARIANTS[:default]
       size_classes = SIZES[@size] || SIZES[:default]
       custom_classes = @options[:class]
 
-      [base_classes, variant_classes, size_classes, custom_classes].compact.join(" ")
+      [ base_classes, variant_classes, size_classes, custom_classes ].compact.join(" ")
     end
   end
 end

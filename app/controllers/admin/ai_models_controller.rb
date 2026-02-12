@@ -3,7 +3,7 @@
 module Admin
   class AiModelsController < Admin::ApplicationController
     before_action :check_table_exists
-    before_action :set_ai_model, only: [:show, :edit, :update, :destroy, :toggle_active]
+    before_action :set_ai_model, only: [ :show, :edit, :update, :destroy, :toggle_active ]
 
     def index
       @ai_models = AiModel.order(:tier, :name)
@@ -20,7 +20,7 @@ module Admin
       @ai_model = AiModel.new(ai_model_params)
 
       if @ai_model.save
-        redirect_to admin_ai_models_path, notice: 'Модель создана'
+        redirect_to admin_ai_models_path, notice: "Модель создана"
       else
         render :new, status: :unprocessable_entity
       end
@@ -30,7 +30,7 @@ module Admin
 
     def update
       if @ai_model.update(ai_model_params)
-        redirect_to admin_ai_models_path, notice: 'Модель обновлена'
+        redirect_to admin_ai_models_path, notice: "Модель обновлена"
       else
         render :edit, status: :unprocessable_entity
       end
@@ -38,7 +38,7 @@ module Admin
 
     def destroy
       @ai_model.destroy
-      redirect_to admin_ai_models_path, notice: 'Модель удалена'
+      redirect_to admin_ai_models_path, notice: "Модель удалена"
     end
 
     def toggle_active
@@ -54,7 +54,7 @@ module Admin
         model.save!
       end
 
-      redirect_to admin_ai_models_path, notice: 'Модели синхронизированы с дефолтами'
+      redirect_to admin_ai_models_path, notice: "Модели синхронизированы с дефолтами"
     end
 
     private
@@ -74,7 +74,7 @@ module Admin
       return if AiModel.table_exists?
 
       redirect_to admin_root_path,
-                  alert: 'Таблица ai_models не существует. Выполните миграции: bin/rails db:migrate'
+                  alert: "Таблица ai_models не существует. Выполните миграции: bin/rails db:migrate"
     end
   end
 end

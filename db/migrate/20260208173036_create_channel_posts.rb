@@ -26,8 +26,8 @@ class CreateChannelPosts < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :channel_posts, [:channel_site_id, :telegram_message_id], unique: true, name: 'idx_channel_posts_on_site_and_message'
-    add_index :channel_posts, [:channel_site_id, :slug], unique: true, where: "slug IS NOT NULL", name: 'idx_channel_posts_on_site_and_slug'
+    add_index :channel_posts, [ :channel_site_id, :telegram_message_id ], unique: true, name: 'idx_channel_posts_on_site_and_message'
+    add_index :channel_posts, [ :channel_site_id, :slug ], unique: true, where: "slug IS NOT NULL", name: 'idx_channel_posts_on_site_and_slug'
     add_index :channel_posts, :visibility
     add_index :channel_posts, :featured
     add_index :channel_posts, :telegram_date

@@ -11,7 +11,7 @@ class PostAnalytic < ApplicationRecord
   scope :for_post, ->(post_id) { where(post_id: post_id) }
   scope :between, ->(start_date, end_date) { where(measured_at: start_date..end_date) }
   scope :latest_for_each_post, -> {
-    where(id: select('DISTINCT ON (post_id) id').order(:post_id, measured_at: :desc))
+    where(id: select("DISTINCT ON (post_id) id").order(:post_id, measured_at: :desc))
   }
 
   # Class methods

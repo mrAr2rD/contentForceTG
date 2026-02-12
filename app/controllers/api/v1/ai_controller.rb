@@ -114,7 +114,7 @@ module Api
         generator = Ai::ImageGenerator.new(project: project, user: current_user)
         result = generator.generate(
           prompt: params[:prompt],
-          aspect_ratio: params[:aspect_ratio] || '1:1',
+          aspect_ratio: params[:aspect_ratio] || "1:1",
           model: params[:model]
         )
 

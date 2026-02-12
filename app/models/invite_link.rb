@@ -10,11 +10,11 @@ class InviteLink < ApplicationRecord
   validates :invite_link, presence: true, uniqueness: true
 
   # Scopes
-  scope :active, -> { where(revoked: false).where('expire_date IS NULL OR expire_date > ?', Time.current) }
-  scope :expired, -> { where('expire_date <= ?', Time.current) }
+  scope :active, -> { where(revoked: false).where("expire_date IS NULL OR expire_date > ?", Time.current) }
+  scope :expired, -> { where("expire_date <= ?", Time.current) }
   scope :revoked, -> { where(revoked: true) }
   scope :by_source, ->(source) { where(source: source) }
-  scope :with_joins, -> { where('join_count > 0') }
+  scope :with_joins, -> { where("join_count > 0") }
 
   # Делегирование
   delegate :channel_name, to: :telegram_bot, allow_nil: true
@@ -38,7 +38,7 @@ class InviteLink < ApplicationRecord
   def conversion_rate
     return 0.0 if join_count.zero?
 
-    stayed = subscriber_events.where(event_type: 'joined').count -
+    stayed = subscriber_events.where(event_type: "joined").count -
              subscriber_events.where(event_type: %w[left kicked]).count
 
     ((stayed.to_f / join_count) * 100).round(2)
@@ -57,9 +57,9 @@ class InviteLink < ApplicationRecord
 
   # Текущее количество подписчиков по этой ссылке
   def current_subscribers_count
-    joins = subscriber_events.where(event_type: 'joined').count
+    joins = subscriber_events.where(event_type: "joined").count
     leaves = subscriber_events.where(event_type: %w[left kicked]).count
-    [joins - leaves, 0].max
+    [ joins - leaves, 0 ].max
   end
 
   # Количество ушедших

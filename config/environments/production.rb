@@ -22,7 +22,7 @@ Rails.application.configure do
   # config.asset_host = "http://assets.example.com"
 
   # Store uploaded files on S3 (or local if S3 not configured)
-  config.active_storage.service = ENV['S3_BUCKET'].present? ? :amazon : :local
+  config.active_storage.service = ENV["S3_BUCKET"].present? ? :amazon : :local
 
   # Assume all access to the app is happening through a SSL-terminating reverse proxy.
   config.assume_ssl = true

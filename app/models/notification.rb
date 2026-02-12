@@ -6,8 +6,8 @@ class Notification < ApplicationRecord
   belongs_to :user
 
   # Enums
-  enum :status, { pending: 'pending', sent: 'sent', failed: 'failed', read: 'read' }, default: :pending
-  enum :channel, { email: 'email', telegram: 'telegram' }, default: :email
+  enum :status, { pending: "pending", sent: "sent", failed: "failed", read: "read" }, default: :pending
+  enum :channel, { email: "email", telegram: "telegram" }, default: :email
 
   # Типы уведомлений
   TYPES = %w[
@@ -54,7 +54,7 @@ class Notification < ApplicationRecord
   def mark_as_failed!(error_message = nil)
     update!(
       status: :failed,
-      metadata: metadata.merge('error' => error_message)
+      metadata: metadata.merge("error" => error_message)
     )
   end
 
@@ -68,9 +68,9 @@ class Notification < ApplicationRecord
   # Планируем отправку уведомления
   def schedule_delivery
     case channel
-    when 'email'
+    when "email"
       NotificationMailer.deliver_notification(self).deliver_later
-    when 'telegram'
+    when "telegram"
       SendTelegramNotificationJob.perform_later(id)
     end
   rescue StandardError => e
