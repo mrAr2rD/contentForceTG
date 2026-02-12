@@ -15,5 +15,19 @@ class AnalyzeStyleJob < ApplicationJob
     else
       Rails.logger.error "Style analysis failed for project #{project_id}: #{result[:error]}"
     end
+
+    # Отправляем обновление в UI через Turbo Stream
+    broadcast_status_update(project)
+  end
+
+  private
+
+  def broadcast_status_update(project)
+    Turbo::StreamsChannel.broadcast_replace_to(
+      "project_#{project.id}",
+      target: "style_status",
+      partial: "projects/style_settings/status",
+      locals: { project: project.reload }
+    )
   end
 end

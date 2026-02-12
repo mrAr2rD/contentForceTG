@@ -30,6 +30,9 @@ module Projects
         return
       end
 
+      # Устанавливаем статус "анализируется" сразу для UI
+      @project.update!(style_analysis_status: :style_analyzing)
+
       AnalyzeStyleJob.perform_later(@project.id)
 
       respond_to do |format|
@@ -37,7 +40,7 @@ module Projects
           render turbo_stream: turbo_stream.replace(
             "style_status",
             partial: "projects/style_settings/status",
-            locals: { project: @project.reload }
+            locals: { project: @project }
           )
         end
         format.html { redirect_to project_style_settings_path(@project), notice: "Анализ стиля запущен" }
