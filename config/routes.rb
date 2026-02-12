@@ -218,6 +218,8 @@ Rails.application.routes.draw do
     resources :payments, only: [:index, :show] do
       member do
         post :refund
+        post :confirm
+        post :cancel
       end
     end
 
