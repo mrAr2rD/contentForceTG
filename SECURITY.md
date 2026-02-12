@@ -113,19 +113,6 @@
 
 ### 🔒 HTTP Security Headers
 
-#### Content Security Policy (CSP)
-- **Файл**: `config/initializers/content_security_policy.rb`
-- **Директивы**:
-  - `default-src 'self'`
-  - `script-src 'self' https: 'nonce-*'` (для Turbo/Stimulus)
-  - `style-src 'self' https: 'unsafe-inline'` (для Tailwind)
-  - `img-src 'self' https: data: blob:`
-  - `connect-src 'self' https: wss:`
-  - `font-src 'self' https: data:`
-  - `frame-ancestors 'none'`
-  - `base-uri 'self'`
-  - `form-action 'self'`
-
 #### Security Headers
 - `X-Frame-Options: SAMEORIGIN` - защита от clickjacking
 - `X-Content-Type-Options: nosniff` - защита от MIME sniffing
@@ -250,7 +237,6 @@ bundle exec brakeman
 - [ ] Настроить Active Record Encryption ключи
 - [ ] Настроить Redis для Rack::Attack
 - [ ] Включить HSTS header
-- [ ] Настроить CSP nonce для production
 - [ ] Ограничить CORS если используется API
 - [ ] Настроить backup базы данных
 - [ ] Включить monitoring (Sentry)
