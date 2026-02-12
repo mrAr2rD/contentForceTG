@@ -31,6 +31,18 @@
   </div>
 
   <div>
+    <%= form.label :display_on, "Где показывать", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+    <%= form.select :display_on,
+        options_for_select([
+          ["Публичные страницы (главная, о нас, pricing и т.д.)", "public_pages"],
+          ["Личный кабинет (dashboard)", "dashboard"]
+        ], sponsor_banner.display_on),
+        {},
+        class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100" %>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Выберите, где будет отображаться баннер (не показывается на мини-сайтах)</p>
+  </div>
+
+  <div>
     <%= form.label :icon, "Иконка/Логотип", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
 
     <% if sponsor_banner.icon.attached? %>

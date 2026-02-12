@@ -5,11 +5,13 @@ class CreateSponsorBanners < ActiveRecord::Migration[8.1]
       t.text :description
       t.string :url, null: false
       t.boolean :enabled, default: false, null: false
+      t.integer :display_on, default: 0, null: false # 0 = public_pages, 1 = dashboard
 
       t.timestamps
     end
 
-    # Добавляем индекс для быстрого поиска активного баннера
+    # Добавляем индексы для быстрого поиска активного баннера
     add_index :sponsor_banners, :enabled
+    add_index :sponsor_banners, [:enabled, :display_on]
   end
 end

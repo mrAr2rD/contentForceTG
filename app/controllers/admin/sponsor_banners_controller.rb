@@ -42,6 +42,6 @@ class Admin::SponsorBannersController < Admin::ApplicationController
   end
 
   def sponsor_banner_params
-    params.require(:sponsor_banner).permit(:title, :description, :url, :enabled, :icon)
+    params.require(:sponsor_banner).permit(:title, :description, :url, :enabled, :display_on, :icon)
   end
 end

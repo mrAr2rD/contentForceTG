@@ -1,6 +1,18 @@
 <%
-  # Получаем активный баннер
-  banner = SponsorBanner.current
+  # НЕ показываем баннер на мини-сайтах (channel sites)
+  # Они используют layout "channel_site"
+  return if controller.class.name.start_with?("ChannelSites") && !controller.class.name.include?("Dashboard")
+
+  # Определяем текущий контекст
+  is_dashboard = controller.class.name.start_with?("Dashboard::") ||
+                 controller.class.name.start_with?("Admin::")
+
+  # Получаем соответствующий баннер
+  banner = if is_dashboard
+    SponsorBanner.current(:dashboard)
+  else
+    SponsorBanner.current(:public_pages)
+  end
 %>
 
 <% if banner.present? %>

@@ -4,9 +4,18 @@ FactoryBot.define do
     description { "Профессиональный инструмент для автоматизации контента в Telegram" }
     url { "https://contentforce.ru" }
     enabled { false }
+    display_on { :public_pages }
 
     trait :enabled do
       enabled { true }
+    end
+
+    trait :for_dashboard do
+      display_on { :dashboard }
+    end
+
+    trait :for_public do
+      display_on { :public_pages }
     end
 
     trait :with_icon do

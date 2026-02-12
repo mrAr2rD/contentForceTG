@@ -13,7 +13,9 @@
 - ✅ Сохранение состояния в localStorage (не показывать повторно после закрытия)
 - ✅ Плавная анимация появления (fade in + slide up)
 - ✅ z-index: 50 (поверх контента)
-- ✅ Singleton pattern (только один активный баннер)
+- ✅ Выбор места отображения: публичные страницы ИЛИ личный кабинет
+- ✅ НЕ показывается на мини-сайтах (channel sites)
+- ✅ Singleton pattern (один активный баннер на каждое место отображения)
 
 ## Использование
 
@@ -31,14 +33,17 @@ rails db:migrate
    - **Заголовок** (обязательно, макс. 100 символов)
    - **Описание** (опционально, макс. 200 символов)
    - **Ссылка** (обязательно, валидный URL)
+   - **Где показывать** (выбор между "Публичные страницы" и "Личный кабинет")
    - **Иконка/Логотип** (опционально, макс. 1MB)
    - **Включить баннер** (checkbox для активации)
 4. Сохраните
 
 ### 3. Управление баннерами
 
-- Только один баннер может быть активен одновременно
-- При активации нового баннера, предыдущий автоматически отключается
+- Только один баннер может быть активен для каждого места отображения (публичные страницы / личный кабинет)
+- При активации нового баннера, предыдущий с тем же `display_on` автоматически отключается
+- Можно иметь одновременно 2 активных баннера: один для публичных страниц, другой для dashboard
+- Баннер НЕ показывается на мини-сайтах (channel sites)
 - Пользователи, закрывшие баннер, не увидят его повторно (сохраняется в localStorage)
 
 ## Технические детали
@@ -51,10 +56,16 @@ title       :string   # Заголовок
 description :text     # Описание
 url         :string   # Ссылка
 enabled     :boolean  # Активен ли баннер
+display_on  :integer  # Где показывать: 0 = public_pages, 1 = dashboard
 icon        :attachment # Active Storage (PNG, JPG, WEBP, SVG)
 
+# Enum
+display_on: { public_pages: 0, dashboard: 1 }
+
 # Методы
-SponsorBanner.current  # Возвращает текущий активный баннер
+SponsorBanner.current(:public_pages)  # Возвращает активный баннер для публичных страниц
+SponsorBanner.current(:dashboard)     # Возвращает активный баннер для dashboard
+SponsorBanner.current                 # По умолчанию :public_pages
 ```
 
 ### Stimulus Controller: `sponsor_banner_controller.js`
@@ -75,13 +86,26 @@ window.SponsorBannerController.clearHistory()
 
 ## Примеры использования
 
-### Создание баннера через Rails console
+### Создание баннера для публичных страниц
 
 ```ruby
 SponsorBanner.create!(
   title: "ContentForce Pro",
   description: "Профессиональный инструмент для автоматизации контента",
   url: "https://contentforce.ru",
+  display_on: :public_pages,
+  enabled: true
+)
+```
+
+### Создание баннера для личного кабинета
+
+```ruby
+SponsorBanner.create!(
+  title: "Upgrade to Pro",
+  description: "Получите больше возможностей с Pro версией",
+  url: "https://contentforce.ru/pricing",
+  display_on: :dashboard,
   enabled: true
 )
 ```
@@ -93,6 +117,7 @@ banner = SponsorBanner.create!(
   title: "Наш спонсор",
   description: "Поддерживают проект",
   url: "https://example.com",
+  display_on: :public_pages,
   enabled: true
 )
 
