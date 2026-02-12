@@ -56,15 +56,27 @@
         /* Кастомный CSS: Footer */
         <%= sanitize_custom_css(@channel_site.custom_css["footer"]) %>
       <% end %>
+
+      /* Утилитарные классы для адаптивных цветов */
       .accent { color: var(--accent-color); }
       .accent-bg { background-color: var(--accent-color); }
       .accent-border { border-color: var(--accent-color); }
+      .text-primary { color: var(--text-primary) !important; }
+      .text-secondary { color: var(--text-secondary) !important; }
+      .text-muted { color: var(--text-secondary); }
+      .bg-primary { background-color: var(--bg-primary) !important; }
+      .bg-secondary { background-color: var(--bg-secondary) !important; }
+      .border-custom { border-color: var(--border-color) !important; }
+
       .card {
         background-color: var(--bg-secondary);
         border: 1px solid var(--border-color);
         border-radius: 12px;
       }
-      .text-muted { color: var(--text-secondary); }
+
+      /* Адаптивные hover состояния */
+      .hover-text-primary:hover { color: var(--text-primary) !important; }
+      .hover-bg-secondary:hover { background-color: var(--bg-secondary) !important; }
       .channel-site-scrollbar::-webkit-scrollbar {
         width: 6px;
       }
@@ -87,25 +99,25 @@
       <div data-sidebar-target="overlay" data-action="click->sidebar#closeMobile" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden"></div>
 
       <!-- Left Sidebar -->
-      <aside data-sidebar-target="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 border-r border-zinc-800 flex flex-col shrink-0 transition-all duration-300 -translate-x-full lg:translate-x-0" style="background-color: var(--bg-secondary);">
+      <aside data-sidebar-target="sidebar" class="fixed lg:static inset-y-0 left-0 z-50 w-64 border-r border-custom flex flex-col shrink-0 transition-all duration-300 -translate-x-full lg:translate-x-0 bg-secondary">
         <!-- Channel Header -->
-        <div class="p-4 border-b border-zinc-800">
+        <div class="p-4 border-b border-custom">
           <a href="/" class="flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-full accent-bg flex items-center justify-center text-black font-bold text-lg">
               <%= (@channel_site.site_title || @channel_site.telegram_bot.channel_name).to_s[0]&.upcase %>
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
+              <div class="font-semibold text-primary truncate accent group-hover:opacity-80 transition-opacity">
                 <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
               </div>
-              <p class="text-xs text-zinc-500">Telegram канал</p>
+              <p class="text-xs text-secondary">Telegram канал</p>
             </div>
           </a>
 
           <!-- Close button (mobile only) -->
           <button
             data-action="click->sidebar#closeMobile"
-            class="lg:hidden absolute top-4 right-4 p-1.5 rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            class="lg:hidden absolute top-4 right-4 p-1.5 rounded-md text-secondary hover-text-primary hover-bg-secondary transition-colors"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
@@ -115,14 +127,14 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto channel-site-scrollbar p-3 space-y-1">
-          <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white' %>">
+          <a href="/" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/' ? 'bg-secondary text-primary' : 'text-secondary hover-bg-secondary hover-text-primary' %>">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
             </svg>
             <span>Главная</span>
           </a>
 
-          <a href="/posts" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/posts' ? 'bg-zinc-800 text-white' : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-white' %>">
+          <a href="/posts" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all <%= request.path == '/posts' ? 'bg-secondary text-primary' : 'text-secondary hover-bg-secondary hover-text-primary' %>">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
             </svg>
@@ -130,19 +142,19 @@
           </a>
 
           <!-- Channel Stats -->
-          <div class="mt-6 pt-4 border-t border-zinc-800">
-            <div class="px-3 py-2 text-xs font-semibold text-zinc-500 uppercase tracking-wider">
+          <div class="mt-6 pt-4 border-t border-custom">
+            <div class="px-3 py-2 text-xs font-semibold text-secondary uppercase tracking-wider">
               Статистика
             </div>
             <div class="space-y-2 px-3 py-2">
               <div class="flex items-center justify-between text-sm">
-                <span class="text-zinc-500">Публикаций</span>
-                <span class="text-white font-medium"><%= @channel_site.posts_count %></span>
+                <span class="text-secondary">Публикаций</span>
+                <span class="text-primary font-medium"><%= @channel_site.posts_count %></span>
               </div>
               <% if @channel_site.last_synced_at.present? %>
                 <div class="flex items-center justify-between text-sm">
-                  <span class="text-zinc-500">Обновлено</span>
-                  <span class="text-zinc-400 text-xs"><%= time_ago_in_words(@channel_site.last_synced_at) %> назад</span>
+                  <span class="text-secondary">Обновлено</span>
+                  <span class="text-secondary text-xs"><%= time_ago_in_words(@channel_site.last_synced_at) %> назад</span>
                 </div>
               <% end %>
             </div>
@@ -150,7 +162,7 @@
         </nav>
 
         <!-- Subscribe CTA -->
-        <div class="p-4 border-t border-zinc-800">
+        <div class="p-4 border-t border-custom">
           <% if @channel_site.telegram_url.present? %>
             <a href="<%= @channel_site.telegram_url %>"
                target="_blank"
@@ -167,7 +179,7 @@
           <a href="https://contentforce.ru"
              target="_blank"
              rel="noopener noreferrer"
-             class="flex items-center justify-center gap-1.5 mt-3 text-xs text-zinc-600 hover:text-zinc-400 transition-colors">
+             class="flex items-center justify-center gap-1.5 mt-3 text-xs text-secondary hover-text-primary transition-colors">
             <span>Создано на</span>
             <span class="font-medium">ContentForce</span>
           </a>
@@ -177,13 +189,13 @@
       <!-- Main Content -->
       <div class="flex-1 flex flex-col overflow-hidden">
         <!-- Mobile header -->
-        <header class="lg:hidden h-14 px-4 border-b border-zinc-800 flex items-center justify-between" style="background-color: var(--bg-primary);">
-          <button data-action="click->sidebar#openMobile" class="p-2 text-zinc-400 hover:text-white transition-colors">
+        <header class="lg:hidden h-14 px-4 border-b border-custom bg-primary">
+          <button data-action="click->sidebar#openMobile" class="p-2 text-secondary hover-text-primary transition-colors">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
             </svg>
           </button>
-          <a href="/" class="font-semibold text-white">
+          <a href="/" class="font-semibold text-primary">
             <%= @channel_site.site_title || @channel_site.telegram_bot.channel_name %>
           </a>
           <% if @channel_site.telegram_url.present? %>
@@ -201,7 +213,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="flex-1 overflow-y-auto channel-site-scrollbar" style="background-color: var(--bg-primary);">
+        <main class="flex-1 overflow-y-auto channel-site-scrollbar bg-primary">
           <%= yield %>
         </main>
       </div>

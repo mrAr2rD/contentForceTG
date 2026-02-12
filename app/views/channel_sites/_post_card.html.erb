@@ -1,5 +1,5 @@
 <%# locals: (post:, featured: false) %>
-<article class="card hover:border-zinc-600 transition-colors group overflow-hidden flex flex-col">
+<article class="card hover:opacity-90 transition-all group overflow-hidden flex flex-col">
   <a href="/post/<%= post.to_param %>" class="block flex-1 flex flex-col">
     <% if post.first_image.present? && featured %>
       <div class="aspect-video -mx-0 -mt-0">
@@ -11,20 +11,20 @@
     <% end %>
 
     <div class="p-4 flex-1 flex flex-col">
-      <h3 class="text-base font-semibold group-hover:accent transition-colors mb-2 line-clamp-2">
+      <h3 class="text-base font-semibold text-primary group-hover:accent transition-colors mb-2 line-clamp-2">
         <%= post.display_title %>
       </h3>
 
-      <p class="text-zinc-400 text-sm line-clamp-2 mb-3 flex-1">
+      <p class="text-secondary text-sm line-clamp-2 mb-3 flex-1">
         <%= post.display_excerpt %>
       </p>
 
-      <div class="flex items-center justify-between text-xs text-zinc-500 mt-auto">
+      <div class="flex items-center justify-between text-xs text-secondary mt-auto">
         <div class="flex items-center gap-2">
           <time datetime="<%= post.telegram_date.iso8601 %>">
             <%= post.telegram_date.strftime('%d.%m.%Y') %>
           </time>
-          <span class="w-1 h-1 rounded-full bg-zinc-600"></span>
+          <span class="w-1 h-1 rounded-full" style="background-color: var(--border-color);"></span>
           <span><%= post.views_count %> просм.</span>
         </div>
         <% if post.featured? %>

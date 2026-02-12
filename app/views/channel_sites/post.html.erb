@@ -1,18 +1,18 @@
 <!-- Breadcrumbs -->
-<nav class="max-w-4xl mx-auto px-6 pt-8 pb-2 text-sm text-zinc-500 flex items-center gap-2">
-  <a href="/" class="hover:text-white transition-colors flex items-center gap-1">
+<nav class="max-w-4xl mx-auto px-6 pt-8 pb-2 text-sm text-secondary flex items-center gap-2">
+  <a href="/" class="hover-text-primary transition-colors flex items-center gap-1">
     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
       <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
     </svg>
   </a>
-  <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+  <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
   </svg>
-  <a href="/posts" class="hover:text-white transition-colors">Публикации</a>
-  <svg class="w-4 h-4 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+  <a href="/posts" class="hover-text-primary transition-colors">Публикации</a>
+  <svg class="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
     <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
   </svg>
-  <span class="text-zinc-400 truncate max-w-[200px]"><%= @channel_post.display_title&.truncate(30) %></span>
+  <span class="text-secondary truncate max-w-[200px]"><%= @channel_post.display_title&.truncate(30) %></span>
 </nav>
 
 <div data-controller="post-scroll"
@@ -32,7 +32,7 @@
     <!-- Sentinel для подгрузки следующего поста -->
     <div data-post-scroll-target="sentinel" class="py-8">
       <div class="loading-indicator hidden flex justify-center">
-        <div class="flex items-center gap-3 text-zinc-400">
+        <div class="flex items-center gap-3 text-secondary">
           <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
