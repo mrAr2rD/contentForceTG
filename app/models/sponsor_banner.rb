@@ -3,10 +3,9 @@ class SponsorBanner < ApplicationRecord
   has_one_attached :icon
 
   # Enum для выбора места отображения
-  enum display_on: {
-    public_pages: 0,  # Публичные страницы (home, about, pricing и т.д.)
-    dashboard: 1      # Личный кабинет (dashboard)
-  }
+  # public_pages: 0 - Публичные страницы (home, about, pricing и т.д.)
+  # dashboard: 1 - Личный кабинет (dashboard)
+  enum :display_on, { public_pages: 0, dashboard: 1 }
 
   # Валидации
   validates :title, presence: true, length: { maximum: 100 }
