@@ -196,6 +196,9 @@ Rails.application.routes.draw do
     # Site Settings (Feature flags)
     resource :site_settings, only: [ :edit, :update ]
 
+    # Sponsor Banners (Рекламные баннеры)
+    resources :sponsor_banners
+
     # Тарифные планы
     resources :plans
 

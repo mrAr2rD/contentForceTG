@@ -1,0 +1,60 @@
+<%= form_with(model: [:admin, sponsor_banner], local: true, class: "space-y-6") do |form| %>
+  <% if sponsor_banner.errors.any? %>
+    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+      <h3 class="text-sm font-medium text-red-800 dark:text-red-200 mb-2">
+        <%= pluralize(sponsor_banner.errors.count, "ошибка", "ошибки", "ошибок") %>:
+      </h3>
+      <ul class="list-disc list-inside text-sm text-red-700 dark:text-red-300">
+        <% sponsor_banner.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :title, "Заголовок", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+    <%= form.text_field :title, class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100", placeholder: "Например: ContentForce Pro" %>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Основной текст баннера (макс. 100 символов)</p>
+  </div>
+
+  <div>
+    <%= form.label :description, "Описание", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+    <%= form.text_area :description, rows: 3, class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100", placeholder: "Краткое описание спонсора" %>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">Дополнительная информация (опционально, макс. 200 символов)</p>
+  </div>
+
+  <div>
+    <%= form.label :url, "Ссылка", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+    <%= form.url_field :url, class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100", placeholder: "https://example.com" %>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">URL, на который ведёт баннер</p>
+  </div>
+
+  <div>
+    <%= form.label :icon, "Иконка/Логотип", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+
+    <% if sponsor_banner.icon.attached? %>
+      <div class="mb-4 flex items-center gap-4">
+        <%= image_tag sponsor_banner.icon, class: "h-20 w-20 rounded-lg object-cover border border-zinc-200 dark:border-zinc-700" %>
+        <div class="text-sm text-zinc-600 dark:text-zinc-400">
+          <p class="font-medium"><%= sponsor_banner.icon.filename %></p>
+          <p class="text-xs"><%= number_to_human_size(sponsor_banner.icon.byte_size) %></p>
+        </div>
+      </div>
+    <% end %>
+
+    <%= form.file_field :icon, accept: "image/*", class: "block w-full text-sm text-zinc-500 dark:text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/20 dark:file:text-blue-400" %>
+    <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">PNG, JPG, WEBP или SVG (макс. 1MB)</p>
+  </div>
+
+  <div class="flex items-center">
+    <%= form.check_box :enabled, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-zinc-300 rounded dark:border-zinc-600 dark:bg-zinc-800" %>
+    <%= form.label :enabled, "Включить баннер", class: "ml-2 block text-sm text-zinc-700 dark:text-zinc-300" %>
+    <p class="ml-2 text-sm text-zinc-500 dark:text-zinc-400">(автоматически отключит другие активные баннеры)</p>
+  </div>
+
+  <div class="flex gap-4">
+    <%= form.submit "Сохранить", class: "bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors" %>
+    <%= link_to "Отмена", admin_sponsor_banners_path, class: "bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 px-6 py-2 rounded-lg font-medium transition-colors" %>
+  </div>
+<% end %>
