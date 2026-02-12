@@ -7,11 +7,16 @@
   is_dashboard = controller.class.name.start_with?("Dashboard::") ||
                  controller.class.name.start_with?("Admin::")
 
-  # Получаем соответствующий баннер
-  banner = if is_dashboard
-    SponsorBanner.current(:dashboard)
-  else
-    SponsorBanner.current(:public_pages)
+  # Получаем соответствующий баннер (безопасно, если таблица не существует)
+  banner = begin
+    if is_dashboard
+      SponsorBanner.current(:dashboard)
+    else
+      SponsorBanner.current(:public_pages)
+    end
+  rescue ActiveRecord::StatementInvalid, NameError
+    # Таблица не существует или модель не загружена - пропускаем баннер
+    nil
   end
 %>
 
