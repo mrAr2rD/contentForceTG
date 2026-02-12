@@ -27,6 +27,9 @@ prepare_database() {
 
   # Now run migrations - Solid tables already exist, so no schema load will be triggered
   ./bin/rails db:prepare
+
+  # Явно запускаем pending миграции (на случай если db:prepare их пропустил)
+  ./bin/rails db:migrate
 }
 
 # If running the rails server or supervisord then create or migrate existing database
