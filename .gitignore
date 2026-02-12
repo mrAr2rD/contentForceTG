@@ -40,3 +40,4 @@ telegram_parser/.env
 
 /node_modules
 coverage/
+contentforce/
