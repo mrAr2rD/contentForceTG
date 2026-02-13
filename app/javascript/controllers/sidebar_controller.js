@@ -5,6 +5,32 @@ export default class extends Controller {
 
   connect() {
     this.loadState()
+
+    // Автоматически закрывать мобильный сайдбар при навигации
+    this.boundCloseMobileOnNavigation = this.closeMobileOnNavigation.bind(this)
+    document.addEventListener("turbo:before-visit", this.boundCloseMobileOnNavigation)
+
+    // Закрывать по Escape
+    this.boundHandleKeydown = this.handleKeydown.bind(this)
+    document.addEventListener("keydown", this.boundHandleKeydown)
+  }
+
+  disconnect() {
+    document.removeEventListener("turbo:before-visit", this.boundCloseMobileOnNavigation)
+    document.removeEventListener("keydown", this.boundHandleKeydown)
+  }
+
+  handleKeydown(event) {
+    if (event.key === "Escape") {
+      this.closeMobile()
+    }
+  }
+
+  closeMobileOnNavigation() {
+    // Закрываем сайдбар только на мобильных (когда overlay виден)
+    if (this.hasOverlayTarget && !this.overlayTarget.classList.contains('hidden')) {
+      this.closeMobile()
+    }
   }
 
   toggle() {
