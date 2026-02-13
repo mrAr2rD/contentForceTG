@@ -28,7 +28,7 @@ module Admin
     end
 
     def page_seo_params
-      params.require(:page_seo).permit(:title, :description, :og_title, :og_description, :canonical_url)
+      params.require(:page_seo).permit(:title, :description, :og_title, :og_description, :canonical_url, :noindex)
     end
 
     def seed_missing_pages

@@ -22,6 +22,8 @@ class PageSeo < ApplicationRecord
 
   # Scopes
   scope :ordered, -> { order(:slug) }
+  scope :indexed, -> { where(noindex: false) }
+  scope :noindexed, -> { where(noindex: true) }
 
   # Получить SEO для страницы (с fallback на дефолтные значения)
   def self.for_page(slug)

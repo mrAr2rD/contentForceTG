@@ -99,6 +99,28 @@
       </div>
     </div>
 
+    <!-- Индексация -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
+            </svg>
+          </div>
+          <div>
+            <h4 class="font-medium text-zinc-900 dark:text-zinc-100">Скрыть от поисковиков</h4>
+            <p class="text-sm text-zinc-500">Добавит тег noindex, nofollow — страница не будет индексироваться</p>
+          </div>
+        </div>
+
+        <label class="relative inline-flex items-center cursor-pointer">
+          <%= form.check_box :noindex, class: "sr-only peer", id: "noindex_toggle" %>
+          <div class="w-11 h-6 bg-zinc-300 dark:bg-zinc-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-red-300 dark:peer-focus:ring-red-800 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+        </label>
+      </div>
+    </div>
+
     <!-- Превью -->
     <div class="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6">
       <h3 class="font-semibold mb-4">Предпросмотр в Google</h3>

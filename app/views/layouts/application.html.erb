@@ -18,6 +18,7 @@
     <% if (desc = seo_description).present? %>
       <meta name="description" content="<%= desc %>">
     <% end %>
+    <%= seo_robots_tag %>
     <link rel="canonical" href="<%= seo_canonical_url %>">
 
     <!-- OpenGraph -->

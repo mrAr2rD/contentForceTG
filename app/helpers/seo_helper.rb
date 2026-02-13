@@ -49,6 +49,19 @@ module SeoHelper
     SiteConfiguration.current.default_og_image.presence
   end
 
+  # Проверка нужно ли скрывать страницу от индексации
+  def seo_noindex?
+    seo = page_seo
+    seo&.noindex? || false
+  end
+
+  # Robots meta tag
+  def seo_robots_tag
+    if seo_noindex?
+      tag.meta(name: "robots", content: "noindex, nofollow")
+    end
+  end
+
   # Рендер всех SEO мета-тегов
   def render_seo_tags(options = {})
     seo = page_seo(options[:slug])
