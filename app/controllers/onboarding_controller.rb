@@ -41,16 +41,24 @@ class OnboardingController < ApplicationController
           @step_index = next_index
           @total_steps = STEPS.size
           @onboarding_data = session[:onboarding_data]
-          render turbo_stream: turbo_stream.replace(
-            "onboarding_content",
-            partial: "onboarding/step_#{@step}",
-            locals: {
-              step: @step,
-              step_index: @step_index,
-              total_steps: @total_steps,
-              onboarding_data: @onboarding_data
-            }
-          )
+
+          render turbo_stream: [
+            turbo_stream.replace(
+              "onboarding_progress",
+              partial: "onboarding/progress_bar",
+              locals: { step_index: @step_index, total_steps: @total_steps }
+            ),
+            turbo_stream.replace(
+              "onboarding_content",
+              partial: "onboarding/step_#{@step}",
+              locals: {
+                step: @step,
+                step_index: @step_index,
+                total_steps: @total_steps,
+                onboarding_data: @onboarding_data
+              }
+            )
+          ]
         end
         format.html { redirect_to onboarding_path }
       end
