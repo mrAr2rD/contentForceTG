@@ -4,11 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**ContentForce** — монолитное Rails 8.1.2 приложение для автоматизации создания и публикации контента в Telegram с использованием AI.
+**ContentForce** — монолитное Rails 8 приложение для автоматизации создания и публикации контента в Telegram с использованием AI.
 
 ## Technology Stack
 
-- **Ruby** 3.4.6, **Rails** 8.1.2, **PostgreSQL** 16, **Redis** 7
+- **Ruby** 3.4.x, **Rails** 8.x, **PostgreSQL** 16, **Redis** 7
 - **Frontend**: Hotwire (Turbo + Stimulus), Tailwind CSS 4.x
 - **Auth**: Devise + Telegram OAuth, Pundit
 - **Jobs**: Solid Queue (Rails 8 default)
@@ -25,6 +25,7 @@ rails db:create db:migrate db:seed
 
 # Development
 bin/dev                              # Запуск всего (web, css, js, workers)
+bin/jobs                             # Только Solid Queue workers
 docker-compose up                    # Или через Docker
 
 # Testing
@@ -32,10 +33,12 @@ rspec                                # Все тесты
 rspec spec/models                    # Только модели
 rspec spec/path/to_spec.rb           # Один файл
 rspec spec/path/to_spec.rb:42        # Один тест на строке 42
+COVERAGE=true rspec                  # С coverage отчётом
 
 # Code quality
 rubocop -a                           # Auto-fix linting
 bundle exec brakeman                 # Security scan
+bundle audit check --update          # CVE в зависимостях
 
 # Database
 rails db:migrate                     # Миграции
@@ -49,17 +52,23 @@ rails console                        # Консоль
 
 Бизнес-логика в `app/services/`:
 
-- **Telegram::*** — `VerifyService`, `PublishService`, `WebhookService`, `AnalyticsService`
-- **AI::*** — `ContentGenerator`, `PostImprover`, `HashtagGenerator`, `ImageGenerator`
+- **Telegram::*** — `VerifyService`, `PublishService`, `WebhookService`, `AnalyticsService`, `AuthService`, `PostStatsService`, `ChannelInfoService`, `InviteLinkService`
+- **AI::*** — `ContentGenerator`, `ImageGenerator`, `StyleAnalyzer`
 - **Analytics::*** — `RoiCalculatorService`
-- **Payment::*** — `RobokassaService`
 - **ChannelSites::*** — `SyncService`, `ImportPostsService`, `VerifyDomainService`
+- **Notifications::*** — `DispatcherService`
 
 ### Background Jobs (Solid Queue)
 
 - `PublishPostJob` — отложенная публикация постов
+- `ImportStyleSamplesJob`, `AnalyzeStyleJob` — импорт и анализ стиля канала
 - `Analytics::UpdatePostViewsJob` — обновление просмотров
 - `Analytics::SnapshotChannelMetricsJob` — снапшоты метрик
+- `Analytics::CalculateChurnRateJob` — расчёт оттока подписчиков
+- `CheckExpiringSubscriptionsJob` — уведомления об истечении подписок
+- `SendTelegramNotificationJob` — отправка уведомлений
+- `SyncInviteLinkStatsJob` — статистика invite-ссылок
+- `ChannelSites::SyncJob` — синхронизация мини-сайтов
 
 ### Key Models
 
@@ -67,21 +76,27 @@ rails console                        # Консоль
 User
 ├── has_many :projects
 ├── has_one :subscription
-└── has_many :payments
+├── has_many :payments
+└── has_many :notifications
 
 Project
 ├── belongs_to :user
 ├── has_many :telegram_bots
-└── has_many :posts
+├── has_many :posts
+└── has_many :style_documents
 
 TelegramBot
 ├── belongs_to :project
 ├── has_many :posts
+├── has_many :invite_links
+├── has_many :style_samples
+├── has_one :channel_site
 └── encrypts :bot_token
 
 Post
 ├── belongs_to :project, :user
 ├── belongs_to :telegram_bot (optional)
+├── has_one :post_analytic
 ├── enum status: [:draft, :scheduled, :published, :failed]
 └── has_one_attached :image
 
@@ -90,20 +105,24 @@ Subscription
 ├── belongs_to :plan_record (Plan)
 └── jsonb :usage, :limits
 
-AiUsageLog
-├── belongs_to :user
-├── belongs_to :project (optional)
-└── tracks: cost, tokens_used, input_cost, output_cost
+AiUsageLog — трекинг расходов AI: cost, tokens_used, input_cost, output_cost
+
+StyleDocument / StyleSample — анализ стиля канала для AI генерации
+
+InviteLink — отслеживание UTM-ссылок приглашения в канал
 
 ChannelSite (Mini-sites для SEO)
 ├── belongs_to :telegram_bot
-├── belongs_to :project
 ├── has_many :channel_posts
 ├── subdomain/custom_domain routing
 └── enabled/disabled через SiteConfiguration
 
 SiteConfiguration (Feature flags, singleton)
 └── channel_sites_enabled: boolean
+
+Notification / NotificationTemplate — система уведомлений
+
+SponsorBanner — рекламные баннеры для мини-сайтов
 ```
 
 ### Database Patterns
@@ -213,9 +232,10 @@ bundle audit check --update         # Проверка CVE в зависимос
 ## Code Style
 
 - **Linter**: rubocop-rails-omakase (Rails defaults)
-- **Комментарии**: на русском языке
+- **Комментарии**: на русском языке (см. `.qoder/rules/russian.md`)
 - Запускать `rubocop -a` перед коммитом
 - Security комментарии: помечать как `# SECURITY:`
+- Использовать UUID primary keys для всех новых моделей
 
 ## Key Business Logic
 

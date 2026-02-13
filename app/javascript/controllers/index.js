@@ -42,3 +42,6 @@ application.register("infinite-scroll", InfiniteScrollController)
 
 import PostScrollController from "./post_scroll_controller"
 application.register("post-scroll", PostScrollController)
+
+import SponsorBannerController from "./sponsor_banner_controller"
+application.register("sponsor-banner", SponsorBannerController)
