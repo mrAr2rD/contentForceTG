@@ -45,20 +45,20 @@
   <div>
     <%= form.label :label_type, "Тип лейбла", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      <label class="relative flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all hover:border-yellow-500 <%= sponsor_banner.sponsor? || sponsor_banner.label_type.nil? ? 'border-yellow-500 bg-yellow-500/10' : 'border-zinc-300 dark:border-zinc-600' %>">
-        <%= form.radio_button :label_type, "sponsor", class: "sr-only peer" %>
+      <label class="relative flex items-center justify-center p-3 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer transition-all hover:border-yellow-500 has-[:checked]:border-yellow-500 has-[:checked]:bg-yellow-500/10">
+        <%= form.radio_button :label_type, "sponsor", class: "sr-only", checked: sponsor_banner.sponsor? || sponsor_banner.label_type.nil? %>
         <span class="px-2 py-1 text-sm font-medium bg-yellow-500/10 text-yellow-500 rounded-full">Спонсор</span>
       </label>
-      <label class="relative flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all hover:border-emerald-500 <%= sponsor_banner.support? ? 'border-emerald-500 bg-emerald-500/10' : 'border-zinc-300 dark:border-zinc-600' %>">
-        <%= form.radio_button :label_type, "support", class: "sr-only peer" %>
+      <label class="relative flex items-center justify-center p-3 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer transition-all hover:border-emerald-500 has-[:checked]:border-emerald-500 has-[:checked]:bg-emerald-500/10">
+        <%= form.radio_button :label_type, "support", class: "sr-only", checked: sponsor_banner.support? %>
         <span class="px-2 py-1 text-sm font-medium bg-emerald-500/10 text-emerald-500 rounded-full">Поддержка</span>
       </label>
-      <label class="relative flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all hover:border-blue-500 <%= sponsor_banner.partner? ? 'border-blue-500 bg-blue-500/10' : 'border-zinc-300 dark:border-zinc-600' %>">
-        <%= form.radio_button :label_type, "partner", class: "sr-only peer" %>
+      <label class="relative flex items-center justify-center p-3 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer transition-all hover:border-blue-500 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-500/10">
+        <%= form.radio_button :label_type, "partner", class: "sr-only", checked: sponsor_banner.partner? %>
         <span class="px-2 py-1 text-sm font-medium bg-blue-500/10 text-blue-500 rounded-full">Партнёр</span>
       </label>
-      <label class="relative flex items-center justify-center p-3 border rounded-lg cursor-pointer transition-all hover:border-purple-500 <%= sponsor_banner.useful? ? 'border-purple-500 bg-purple-500/10' : 'border-zinc-300 dark:border-zinc-600' %>">
-        <%= form.radio_button :label_type, "useful", class: "sr-only peer" %>
+      <label class="relative flex items-center justify-center p-3 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer transition-all hover:border-purple-500 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-500/10">
+        <%= form.radio_button :label_type, "useful", class: "sr-only", checked: sponsor_banner.useful? %>
         <span class="px-2 py-1 text-sm font-medium bg-purple-500/10 text-purple-500 rounded-full">Полезное</span>
       </label>
     </div>
