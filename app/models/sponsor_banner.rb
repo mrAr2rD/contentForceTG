@@ -4,17 +4,26 @@ class SponsorBanner < ApplicationRecord
 
   # Явное объявление типа атрибута для enum (требование Rails 8.1)
   attribute :display_on, :integer
+  attribute :label_type, :integer
 
   # Enum для выбора места отображения
   # public_pages: 0 - Публичные страницы (home, about, pricing и т.д.)
   # dashboard: 1 - Личный кабинет (dashboard)
   enum :display_on, { public_pages: 0, dashboard: 1 }
 
+  # Enum для типа лейбла
+  # sponsor: 0 - Спонсор (желтый)
+  # support: 1 - Поддержка (зеленый)
+  # partner: 2 - Партнер (синий)
+  # useful: 3 - Полезное (фиолетовый)
+  enum :label_type, { sponsor: 0, support: 1, partner: 2, useful: 3 }
+
   # Валидации
   validates :title, presence: true, length: { maximum: 100 }
   validates :description, length: { maximum: 200 }
   validates :url, presence: true, format: { with: URI::DEFAULT_PARSER.make_regexp(%w[http https]) }
   validates :display_on, presence: true
+  validates :label_type, presence: true
 
   # Валидация иконки через callback (content_type и size валидаторы не поддерживаются в Rails 8.1)
   validate :validate_icon_attachment, if: -> { icon.attached? }
@@ -59,6 +68,28 @@ class SponsorBanner < ApplicationRecord
       "Личный кабинет"
     else
       display_on.humanize
+    end
+  end
+
+  # Текст лейбла для отображения
+  def label_text
+    case label_type
+    when "sponsor" then "Спонсор"
+    when "support" then "Поддержка"
+    when "partner" then "Партнёр"
+    when "useful" then "Полезное"
+    else "Спонсор"
+    end
+  end
+
+  # CSS классы для цвета лейбла (Tailwind)
+  def label_color_classes
+    case label_type
+    when "sponsor" then "bg-yellow-500/10 text-yellow-500"      # Желтый
+    when "support" then "bg-emerald-500/10 text-emerald-500"    # Зеленый
+    when "partner" then "bg-blue-500/10 text-blue-500"          # Синий
+    when "useful" then "bg-purple-500/10 text-purple-500"       # Фиолетовый
+    else "bg-yellow-500/10 text-yellow-500"
     end
   end
 
