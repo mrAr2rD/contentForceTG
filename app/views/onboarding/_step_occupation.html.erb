@@ -1,0 +1,22 @@
+<div class="fade-in" id="onboarding_content">
+  <!-- Question -->
+  <div class="text-center mb-10">
+    <p class="text-[#00D4AA] text-sm mono uppercase tracking-wider mb-3">Шаг 3 из 4</p>
+    <h1 class="text-2xl md:text-3xl font-bold text-[#FAFAFA] mb-2">Чем вы занимаетесь?</h1>
+    <p class="text-[#A1A1AA]">Это поможет нам предложить лучшие функции для вашей работы</p>
+  </div>
+
+  <!-- Options grid -->
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+    <% User::OCCUPATIONS.each do |key, label| %>
+      <%= button_to update_step_onboarding_path,
+                    method: :post,
+                    params: { step: "occupation", value: key },
+                    class: "onboarding-option #{onboarding_data['occupation'] == key ? 'selected' : ''}",
+                    data: { turbo_frame: "_top" } do %>
+        <span class="icon"><%= occupation_icon(key) %></span>
+        <span class="label"><%= label %></span>
+      <% end %>
+    <% end %>
+  </div>
+</div>

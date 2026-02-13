@@ -8,15 +8,22 @@ class ApplicationController < ActionController::Base
   # Include date helpers
   include ActionView::Helpers::DateHelper
 
+  # Onboarding redirect
+  include OnboardingRedirectable
+
   # Pundit error handling
   rescue_from Pundit::NotAuthorizedError, with: :user_not_authorized
 
   # Устанавливаем часовой пояс пользователя для корректной работы Time.zone
   around_action :set_time_zone, if: :current_user
 
-  # Redirect to dashboard after sign in
+  # Redirect to onboarding or dashboard after sign in
   def after_sign_in_path_for(resource)
-    dashboard_path
+    if resource.onboarding_required?
+      onboarding_path
+    else
+      dashboard_path
+    end
   end
 
   private

@@ -8,6 +8,46 @@ class User < ApplicationRecord
          :trackable, :lockable,
          :omniauthable, omniauth_providers: [ :telegram ]
 
+  # Onboarding — варианты ответов для аналитики аудитории
+  REFERRAL_SOURCES = {
+    "search" => "Поиск в интернете",
+    "social" => "Соцсети",
+    "recommendation" => "Рекомендация друга/коллеги",
+    "youtube" => "YouTube",
+    "telegram" => "Telegram",
+    "advertising" => "Реклама",
+    "article" => "Статья/блог",
+    "other" => "Другое"
+  }.freeze
+
+  AGE_RANGES = {
+    "18-24" => "18-24 года",
+    "25-34" => "25-34 года",
+    "35-44" => "35-44 года",
+    "45-54" => "45-54 года",
+    "55+" => "55+ лет"
+  }.freeze
+
+  OCCUPATIONS = {
+    "marketing" => "Маркетинг / SMM",
+    "content_manager" => "Контент-менеджер",
+    "business_owner" => "Владелец бизнеса",
+    "blogger" => "Блогер / Инфлюенсер",
+    "freelancer" => "Фрилансер",
+    "agency" => "Агентство",
+    "education" => "Образование",
+    "media" => "СМИ / Медиа",
+    "other" => "Другое"
+  }.freeze
+
+  COMPANY_SIZES = {
+    "solo" => "Только я",
+    "2-5" => "2-5 человек",
+    "6-20" => "6-20 человек",
+    "21-100" => "21-100 человек",
+    "100+" => "100+ человек"
+  }.freeze
+
   # Enums
   enum :role, { user: 0, admin: 1 }, default: :user
 
@@ -30,9 +70,62 @@ class User < ApplicationRecord
   # Callbacks
   after_create :create_default_subscription, if: -> { subscription.nil? }
 
+  # Onboarding scopes
+  scope :completed_onboarding, -> { where.not(onboarding_completed_at: nil) }
+  scope :skipped_onboarding, -> { where.not(onboarding_skipped_at: nil) }
+  scope :onboarding_pending, -> {
+    where(onboarding_completed_at: nil, onboarding_skipped_at: nil)
+  }
+  scope :with_onboarding_data, -> {
+    where.not(onboarding_completed_at: nil).or(where.not(onboarding_skipped_at: nil))
+  }
+
   # Helper method for admin check
   def admin?
     role == "admin"
+  end
+
+  # Onboarding methods
+
+  # Нужен ли пользователю онбординг?
+  # Показываем только новым пользователям (зарегистрированным недавно и не прошедшим онбординг)
+  def onboarding_required?
+    return false if onboarding_completed_at.present? || onboarding_skipped_at.present?
+    # Показываем онбординг только пользователям, зарегистрированным после добавления функции
+    created_at >= Time.zone.parse("2026-02-13")
+  end
+
+  # Завершить онбординг с сохранением данных
+  def complete_onboarding!(data)
+    update!(
+      referral_source: data[:referral_source],
+      age_range: data[:age_range],
+      occupation: data[:occupation],
+      company_size: data[:company_size],
+      onboarding_completed_at: Time.current
+    )
+  end
+
+  # Пропустить онбординг
+  def skip_onboarding!
+    update!(onboarding_skipped_at: Time.current)
+  end
+
+  # Человекочитаемые названия для аналитики
+  def referral_source_name
+    REFERRAL_SOURCES[referral_source] || referral_source
+  end
+
+  def age_range_name
+    AGE_RANGES[age_range] || age_range
+  end
+
+  def occupation_name
+    OCCUPATIONS[occupation] || occupation
+  end
+
+  def company_size_name
+    COMPANY_SIZES[company_size] || company_size
   end
 
   # Class methods

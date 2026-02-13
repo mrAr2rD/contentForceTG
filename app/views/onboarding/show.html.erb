@@ -1,0 +1,20 @@
+<div class="w-full max-w-2xl mx-auto" data-controller="onboarding-wizard">
+  <!-- Progress bar -->
+  <div class="flex items-center justify-center gap-3 mb-12">
+    <% @total_steps.times do |i| %>
+      <div class="progress-dot <%= i < @step_index ? 'completed' : '' %> <%= i == @step_index ? 'active' : '' %>"></div>
+      <% if i < @total_steps - 1 %>
+        <div class="w-12 h-px <%= i < @step_index ? 'bg-[#00D4AA]' : 'bg-[#27272A]' %>"></div>
+      <% end %>
+    <% end %>
+  </div>
+
+  <!-- Step content -->
+  <div id="onboarding_content">
+    <%= render "onboarding/step_#{@step}",
+               step: @step,
+               step_index: @step_index,
+               total_steps: @total_steps,
+               onboarding_data: @onboarding_data %>
+  </div>
+</div>

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+  <head>
+    <script>
+      // Force dark theme
+      document.documentElement.classList.add('dark');
+    </script>
+
+    <title>Добро пожаловать - ContentForce</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="theme-color" content="#0A0A0B">
+    <meta name="robots" content="noindex, nofollow">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_include_tag "application", "data-turbo-track": "reload", type: "module" %>
+
+    <style>
+      :root {
+        --accent: #00D4AA;
+        --accent-glow: rgba(0, 212, 170, 0.5);
+        --bg-base: #0A0A0B;
+        --bg-elevated: #111113;
+        --bg-surface: #18181B;
+        --border: #27272A;
+        --border-bright: #3F3F46;
+        --text-primary: #FAFAFA;
+        --text-secondary: #A1A1AA;
+        --text-muted: #71717A;
+      }
+
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg-base);
+        color: var(--text-primary);
+      }
+
+      .mono {
+        font-family: 'JetBrains Mono', monospace;
+      }
+
+      /* Grain overlay */
+      .grain-overlay {
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        opacity: 0.015;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      /* Option button */
+      .onboarding-option {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        padding: 1.25rem 1rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-height: 100px;
+      }
+
+      .onboarding-option:hover {
+        border-color: var(--accent);
+        background: rgba(0, 212, 170, 0.05);
+        transform: translateY(-2px);
+      }
+
+      .onboarding-option.selected {
+        border-color: var(--accent);
+        background: rgba(0, 212, 170, 0.15);
+        box-shadow: 0 0 20px rgba(0, 212, 170, 0.2);
+      }
+
+      .onboarding-option .icon {
+        font-size: 1.75rem;
+        line-height: 1;
+      }
+
+      .onboarding-option .label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        text-align: center;
+      }
+
+      /* Progress dots */
+      .progress-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--border);
+        transition: all 0.3s ease;
+      }
+
+      .progress-dot.active {
+        background: var(--accent);
+        box-shadow: 0 0 10px var(--accent-glow);
+      }
+
+      .progress-dot.completed {
+        background: var(--accent);
+      }
+
+      /* Skip button */
+      .skip-button {
+        color: var(--text-muted);
+        font-size: 0.875rem;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+
+      .skip-button:hover {
+        color: var(--text-secondary);
+      }
+
+      /* Fade in animation */
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .fade-in {
+        animation: fadeIn 0.3s ease forwards;
+      }
+    </style>
+  </head>
+
+  <body class="antialiased bg-[#0A0A0B] min-h-screen">
+    <div class="grain-overlay"></div>
+
+    <div class="min-h-screen flex flex-col">
+      <!-- Header -->
+      <header class="h-16 px-6 flex items-center justify-between border-b border-[#27272A]">
+        <div class="flex items-center gap-3">
+          <div class="relative">
+            <div class="absolute inset-0 bg-[#00D4AA]/30 rounded-lg blur-md"></div>
+            <div class="relative w-9 h-9 rounded-lg bg-gradient-to-br from-[#00D4AA] to-[#00A896] flex items-center justify-center shadow-lg">
+              <span class="text-[#0A0A0B] text-sm font-bold">CF</span>
+            </div>
+          </div>
+          <div>
+            <span class="text-sm font-semibold text-[#FAFAFA]">ContentForce</span>
+            <p class="text-[9px] text-[#00D4AA] mono tracking-widest uppercase">AI Platform</p>
+          </div>
+        </div>
+
+        <%= button_to skip_onboarding_path, method: :post, class: "skip-button", data: { turbo: false } do %>
+          Пропустить
+        <% end %>
+      </header>
+
+      <!-- Main content -->
+      <main class="flex-1 flex items-center justify-center p-6">
+        <%= yield %>
+      </main>
+
+      <!-- Footer with progress -->
+      <footer class="h-16 px-6 flex items-center justify-center border-t border-[#27272A]">
+        <p class="text-xs text-[#71717A]">
+          Эти данные помогут нам улучшить сервис для вас
+        </p>
+      </footer>
+    </div>
+  </body>
+</html>

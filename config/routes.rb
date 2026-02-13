@@ -27,6 +27,12 @@ Rails.application.routes.draw do
   # Public root - Landing page
   root "pages#home"
 
+  # Onboarding (4-step wizard for new users)
+  resource :onboarding, only: [ :show ], controller: "onboarding" do
+    post :update_step
+    post :skip
+  end
+
   # Dashboard
   get "dashboard", to: "dashboard#index", as: :dashboard
 
@@ -235,6 +241,9 @@ Rails.application.routes.draw do
 
     # ROI дашборд
     get "roi", to: "roi#index"
+
+    # Audience analytics дашборд
+    get "audience", to: "audience#index"
 
     # Шаблоны уведомлений
     resources :notification_templates do

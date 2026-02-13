@@ -1,0 +1,22 @@
+<div class="fade-in" id="onboarding_content">
+  <!-- Question -->
+  <div class="text-center mb-10">
+    <p class="text-[#00D4AA] text-sm mono uppercase tracking-wider mb-3">Шаг 4 из 4</p>
+    <h1 class="text-2xl md:text-3xl font-bold text-[#FAFAFA] mb-2">Размер вашей команды?</h1>
+    <p class="text-[#A1A1AA]">Это поможет нам понять, какие функции вам могут понадобиться</p>
+  </div>
+
+  <!-- Options grid -->
+  <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+    <% User::COMPANY_SIZES.each do |key, label| %>
+      <%= button_to update_step_onboarding_path,
+                    method: :post,
+                    params: { step: "company_size", value: key },
+                    class: "onboarding-option #{onboarding_data['company_size'] == key ? 'selected' : ''}",
+                    data: { turbo_frame: "_top" } do %>
+        <span class="icon"><%= company_size_icon(key) %></span>
+        <span class="label"><%= label %></span>
+      <% end %>
+    <% end %>
+  </div>
+</div>
