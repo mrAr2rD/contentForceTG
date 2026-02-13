@@ -72,28 +72,10 @@
 <div class="docs-page min-h-screen bg-[#0A0A0B] text-[#FAFAFA]">
   <div class="grain-overlay"></div>
 
-  <!-- Navigation -->
-  <nav class="sticky top-0 z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
-    <div class="max-w-6xl mx-auto px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <%= link_to root_path, class: "flex items-center gap-3 group" do %>
-          <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
-            CF
-          </div>
-          <span class="text-lg font-semibold tracking-tight">ContentForce</span>
-        <% end %>
-
-        <div class="flex items-center gap-4 text-sm">
-          <%= link_to "Главная", root_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
-          <%= link_to "Блог", blog_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
-          <%= link_to "Контакты", contacts_path, class: "text-[#A1A1AA] hover:text-[#00D4AA] transition-colors" %>
-        </div>
-      </div>
-    </div>
-  </nav>
+  <%= render "shared/public_nav" %>
 
   <!-- Hero -->
-  <div class="relative border-b border-[#27272A]">
+  <div class="relative border-b border-[#27272A] pt-16">
     <div class="absolute inset-0 bg-gradient-to-b from-[#00D4AA]/5 to-transparent"></div>
     <div class="relative max-w-6xl mx-auto px-6 lg:px-8 py-16">
       <div class="mono text-xs text-[#00D4AA] tracking-widest uppercase mb-4">Документация</div>

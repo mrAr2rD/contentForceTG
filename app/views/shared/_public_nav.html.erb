@@ -1,0 +1,31 @@
+<!-- Public Navigation -->
+<nav class="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#0A0A0B]/80 border-b border-[#27272A]/50">
+  <div class="max-w-7xl mx-auto px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <%= link_to root_path, class: "flex items-center gap-3 group" do %>
+        <div class="w-9 h-9 bg-[#00D4AA] rounded-lg flex items-center justify-center font-bold text-[#0A0A0B] text-sm group-hover:rotate-[-8deg] transition-transform duration-300">
+          CF
+        </div>
+        <span class="text-lg font-semibold tracking-tight">ContentForce</span>
+      <% end %>
+
+      <div class="hidden md:flex items-center gap-8">
+        <%= link_to "Возможности", root_path(anchor: "features"), class: "nav-link text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors" %>
+        <%= link_to "Тарифы", root_path(anchor: "pricing"), class: "nav-link text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors" %>
+        <%= link_to "Документация", docs_path, class: "nav-link text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors" %>
+        <%= link_to "Блог", blog_path, class: "nav-link text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors" %>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <% if user_signed_in? %>
+          <%= link_to "Кабинет", dashboard_path, class: "text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors px-4 py-2" %>
+        <% else %>
+          <%= link_to "Войти", new_user_session_path, class: "text-sm text-[#A1A1AA] hover:text-[#FAFAFA] transition-colors px-4 py-2" %>
+          <%= link_to new_user_registration_path, class: "bg-gradient-to-r from-[#00D4AA] to-[#00B894] hover:from-[#00E5BB] hover:to-[#00D4AA] text-[#0A0A0B] px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 shadow-lg shadow-[#00D4AA]/20 hover:shadow-[#00D4AA]/40" do %>
+            Начать бесплатно
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</nav>
