@@ -77,7 +77,8 @@ class ProjectsController < ApplicationController
       :ai_model,
       :ai_temperature,
       :system_prompt,
-      :writing_style
+      :writing_style,
+      :custom_style_enabled
     )
   end
 end

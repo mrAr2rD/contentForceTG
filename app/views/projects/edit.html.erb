@@ -97,6 +97,64 @@
                 class: "flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50" %>
             <p class="text-xs text-muted-foreground">Кастомная инструкция для AI. Если не указан, будет использован стандартный промпт на основе выбранного стиля</p>
           </div>
+
+          <!-- Custom Style -->
+          <% if @project.style_style_completed? %>
+            <div class="space-y-3 p-4 rounded-lg border border-primary/20 bg-primary/5">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-medium text-foreground">Пользовательский стиль</h4>
+                    <span class="text-xs text-primary bg-primary/10 px-2 py-0.5 rounded-full">Готов</span>
+                  </div>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    Стиль проанализирован на основе <%= @project.style_samples_count %> примеров
+                    (<%= @project.total_style_words %> слов)
+                  </p>
+                </div>
+              </div>
+
+              <label class="flex items-center gap-3 cursor-pointer">
+                <%= f.check_box :custom_style_enabled, class: "w-4 h-4 rounded border-input text-primary focus:ring-primary" %>
+                <span class="text-sm text-foreground">Использовать пользовательский стиль при генерации</span>
+              </label>
+
+              <% if @project.custom_style_enabled && @project.custom_style_prompt.present? %>
+                <details class="text-xs">
+                  <summary class="text-muted-foreground cursor-pointer hover:text-foreground">Показать промпт стиля</summary>
+                  <div class="mt-2 p-3 bg-background rounded border border-border text-muted-foreground whitespace-pre-wrap max-h-40 overflow-y-auto">
+                    <%= @project.custom_style_prompt.truncate(500) %>
+                  </div>
+                </details>
+              <% end %>
+            </div>
+          <% elsif @project.has_style_data? %>
+            <div class="p-4 rounded-lg border border-border bg-muted/30">
+              <div class="flex items-start gap-3">
+                <div class="flex-shrink-0 w-8 h-8 rounded-lg bg-muted flex items-center justify-center">
+                  <svg class="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-sm font-medium text-foreground">Пользовательский стиль</h4>
+                  <p class="text-xs text-muted-foreground mt-1">
+                    <%= @project.style_samples_count %> примеров загружено.
+                    <% if @project.style_style_analyzing? %>
+                      <span class="text-primary">Анализ в процессе...</span>
+                    <% else %>
+                      Запустите анализ стиля для активации.
+                    <% end %>
+                  </p>
+                </div>
+              </div>
+            </div>
+          <% end %>
         </div>
       </div>
 
