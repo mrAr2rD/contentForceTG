@@ -20,4 +20,18 @@ class SiteConfiguration < ApplicationRecord
   def self.telegram_integration_enabled?
     current.telegram_integration_enabled?
   end
+
+  # Аналитика
+  def yandex_metrika_enabled?
+    yandex_metrika_id.present?
+  end
+
+  def google_analytics_enabled?
+    google_analytics_id.present?
+  end
+
+  # Название сайта для SEO
+  def effective_site_name
+    site_name.presence || "ContentForce"
+  end
 end

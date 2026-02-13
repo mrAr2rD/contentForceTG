@@ -1,0 +1,147 @@
+<% content_for :title, "SEO: #{@page_seo.page_name}" %>
+
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <%= link_to admin_page_seos_path, class: "inline-flex items-center gap-2 text-sm text-zinc-500 hover:text-zinc-700 mb-4" do %>
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      Назад к списку
+    <% end %>
+    <h1 class="text-2xl font-bold">SEO настройки: <%= @page_seo.page_name %></h1>
+    <p class="text-zinc-500 mt-1">Страница: /<%= @page_seo.slug == "home" ? "" : @page_seo.slug %></p>
+  </div>
+
+  <%= form_with model: [:admin, @page_seo], local: true, class: "space-y-6" do |form| %>
+    <% if @page_seo.errors.any? %>
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
+        <ul class="list-disc list-inside text-red-700 dark:text-red-300 text-sm">
+          <% @page_seo.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <!-- Основные SEO поля -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <h3 class="font-semibold mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        Основные мета-теги
+      </h3>
+
+      <div class="space-y-4">
+        <div>
+          <%= form.label :title, "Title", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.text_field :title,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "Заголовок страницы",
+              maxlength: 70 %>
+          <div class="flex justify-between mt-1">
+            <p class="text-sm text-zinc-500">Заголовок в поисковой выдаче и вкладке браузера</p>
+            <p class="text-sm text-zinc-400"><span id="title-count"><%= @page_seo.title&.length || 0 %></span>/70</p>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :description, "Description", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.text_area :description,
+              rows: 3,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "Краткое описание страницы для поисковиков",
+              maxlength: 160 %>
+          <div class="flex justify-between mt-1">
+            <p class="text-sm text-zinc-500">Описание в поисковой выдаче</p>
+            <p class="text-sm text-zinc-400"><span id="desc-count"><%= @page_seo.description&.length || 0 %></span>/160</p>
+          </div>
+        </div>
+
+        <div>
+          <%= form.label :canonical_url, "Canonical URL (опционально)", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.url_field :canonical_url,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "https://contentforce.ru/about" %>
+          <p class="mt-1 text-sm text-zinc-500">Указывает поисковикам основную версию страницы</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- OpenGraph поля -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <h3 class="font-semibold mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/>
+        </svg>
+        OpenGraph (для соцсетей)
+      </h3>
+
+      <div class="space-y-4">
+        <div>
+          <%= form.label :og_title, "OG Title (опционально)", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.text_field :og_title,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "Заголовок для соцсетей (если отличается от Title)",
+              maxlength: 70 %>
+          <p class="mt-1 text-sm text-zinc-500">Если не указан, используется основной Title</p>
+        </div>
+
+        <div>
+          <%= form.label :og_description, "OG Description (опционально)", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.text_area :og_description,
+              rows: 2,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-indigo-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "Описание для соцсетей (если отличается от Description)",
+              maxlength: 200 %>
+          <p class="mt-1 text-sm text-zinc-500">Если не указан, используется основной Description</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Превью -->
+    <div class="bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-6">
+      <h3 class="font-semibold mb-4">Предпросмотр в Google</h3>
+      <div class="bg-white dark:bg-zinc-900 rounded-lg p-4 border border-zinc-200 dark:border-zinc-700">
+        <p class="text-blue-600 dark:text-blue-400 text-lg hover:underline cursor-pointer truncate">
+          <%= @page_seo.title.presence || "Title страницы" %> — <%= SiteConfiguration.current.effective_site_name %>
+        </p>
+        <p class="text-green-700 dark:text-green-500 text-sm">
+          contentforce.ru/<%= @page_seo.slug == "home" ? "" : @page_seo.slug %>
+        </p>
+        <p class="text-zinc-600 dark:text-zinc-400 text-sm mt-1 line-clamp-2">
+          <%= @page_seo.description.presence || "Description страницы будет отображаться здесь..." %>
+        </p>
+      </div>
+    </div>
+
+    <!-- Submit -->
+    <div class="flex justify-end gap-3">
+      <%= link_to "Отмена", admin_page_seos_path, class: "px-6 py-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-zinc-700 dark:text-zinc-300 rounded-lg transition-colors" %>
+      <%= form.submit "Сохранить",
+                      class: "px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  // Счётчик символов для title и description
+  document.addEventListener('DOMContentLoaded', function() {
+    const titleInput = document.getElementById('page_seo_title');
+    const descInput = document.getElementById('page_seo_description');
+    const titleCount = document.getElementById('title-count');
+    const descCount = document.getElementById('desc-count');
+
+    if (titleInput && titleCount) {
+      titleInput.addEventListener('input', function() {
+        titleCount.textContent = this.value.length;
+      });
+    }
+
+    if (descInput && descCount) {
+      descInput.addEventListener('input', function() {
+        descCount.textContent = this.value.length;
+      });
+    }
+  });
+</script>

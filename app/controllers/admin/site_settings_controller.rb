@@ -19,7 +19,15 @@ module Admin
     private
 
     def site_config_params
-      params.require(:site_configuration).permit(:channel_sites_enabled, :analytics_enabled, :telegram_integration_enabled)
+      params.require(:site_configuration).permit(
+        :channel_sites_enabled,
+        :analytics_enabled,
+        :telegram_integration_enabled,
+        :yandex_metrika_id,
+        :google_analytics_id,
+        :site_name,
+        :default_og_image
+      )
     end
   end
 end

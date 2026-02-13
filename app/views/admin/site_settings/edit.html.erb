@@ -105,6 +105,89 @@
       </div>
     </div>
 
+    <!-- SEO Настройки -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <h3 class="font-semibold mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        SEO Настройки
+      </h3>
+
+      <div class="space-y-4">
+        <div>
+          <%= form.label :site_name, "Название сайта", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.text_field :site_name,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "ContentForce" %>
+          <p class="mt-1 text-sm text-zinc-500">Используется в title страниц (например: "О нас — ContentForce")</p>
+        </div>
+
+        <div>
+          <%= form.label :default_og_image, "OG Image по умолчанию (URL)", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <%= form.url_field :default_og_image,
+              class: "w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+              placeholder: "https://example.com/og-image.png" %>
+          <p class="mt-1 text-sm text-zinc-500">Изображение для социальных сетей (рекомендуемый размер: 1200x630)</p>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        <%= link_to admin_page_seos_path, class: "inline-flex items-center gap-2 text-sm text-blue-500 hover:text-blue-600" do %>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+          </svg>
+          Настроить SEO для каждой страницы
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Счётчики аналитики -->
+    <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-6">
+      <h3 class="font-semibold mb-6 flex items-center gap-2">
+        <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
+        Счётчики аналитики
+      </h3>
+
+      <div class="space-y-4">
+        <div>
+          <%= form.label :yandex_metrika_id, "Яндекс.Метрика ID", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
+              <span class="text-yellow-600 font-bold text-sm">Я</span>
+            </div>
+            <%= form.text_field :yandex_metrika_id,
+                class: "flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-yellow-500 dark:bg-zinc-800 dark:text-zinc-100",
+                placeholder: "12345678" %>
+          </div>
+          <p class="mt-1 text-sm text-zinc-500">Только номер счётчика (без кода). Включает вебвизор, тепловые карты, аналитику форм.</p>
+        </div>
+
+        <div>
+          <%= form.label :google_analytics_id, "Google Analytics ID", class: "block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2" %>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+              <span class="text-blue-600 font-bold text-sm">G</span>
+            </div>
+            <%= form.text_field :google_analytics_id,
+                class: "flex-1 px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-zinc-800 dark:text-zinc-100",
+                placeholder: "G-XXXXXXXXXX" %>
+          </div>
+          <p class="mt-1 text-sm text-zinc-500">Measurement ID для Google Analytics 4 (начинается с G-)</p>
+        </div>
+      </div>
+
+      <div class="mt-4 p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg">
+        <p class="text-sm text-zinc-600 dark:text-zinc-400">
+          <strong>Текущий статус:</strong><br>
+          Яндекс.Метрика: <%= @site_config.yandex_metrika_id.present? ? "✓ Подключена (#{@site_config.yandex_metrika_id})" : "✗ Не настроена" %><br>
+          Google Analytics: <%= @site_config.google_analytics_id.present? ? "✓ Подключён (#{@site_config.google_analytics_id})" : "✗ Не настроен" %>
+        </p>
+      </div>
+    </div>
+
     <!-- Submit -->
     <div class="flex justify-end">
       <%= form.submit "Сохранить",
