@@ -1,18 +1,28 @@
-<div class="space-y-6">
+<div class="space-y-6"
+     data-controller="audience-charts"
+     data-audience-charts-referral-sources-value="<%= @chart_data[:referral_sources].to_json %>"
+     data-audience-charts-age-ranges-value="<%= @chart_data[:age_ranges].to_json %>"
+     data-audience-charts-occupations-value="<%= @chart_data[:occupations].to_json %>"
+     data-audience-charts-company-sizes-value="<%= @chart_data[:company_sizes].to_json %>"
+     data-audience-charts-registrations-value="<%= @chart_data[:registrations_by_day].to_json %>">
+
   <!-- Header with period filter -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h2 class="text-2xl font-bold text-zinc-900 dark:text-zinc-50">Аналитика аудитории</h2>
       <p class="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
         Данные из онбординга пользователей
+        <% if @date_from %>
+          (с <%= @date_from.strftime('%d.%m.%Y') %>)
+        <% end %>
       </p>
     </div>
 
     <div class="flex items-center gap-2">
-      <%= link_to "7 дней", admin_audience_path(period: 7), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 7 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
-      <%= link_to "30 дней", admin_audience_path(period: 30), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 30 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
-      <%= link_to "90 дней", admin_audience_path(period: 90), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 90 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
-      <%= link_to "Все время", admin_audience_path(period: 0), class: "px-3 py-1.5 text-sm rounded-lg #{@period == 0 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}" %>
+      <%= link_to "7 дней", admin_audience_path(period: 7), class: "px-3 py-1.5 text-sm rounded-lg transition-colors #{@period == 7 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}", data: { turbo: false } %>
+      <%= link_to "30 дней", admin_audience_path(period: 30), class: "px-3 py-1.5 text-sm rounded-lg transition-colors #{@period == 30 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}", data: { turbo: false } %>
+      <%= link_to "90 дней", admin_audience_path(period: 90), class: "px-3 py-1.5 text-sm rounded-lg transition-colors #{@period == 90 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}", data: { turbo: false } %>
+      <%= link_to "Все время", admin_audience_path(period: 0), class: "px-3 py-1.5 text-sm rounded-lg transition-colors #{@period == 0 ? 'bg-primary-600 text-white' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}", data: { turbo: false } %>
     </div>
   </div>
 
@@ -30,7 +40,7 @@
       </div>
       <p class="text-2xl font-bold text-zinc-900 dark:text-zinc-50"><%= number_with_delimiter(@metrics[:total]) %></p>
       <p class="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-        +<%= @metrics[:new_today] %> сегодня
+        +<%= @metrics[:new_today] %> сегодня / +<%= @metrics[:new_this_week] %> за неделю
       </p>
     </div>
 
@@ -69,7 +79,7 @@
     <!-- Conversion rate -->
     <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
       <div class="flex items-center justify-between mb-4">
-        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Конверсия</span>
+        <span class="text-sm font-medium text-zinc-500 dark:text-zinc-400">Конверсия онбординга</span>
         <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
           <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -83,230 +93,170 @@
     </div>
   </div>
 
-  <!-- Charts row 1: Referral Sources & Age Ranges -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Referral Sources (Pie) -->
-    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Источники трафика</h3>
-      <div class="h-64">
-        <canvas id="referralSourcesChart"></canvas>
+  <% has_onboarding_data = @metrics[:completed] > 0 %>
+
+  <% if has_onboarding_data %>
+    <!-- Charts row 1: Referral Sources & Age Ranges -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Referral Sources (Pie) -->
+      <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Источники трафика</h3>
+        <div class="h-64">
+          <canvas data-audience-charts-target="referralChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2">
+          <% @chart_data[:referral_sources].select { |i| i[:count] > 0 }.first(5).each do |item| %>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-zinc-600 dark:text-zinc-400"><%= item[:label] %></span>
+              <span class="font-medium text-zinc-900 dark:text-zinc-50"><%= item[:count] %></span>
+            </div>
+          <% end %>
+        </div>
       </div>
-      <div class="mt-4 space-y-2">
-        <% @chart_data[:referral_sources].first(5).each do |item| %>
-          <% next if item[:count].zero? %>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-zinc-600 dark:text-zinc-400"><%= item[:label] %></span>
-            <span class="font-medium text-zinc-900 dark:text-zinc-50"><%= item[:count] %></span>
-          </div>
-        <% end %>
+
+      <!-- Age Ranges (Pie) -->
+      <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Возрастное распределение</h3>
+        <div class="h-64">
+          <canvas data-audience-charts-target="ageChart"></canvas>
+        </div>
+        <div class="mt-4 space-y-2">
+          <% @chart_data[:age_ranges].select { |i| i[:count] > 0 }.each do |item| %>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-zinc-600 dark:text-zinc-400"><%= item[:label] %></span>
+              <span class="font-medium text-zinc-900 dark:text-zinc-50"><%= item[:count] %></span>
+            </div>
+          <% end %>
+        </div>
       </div>
     </div>
 
-    <!-- Age Ranges (Pie) -->
-    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Возрастное распределение</h3>
-      <div class="h-64">
-        <canvas id="ageRangesChart"></canvas>
+    <!-- Charts row 2: Occupations & Company Sizes -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- Occupations (Bar) -->
+      <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Сферы деятельности</h3>
+        <div class="h-80">
+          <canvas data-audience-charts-target="occupationsChart"></canvas>
+        </div>
       </div>
-      <div class="mt-4 space-y-2">
-        <% @chart_data[:age_ranges].each do |item| %>
-          <% next if item[:count].zero? %>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-zinc-600 dark:text-zinc-400"><%= item[:label] %></span>
-            <span class="font-medium text-zinc-900 dark:text-zinc-50"><%= item[:count] %></span>
-          </div>
-        <% end %>
+
+      <!-- Company Sizes (Bar) -->
+      <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Размер команды</h3>
+        <div class="h-80">
+          <canvas data-audience-charts-target="companySizesChart"></canvas>
+        </div>
       </div>
     </div>
-  </div>
-
-  <!-- Charts row 2: Occupations & Company Sizes -->
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <!-- Occupations (Bar) -->
-    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Сферы деятельности</h3>
-      <div class="h-80">
-        <canvas id="occupationsChart"></canvas>
+  <% else %>
+    <!-- No data message -->
+    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-12 text-center">
+      <div class="w-16 h-16 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-8 h-8 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+        </svg>
       </div>
+      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-2">Пока нет данных</h3>
+      <p class="text-zinc-500 dark:text-zinc-400 max-w-md mx-auto">
+        Графики появятся после того, как пользователи начнут проходить онбординг.
+        Данные собираются автоматически при регистрации новых пользователей.
+      </p>
     </div>
+  <% end %>
 
-    <!-- Company Sizes (Bar) -->
-    <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
-      <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Размер команды</h3>
-      <div class="h-80">
-        <canvas id="companySizesChart"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <!-- Registrations by day (Line) -->
+  <!-- Registrations by day (Line) - always show -->
   <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
     <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Регистрации по дням</h3>
     <div class="h-64">
-      <canvas id="registrationsChart"></canvas>
+      <canvas data-audience-charts-target="registrationsChart"></canvas>
     </div>
   </div>
+
+  <!-- Data table -->
+  <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-6">
+    <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50 mb-4">Сводная таблица</h3>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-zinc-200 dark:divide-zinc-800">
+        <thead>
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Метрика</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Значение</th>
+            <th class="px-4 py-3 text-right text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">% от всех</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-800">
+          <tr>
+            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-50">Всего пользователей</td>
+            <td class="px-4 py-3 text-sm text-right font-medium text-zinc-900 dark:text-zinc-50"><%= @metrics[:total] %></td>
+            <td class="px-4 py-3 text-sm text-right text-zinc-500 dark:text-zinc-400">100%</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-50">Прошли онбординг</td>
+            <td class="px-4 py-3 text-sm text-right font-medium text-green-600 dark:text-green-400"><%= @metrics[:completed] %></td>
+            <td class="px-4 py-3 text-sm text-right text-zinc-500 dark:text-zinc-400"><%= @metrics[:conversion_rate] %>%</td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-50">Пропустили онбординг</td>
+            <td class="px-4 py-3 text-sm text-right font-medium text-amber-600 dark:text-amber-400"><%= @metrics[:skipped] %></td>
+            <td class="px-4 py-3 text-sm text-right text-zinc-500 dark:text-zinc-400">
+              <%= @metrics[:total].positive? ? ((@metrics[:skipped].to_f / @metrics[:total]) * 100).round(1) : 0 %>%
+            </td>
+          </tr>
+          <tr>
+            <td class="px-4 py-3 text-sm text-zinc-900 dark:text-zinc-50">Ожидают онбординга</td>
+            <td class="px-4 py-3 text-sm text-right font-medium text-zinc-600 dark:text-zinc-400"><%= @metrics[:pending] %></td>
+            <td class="px-4 py-3 text-sm text-right text-zinc-500 dark:text-zinc-400">
+              <%= @metrics[:total].positive? ? ((@metrics[:pending].to_f / @metrics[:total]) * 100).round(1) : 0 %>%
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <% if has_onboarding_data %>
+    <!-- Top values summary -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Top referral source -->
+      <% top_referral = @chart_data[:referral_sources].max_by { |i| i[:count] } %>
+      <% if top_referral && top_referral[:count] > 0 %>
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Топ источник</p>
+          <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-50"><%= top_referral[:label] %></p>
+          <p class="text-sm text-primary-600 dark:text-primary-400"><%= top_referral[:count] %> пользователей</p>
+        </div>
+      <% end %>
+
+      <!-- Top age range -->
+      <% top_age = @chart_data[:age_ranges].max_by { |i| i[:count] } %>
+      <% if top_age && top_age[:count] > 0 %>
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Основной возраст</p>
+          <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-50"><%= top_age[:label] %></p>
+          <p class="text-sm text-primary-600 dark:text-primary-400"><%= top_age[:count] %> пользователей</p>
+        </div>
+      <% end %>
+
+      <!-- Top occupation -->
+      <% top_occupation = @chart_data[:occupations].max_by { |i| i[:count] } %>
+      <% if top_occupation && top_occupation[:count] > 0 %>
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Топ профессия</p>
+          <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-50"><%= top_occupation[:label] %></p>
+          <p class="text-sm text-primary-600 dark:text-primary-400"><%= top_occupation[:count] %> пользователей</p>
+        </div>
+      <% end %>
+
+      <!-- Top company size -->
+      <% top_company = @chart_data[:company_sizes].max_by { |i| i[:count] } %>
+      <% if top_company && top_company[:count] > 0 %>
+        <div class="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+          <p class="text-xs text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1">Размер команды</p>
+          <p class="text-lg font-semibold text-zinc-900 dark:text-zinc-50"><%= top_company[:label] %></p>
+          <p class="text-sm text-primary-600 dark:text-primary-400"><%= top_company[:count] %> пользователей</p>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  const isDarkMode = document.documentElement.classList.contains('dark');
-  const textColor = isDarkMode ? '#A1A1AA' : '#71717A';
-  const gridColor = isDarkMode ? '#27272A' : '#E4E4E7';
-
-  // Color palette
-  const colors = [
-    '#00D4AA', '#00A896', '#028090', '#05668D', '#02C39A',
-    '#F0B429', '#F76C5E', '#A855F7', '#3B82F6', '#EF4444'
-  ];
-
-  // Referral Sources (Doughnut)
-  const referralData = <%= raw @chart_data[:referral_sources].map { |i| { label: i[:label], count: i[:count] } }.to_json %>;
-  new Chart(document.getElementById('referralSourcesChart'), {
-    type: 'doughnut',
-    data: {
-      labels: referralData.map(i => i.label),
-      datasets: [{
-        data: referralData.map(i => i.count),
-        backgroundColor: colors,
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: { color: textColor, boxWidth: 12, padding: 10 }
-        }
-      }
-    }
-  });
-
-  // Age Ranges (Doughnut)
-  const ageData = <%= raw @chart_data[:age_ranges].map { |i| { label: i[:label], count: i[:count] } }.to_json %>;
-  new Chart(document.getElementById('ageRangesChart'), {
-    type: 'doughnut',
-    data: {
-      labels: ageData.map(i => i.label),
-      datasets: [{
-        data: ageData.map(i => i.count),
-        backgroundColor: colors,
-        borderWidth: 0
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'right',
-          labels: { color: textColor, boxWidth: 12, padding: 10 }
-        }
-      }
-    }
-  });
-
-  // Occupations (Horizontal Bar)
-  const occupationData = <%= raw @chart_data[:occupations].map { |i| { label: i[:label], count: i[:count] } }.to_json %>;
-  new Chart(document.getElementById('occupationsChart'), {
-    type: 'bar',
-    data: {
-      labels: occupationData.map(i => i.label),
-      datasets: [{
-        data: occupationData.map(i => i.count),
-        backgroundColor: '#00D4AA',
-        borderRadius: 4
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { color: gridColor },
-          ticks: { color: textColor }
-        },
-        y: {
-          grid: { display: false },
-          ticks: { color: textColor }
-        }
-      }
-    }
-  });
-
-  // Company Sizes (Bar)
-  const companyData = <%= raw @chart_data[:company_sizes].map { |i| { label: i[:label], count: i[:count] } }.to_json %>;
-  new Chart(document.getElementById('companySizesChart'), {
-    type: 'bar',
-    data: {
-      labels: companyData.map(i => i.label),
-      datasets: [{
-        data: companyData.map(i => i.count),
-        backgroundColor: '#00A896',
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: { color: textColor }
-        },
-        y: {
-          grid: { color: gridColor },
-          ticks: { color: textColor }
-        }
-      }
-    }
-  });
-
-  // Registrations by day (Line)
-  const regData = <%= raw @chart_data[:registrations_by_day].to_json %>;
-  new Chart(document.getElementById('registrationsChart'), {
-    type: 'line',
-    data: {
-      labels: regData.map(i => i.date),
-      datasets: [{
-        label: 'Регистрации',
-        data: regData.map(i => i.count),
-        borderColor: '#00D4AA',
-        backgroundColor: 'rgba(0, 212, 170, 0.1)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 3,
-        pointBackgroundColor: '#00D4AA'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false }
-      },
-      scales: {
-        x: {
-          grid: { color: gridColor },
-          ticks: { color: textColor, maxRotation: 45 }
-        },
-        y: {
-          grid: { color: gridColor },
-          ticks: { color: textColor, stepSize: 1 },
-          beginAtZero: true
-        }
-      }
-    }
-  });
-});
-</script>
